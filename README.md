@@ -1,2 +1,2 @@
-# (App name)
-Official repo for &lt;App Name> releases and issue tracking.
+# AragoJ
+Official repo for AragoJ releases and issue tracking.
