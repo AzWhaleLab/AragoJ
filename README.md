@@ -4,6 +4,8 @@ AragoJ is a free multi-platform stand-alone application, for acquiring planar me
 
 This is the official repo for AragoJ releases and issue tracking.
 
+## Where are the releases?
+Latest release can be found [here.](../../releases/latest)
 ## Where is the documentation?
 Any info about the app, including description and usage can be found on the [AragoJ Wiki](../../wiki).
 
