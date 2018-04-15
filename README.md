@@ -1,5 +1,4 @@
-# AragoJ - Single camera photogrammetry software
-
+# AragoJ
 AragoJ is a free multi-platform stand-alone application, for acquiring planar measurements from photographs using simple tools.
 
 ## Where is the latest release?
