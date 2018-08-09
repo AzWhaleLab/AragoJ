@@ -1,5 +1,7 @@
-# AragoJ
+# ![AragoJ](https://github.com/franciscoaleixo/AragoJ/blob/master/wiki/title.png)
+
 AragoJ is a free multi-platform stand-alone application, for acquiring planar measurements from photographs using simple tools.
+
 
 ## Where is the latest release?
 Latest release can be found [here.](../../releases/latest)
