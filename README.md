@@ -9,8 +9,8 @@ AragoJ is a free multi-platform stand-alone application, for acquiring planar me
 Latest release can be found **[here.](../../releases/latest)**
 
 ## Where is the documentation?
-Any info about the app, including description and usage can be found on the [AragoJ Wiki](../../wiki).
-A printable version is also available **[here](https://github.com/franciscoaleixo/AragoJ/blob/master/wiki/AragoJ_0_4.pdf)**
+Any info about the app, including description and usage can be found on the **[AragoJ Wiki](../../wiki)**.
+A printable pdf version is also available **[here](https://github.com/franciscoaleixo/AragoJ/blob/master/wiki/AragoJ_0_4.pdf)**
 
 ## Where is the code?
 Currently it's not available to the public. There are plans to make it open-source but no firm ETA.
