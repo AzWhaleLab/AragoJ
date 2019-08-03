@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane style="-fx-background-color: #FFFFFF;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" >
+   <children>
+      <VBox prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <GridPane style="-fx-background-color: #FFFFFF;">
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+              </rowConstraints>
+               <children>
+                  <Label text="%lengthPixels" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER">
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                   <Label text="%trueLength" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                       <GridPane.margin>
+                           <Insets right="5.0" />
+                       </GridPane.margin>
+                   </Label>
+                   <Label text="%units" GridPane.halignment="RIGHT" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                       <GridPane.margin>
+                           <Insets right="5.0" />
+                       </GridPane.margin>
+                   </Label>
+                   <Label text="%applyToAll" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+                       <GridPane.margin>
+                           <Insets right="5.0" top="20.0" />
+                       </GridPane.margin>
+                   </Label>
+                  <HBox alignment="CENTER_LEFT" style="-fx-background-color: #FFFFFF;" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                     <children>
+                        <JFXComboBox fx:id="pixelLengthComboBox" editable="true" prefWidth="180.0">
+                           <HBox.margin>
+                              <Insets right="10.0" />
+                           </HBox.margin>
+                        </JFXComboBox>
+                        <!--<CheckBox mnemonicParsing="false" text="%reference">-->
+                           <!--<opaqueInsets>-->
+                              <!--<Insets />-->
+                           <!--</opaqueInsets>-->
+                        <!--</CheckBox>-->
+                     </children>
+                     <GridPane.margin>
+                        <Insets left="5.0" />
+                     </GridPane.margin>
+                  </HBox>
+                  <JFXTextField fx:id="trueLengthTextField" maxWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                     <GridPane.margin>
+                        <Insets left="5.0" />
+                     </GridPane.margin>
+                  </JFXTextField>
+                  <JFXTextField fx:id="unitsTextField" maxWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.vgrow="NEVER">
+                     <GridPane.margin>
+                        <Insets left="5.0" />
+                     </GridPane.margin>
+                  </JFXTextField>
+                   <CheckBox fx:id="applyToAllCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <GridPane.margin>
+                        <Insets left="5.0" top="20.0" />
+                     </GridPane.margin>
+                   </CheckBox>
+                   <Label GridPane.halignment="RIGHT" text="%scale" GridPane.rowIndex="4">
+                       <GridPane.margin>
+                           <Insets top="20.0" />
+                       </GridPane.margin>
+                   </Label>
+                   <Label fx:id="lengthRatioLabel" text="Not set" GridPane.columnIndex="1" GridPane.rowIndex="4" style="-fx-text-fill: #939393">
+                       <GridPane.margin>
+                           <Insets left="5.0" top="20.0" />
+                       </GridPane.margin>
+                   </Label>
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+               </columnConstraints>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <padding>
+                  <Insets bottom="15.0" />
+               </padding>
+            </GridPane>
+
+            <HBox alignment="CENTER_RIGHT" style="-fx-background-color: #FFFFFF;">
+               <children>
+                  <JFXButton fx:id="okButton" mnemonicParsing="false" prefWidth="60.0" text="%ok" onAction="#onOkAction" disable="true">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </JFXButton>
+                  <JFXButton mnemonicParsing="false" prefWidth="60.0" text="%cancel" onAction="#onCloseAction" />
+               </children>
+               <VBox.margin>
+                  <Insets right="10.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+
+   </children>
+   <padding>
+      <Insets left="10.0" top="10.0" />
+   </padding>
+</AnchorPane>

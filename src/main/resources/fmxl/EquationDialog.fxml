@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <HBox style="-fx-background-color: #FFFFFF;">
+                    <JFXListView fx:id="equationListView" prefWidth="109" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                    <VBox style="-fx-background-color: #FFFFFF;" HBox.hgrow="ALWAYS">
+                        <GridPane id="equationInfoGridPane" style="-fx-background-color: #FFFFFF;">
+                            <rowConstraints>
+                                <RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="NEVER" />
+                                <RowConstraints minHeight="10.0" prefHeight="50.0" />
+                            </rowConstraints>
+                            <children>
+                                <Label text="%name" GridPane.halignment="RIGHT">
+                                    <GridPane.margin>
+                                        <Insets right="5.0" />
+                                    </GridPane.margin>
+                                </Label>
+                                <JFXTextField fx:id="nameTextField" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="NEVER">
+                                    <GridPane.margin>
+                                        <Insets bottom="6.0" left="5.0" />
+                                    </GridPane.margin>
+                                </JFXTextField>
+
+                                <!--<Label minWidth="-Infinity" text="%description" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.valignment="TOP">-->
+                                    <!--<GridPane.margin>-->
+                                        <!--<Insets right="5.0" top="5.0" />-->
+                                    <!--</GridPane.margin>-->
+                                <!--</Label>-->
+                                <!--<JFXTextArea fx:id="descriptionTextField" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">-->
+                                    <!--<GridPane.margin>-->
+                                        <!--<Insets bottom="10" left="5.0" top="5.0" />-->
+                                    <!--</GridPane.margin>-->
+                                <!--</JFXTextArea>-->
+
+                                <Label text="%expression" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                                    <GridPane.margin>
+                                        <Insets right="5.0" />
+                                    </GridPane.margin>
+                                </Label>
+                                <JFXTextField fx:id="expressionTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                                    <GridPane.margin>
+                                        <Insets left="5.0" />
+                                    </GridPane.margin>
+                                </JFXTextField>
+                                <!--<Label GridPane.halignment="RIGHT" text="%scale" GridPane.rowIndex="4">-->
+                                <!--<GridPane.margin>-->
+                                <!--<Insets top="20.0" />-->
+                                <!--</GridPane.margin>-->
+                                <!--</Label>-->
+                                <!--<Label fx:id="lengthRatioLabel" text="Not set" GridPane.columnIndex="1" GridPane.rowIndex="4" style="-fx-text-fill: #939393">-->
+                                <!--<GridPane.margin>-->
+                                <!--<Insets left="5.0" top="20.0" />-->
+                                <!--</GridPane.margin>-->
+                                <!--</Label>-->
+                            </children>
+                            <columnConstraints>
+                                <ColumnConstraints />
+                                <ColumnConstraints />
+                            </columnConstraints>
+                            <opaqueInsets>
+                                <Insets />
+                            </opaqueInsets>
+                            <VBox.margin>
+                                <Insets />
+                            </VBox.margin>
+                            <padding>
+                                <Insets bottom="15.0" />
+                            </padding>
+                            <VBox.margin>
+                                <Insets left="10.0" right="15" />
+                            </VBox.margin>
+                        </GridPane>
+                        <TableView fx:id="variablesValueTableView" maxHeight="180" VBox.vgrow="ALWAYS">
+                         <VBox.margin>
+                            <Insets left="10.0" right="15" />
+                         </VBox.margin>
+                        </TableView>
+                    </VBox>
+                </HBox>
+
+                <HBox alignment="CENTER" style="-fx-background-color: #FFFFFF;" VBox.vgrow="ALWAYS">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" style="-fx-background-color: #FFFFFF;">
+                            <children>
+                                <JFXButton fx:id="newButton" mnemonicParsing="false" onAction="#onNewAction" prefWidth="61.0" text="%new">
+                                </JFXButton>
+                                <JFXButton fx:id="removeButton" mnemonicParsing="false" disable="true" onAction="#onRemoveAction" prefWidth="75.0" text="%remove" />
+                                <!--<JFXButton fx:id="saveButton" mnemonicParsing="false" disable="true" onAction="#onSaveAction" prefWidth="61.0" text="%save" />-->
+                            </children>
+                        </HBox>
+                        <Region prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER_RIGHT" style="-fx-background-color: #FFFFFF;">
+                            <children>
+                                <JFXButton fx:id="okButton" disable="true" mnemonicParsing="false" onAction="#onOkAction" prefWidth="60.0" text="%ok">
+                                    <HBox.margin>
+                                        <Insets right="10.0" />
+                                    </HBox.margin>
+                                </JFXButton>
+                                <JFXButton mnemonicParsing="false" onAction="#onCloseAction" prefWidth="75.0" text="%cancel" />
+                            </children>
+                        </HBox>
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="5.0" right="15.0" top="5" />
+                    </VBox.margin>
+                </HBox>
+            </children>
+        </VBox>
+
+    </children>
+    <padding>
+        <Insets left="10.0" top="10.0" />
+    </padding>
+</AnchorPane>

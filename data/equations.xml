@@ -1,0 +1,9 @@
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<expressions>
+    <item>
+        <name>Fluke allometric equation</name>
+        <expression>10^(0.9268*log10(pw)+0.605)</expression>
+    </item>
+</expressions>
+

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import com.jfoenix.controls.JFXTextArea?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="stackPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+    <AnchorPane prefHeight="500.0" prefWidth="700.0">
+        <children>
+            <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <top>
+                    <MenuBar style="-fx-background-color: #FFFFFF;">
+                        <menus>
+                            <Menu text="%file">
+                                <items>
+                                    <MenuItem fx:id="newCalibrationMenuItem" mnemonicParsing="false" onAction="#newCalibration" text="%new">
+                                        <accelerator>
+                                            <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                                        </accelerator>
+                                    </MenuItem>
+                                    <MenuItem fx:id="saveCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#onSaveCalibration" text="%save">
+                                        <accelerator>
+                                            <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                                        </accelerator>
+                                    </MenuItem>
+                                    <SeparatorMenuItem mnemonicParsing="false" />
+                                    <MenuItem fx:id="exportCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#onExportCalibration" text="%exportCalibration">
+                                        <accelerator>
+                                            <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                                        </accelerator>
+                                    </MenuItem>
+                                    <SeparatorMenuItem mnemonicParsing="false" />
+                                    <MenuItem fx:id="importImagesMenuItem" mnemonicParsing="false" onAction="#onImportImages" text="%importCalibrationImages">
+                                        <accelerator>
+                                            <KeyCodeCombination alt="UP" code="I" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                                        </accelerator>
+                                    </MenuItem>
+                                    <SeparatorMenuItem mnemonicParsing="false" />
+                                    <MenuItem mnemonicParsing="false" onAction="#onExitClick" text="%close" />
+                                </items>
+                            </Menu>
+                            <Menu mnemonicParsing="false" text="%calibration">
+                                <items>
+                                    <MenuItem fx:id="runCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#onRunCalibration" text="%runCalibration">
+                                        <accelerator>
+                                            <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                                        </accelerator>
+                                    </MenuItem>
+                                    <MenuItem mnemonicParsing="false" onAction="#onCalibrationOptions" text="%configuration">
+                                    </MenuItem>
+                                </items>
+                            </Menu>
+                        </menus>
+                    </MenuBar>
+                </top>
+                <center>
+                    <SplitPane dividerPositions="0.2157190635451505" prefHeight="362.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+                        <items>
+                            <AnchorPane prefHeight="200.0" prefWidth="200.0" SplitPane.resizableWithParent="false">
+                                <children>
+                                    <JFXListView fx:id="imageListView" onDragDropped="#onImageDropped" onDragOver="#onImageListDragOver" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                </children>
+                            </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                <children>
+                                    <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <children>
+                                            <AnchorPane fx:id="imageEditorToolsAnchorPane" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #FFFFFF;">
+                                                <children>
+                                                    <HBox style="-fx-background-color: #FFFFFF;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <children>
+                                                            <JFXButton fx:id="handButton" mnemonicParsing="false" style="-fx-graphic: url('images/hand.png');" HBox.hgrow="ALWAYS" />
+                                                            <JFXButton fx:id="zoomButton" mnemonicParsing="false" style="-fx-graphic: url('images/magnifier.png');" HBox.hgrow="ALWAYS" />
+                                                            <Separator opacity="0.5" orientation="VERTICAL" prefHeight="200.0" HBox.hgrow="NEVER">
+                                                                <opaqueInsets>
+                                                                    <Insets />
+                                                                </opaqueInsets>
+                                                                <HBox.margin>
+                                                                    <Insets bottom="5.0" top="5.0" />
+                                                                </HBox.margin>
+                                                            </Separator>
+                                                            <JFXButton fx:id="runCalibrationButton" disable="true" mnemonicParsing="false" onAction="#onRunCalibration" style="-fx-graphic: url('images/play.png');" HBox.hgrow="ALWAYS">
+                                                                <tooltip><Tooltip text="%runCalibration" /></tooltip>
+                                                            </JFXButton>
+                                                            <JFXButton fx:id="calibrationOptions" minWidth="-Infinity" mnemonicParsing="false" onAction="#onCalibrationOptions" prefHeight="Infinity" style="-fx-cursor: hand;" text="%configuration" textFill="#0096c9" underline="true" HBox.hgrow="ALWAYS" />
+                                                            <!--<Separator opacity="0.5" orientation="VERTICAL" prefHeight="200.0" HBox.hgrow="NEVER">-->
+                                                                <!--<opaqueInsets>-->
+                                                                    <!--<Insets />-->
+                                                                <!--</opaqueInsets>-->
+                                                                <!--<HBox.margin>-->
+                                                                    <!--<Insets bottom="5.0" top="5.0" />-->
+                                                                <!--</HBox.margin>-->
+                                                            <!--</Separator>-->
+                                                            <Label fx:id="currentConfigLabel" alignment="CENTER_RIGHT" maxWidth="Infinity" prefHeight="30.0" textFill="#00000096" HBox.hgrow="ALWAYS">
+                                                                <HBox.margin>
+                                                                   <Insets left="5.0" right="5.0" top="1.0" />
+                                                                </HBox.margin>
+                                                <font>
+                                                   <Font size="11.0" />
+                                                </font>
+                                                            </Label>
+                                                        </children>
+                                                    </HBox>
+                                                </children></AnchorPane>
+                                            <SplitPane dividerPositions="0.75" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+                                                <AnchorPane fx:id="imageEditorAnchorPane" />
+                                                <VBox prefHeight="20" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" SplitPane.resizableWithParent="false">
+                                                    <Label text="%calibrationOutput">
+                                                      <VBox.margin>
+                                                         <Insets bottom="2.0" left="6.0" top="2.0" />
+                                                      </VBox.margin>
+                                                    </Label>
+                                                    <JFXTextArea fx:id="outputTextArea" editable="false" minHeight="10" VBox.vgrow="ALWAYS" />
+                                                </VBox>
+                                            </SplitPane>
+                                        </children>
+                                    </VBox>
+                                </children>
+                            </AnchorPane>
+                        </items>
+                    </SplitPane>
+                </center>
+            </BorderPane>
+        </children>
+    </AnchorPane>
+</StackPane>

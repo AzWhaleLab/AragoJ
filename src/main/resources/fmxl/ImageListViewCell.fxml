@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox fx:id="hBox" alignment="CENTER_LEFT" prefWidth="10.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Pane fx:id="statusPane" maxHeight="50" minWidth="4.0" style="-fx-background-color: rgba(0, 0, 0, 0);">
+         <HBox.margin>
+            <Insets bottom="2.0" top="2.0" right="1" />
+         </HBox.margin>
+      </Pane>
+      <ImageView fx:id="image" pickOnBounds="true" preserveRatio="true">
+         <HBox.margin>
+            <Insets right="5.0" />
+         </HBox.margin>
+         <viewport>
+            <Rectangle2D />
+         </viewport>
+      </ImageView>
+      <VBox alignment="CENTER_LEFT" HBox.hgrow="NEVER">
+         <children>
+            <Label fx:id="primaryLabel" maxWidth="Infinity" minWidth="-Infinity" text="Label" />
+            <Label fx:id="secondaryLabel" maxWidth="Infinity" minWidth="-Infinity" text="Label" textFill="#ababab" />
+         </children>
+         <HBox.margin>
+            <Insets bottom="5.0" right="5.0" top="5.0" />
+         </HBox.margin>
+      </VBox>
+   </children>
+</HBox>

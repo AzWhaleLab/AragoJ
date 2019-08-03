@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+
+<HBox fx:id="hBox" alignment="CENTER_LEFT" prefWidth="10.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <ImageView fx:id="image" pickOnBounds="true" preserveRatio="true">
+            <HBox.margin>
+                <Insets right="5.0" />
+            </HBox.margin>
+            <viewport>
+                <Rectangle2D />
+            </viewport>
+         <image>
+            <Image url="@../images/e1.png" />
+         </image>
+        </ImageView>
+          <Label fx:id="primaryLabel" maxWidth="Infinity" minWidth="-Infinity" text="Label" />
+    </children>
+</HBox>

@@ -1,0 +1,25 @@
+-dontnote
+-dontwarn
+
+-libraryjars "<java.home>/lib/rt.jar"
+-libraryjars "<java.home>/lib/jce.jar"
+-libraryjars "<java.home>/lib/ext/jfxrt.jar"
+
+-keep class !boofcv.** { * ;}
+
+
+-keepclasseswithmembers public class com.javafx.main.Main {
+    public *; public static *;
+}
+
+-adaptresourcefilecontents **.fxml
+
+-keepclasseswithmembers class * {
+  @proguard.annotation.FXML <methods>;
+}
+
+-keepattributes javafx.fxml.FXML
+
+-keepclassmembernames class * {
+        @javafx.fxml.FXML *;
+    }

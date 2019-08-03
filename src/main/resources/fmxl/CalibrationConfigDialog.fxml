@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXRadioButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <VBox prefHeight="250.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <GridPane style="-fx-background-color: #FFFFFF;">
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="42.0" vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" prefHeight="52.0" vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" prefHeight="52.0" vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" prefHeight="52.0" vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" prefHeight="52.0" vgrow="NEVER" />
+                  <RowConstraints />
+                  <RowConstraints />
+                    </rowConstraints>
+                    <children>
+                        <Label text="%pattern" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER">
+                            <GridPane.margin>
+                                <Insets bottom="7" right="5.0" top="5" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label text="%horizontalPoints" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                            <GridPane.margin>
+                                <Insets right="5.0" top="7.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label text="%verticalPoints" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+                            <GridPane.margin>
+                                <Insets right="5.0" top="7.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label text="%pointSize" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                            <GridPane.margin>
+                                <Insets right="5.0" top="7.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <Label text="%lens" GridPane.halignment="RIGHT" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                            <GridPane.margin>
+                                <Insets right="5.0" top="7.0" />
+                            </GridPane.margin>
+                        </Label>
+                        <HBox alignment="CENTER_LEFT" style="-fx-background-color: #FFFFFF;" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                            <children>
+                                <JFXComboBox fx:id="patternComboBox" prefHeight="25.0" prefWidth="155.0">
+                                    <HBox.margin>
+                                        <Insets right="10.0" />
+                                    </HBox.margin>
+                                </JFXComboBox>
+                                <!--<CheckBox mnemonicParsing="false" text="%reference">-->
+                                <!--<opaqueInsets>-->
+                                <!--<Insets />-->
+                                <!--</opaqueInsets>-->
+                                <!--</CheckBox>-->
+                            </children>
+                            <GridPane.margin>
+                                <Insets bottom="7" left="5.0" top="5" />
+                            </GridPane.margin>
+                        </HBox>
+                        <JFXTextField fx:id="hrzPointsTextField" maxWidth="155.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
+                            <GridPane.margin>
+                                <Insets left="5.0" right="10.0" top="7.0" />
+                            </GridPane.margin>
+                        </JFXTextField>
+                        <JFXTextField fx:id="vertPointsTextField" maxWidth="155.0" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.vgrow="NEVER">
+                            <GridPane.margin>
+                                <Insets left="5.0" right="10.0" top="7.0" />
+                            </GridPane.margin>
+                        </JFXTextField>
+                        <JFXTextField fx:id="pointSizeTextField" disable="true" maxWidth="155.0" text="1" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.vgrow="NEVER">
+                            <GridPane.margin>
+                                <Insets left="5.0" right="10.0" top="7.0" />
+                            </GridPane.margin>
+                        </JFXTextField>
+                        <HBox alignment="CENTER" style="-fx-background-color: #FFFFFF;" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                            <children>
+                                <JFXRadioButton fx:id="rectlinearButton" alignment="CENTER_LEFT" text="Rectilinear" userData="Rectilinear">
+                                    <HBox.margin>
+                                        <Insets right="5.0" />
+                                    </HBox.margin>
+                                    <toggleGroup>
+                                        <ToggleGroup fx:id="lensToggleGroup" />
+                                    </toggleGroup>
+                                </JFXRadioButton>
+                                <JFXRadioButton fx:id="fisheyeButton" text="Fisheye" toggleGroup="$lensToggleGroup" userData="Fisheye">
+                                    <HBox.margin>
+                                        <Insets right="5.0" />
+                                    </HBox.margin>
+                                </JFXRadioButton>
+                                <!--<CheckBox mnemonicParsing="false" text="%reference">-->
+                                <!--<opaqueInsets>-->
+                                <!--<Insets />-->
+                                <!--</opaqueInsets>-->
+                                <!--</CheckBox>-->
+                            </children>
+                            <GridPane.margin>
+                                <Insets bottom="5.0" top="15.0" />
+                            </GridPane.margin>
+                     <padding>
+                        <Insets left="-6.0" />
+                     </padding>
+                        </HBox>
+                        <!--<CheckBox fx:id="optimizeCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="4">-->
+                            <!--<GridPane.margin>-->
+                                <!--<Insets left="5.0" top="20.0" />-->
+                            <!--</GridPane.margin>-->
+                        <!--</CheckBox>-->
+                    </children>
+                    <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                    </columnConstraints>
+                    <opaqueInsets>
+                        <Insets />
+                    </opaqueInsets>
+                    <VBox.margin>
+                        <Insets bottom="5.0" />
+                    </VBox.margin>
+                    <padding>
+                        <Insets bottom="6.0" />
+                    </padding>
+                </GridPane>
+
+                <HBox alignment="CENTER_RIGHT" style="-fx-background-color: #FFFFFF;">
+                    <children>
+                        <JFXButton fx:id="okButton" mnemonicParsing="false" onAction="#onOkAction" prefWidth="60.0" text="%save">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </JFXButton>
+                        <JFXButton mnemonicParsing="false" onAction="#onCloseAction" prefWidth="60.0" text="%cancel" />
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="5.0" right="10.0" />
+                    </VBox.margin>
+               <padding>
+                  <Insets right="5.0" />
+               </padding>
+                </HBox>
+            </children>
+         <padding>
+            <Insets left="10.0" />
+         </padding>
+        </VBox>
+
+    </children>
+    <padding>
+        <Insets left="10.0" top="10.0" />
+    </padding>
+</AnchorPane>

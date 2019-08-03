@@ -1,0 +1,15 @@
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<calibration>
+    <name>GoPro YHDC5170_Fisheye</name>
+    <lens>Fisheye</lens>
+    <intrinsic>1139.2131109819431 0.0 1269.5666663473485
+        0.0 1135.8829736939094 964.6004268967597 0.0 0.0 1.0
+    </intrinsic>
+    <distortion_coefficients>-0.0036215178307375576 0.05863121472958669
+        -0.14356484718971552 0.10234313866032874
+    </distortion_coefficients>
+</calibration>
+
+
+

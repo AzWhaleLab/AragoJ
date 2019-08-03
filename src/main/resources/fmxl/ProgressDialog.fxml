@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXSpinner?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="container" alignment="CENTER" maxWidth="300" minWidth="300" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox prefWidth="264.0">
+         <Pane HBox.hgrow="ALWAYS" />
+         <JFXButton fx:id="cancelButton" alignment="CENTER_RIGHT" textFill="#00000096" HBox.hgrow="ALWAYS">
+            <graphic>
+               <ImageView fitHeight="12" fitWidth="12" pickOnBounds="true" preserveRatio="true">
+                  <image>
+                     <Image url="@/images/close.png" />
+                  </image></ImageView>
+            </graphic>
+         </JFXButton>
+      </HBox>
+       <JFXSpinner radius="15.0">
+         <VBox.margin>
+            <Insets bottom="8.0" right="18.0" />
+         </VBox.margin></JFXSpinner>
+      <Label fx:id="progressPrimary">
+         <VBox.margin>
+            <Insets bottom="10.0" right="18.0" />
+         </VBox.margin>
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="progressDescription"  textFill="#00000096">
+         <VBox.margin>
+            <Insets right="18.0" />
+         </VBox.margin></Label>
+   </children>
+   <padding>
+      <Insets bottom="15.0" left="25.0" right="7.0" top="7.0" />
+   </padding>
+</VBox>

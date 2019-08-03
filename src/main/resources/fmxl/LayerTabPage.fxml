@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.controller.LayerTabPageController">
+    <children>
+        <JFXListView fx:id="layerListView" AnchorPane.bottomAnchor="24.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+
+        <AnchorPane fx:id="imageEditorToolsAnchorPane" prefHeight="20.0" prefWidth="200.0" style="-fx-background-color: #FFFFFF;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <children>
+                <HBox alignment="TOP_RIGHT" style="-fx-background-color: #FFFFFF;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <JFXButton fx:id="addButton" onAction="#onAddBtnClick" mnemonicParsing="false" style="-fx-graphic: url('images/tabs.png');" />
+                        <JFXButton fx:id="removeButton" onAction="#onRemoveBtnLayer" mnemonicParsing="false" style="-fx-graphic: url('images/trash.png');" />
+                        <!--<Separator opacity="0.5" orientation="VERTICAL" prefHeight="200.0" HBox.hgrow="NEVER">-->
+                            <!--<opaqueInsets>-->
+                                <!--<Insets />-->
+                            <!--</opaqueInsets>-->
+                            <!--<HBox.margin>-->
+                                <!--<Insets bottom="5.0" top="5.0" />-->
+                            <!--</HBox.margin>-->
+                        <!--</Separator>-->
+                        <!--<JFXButton fx:id="editorCursorBtn" mnemonicParsing="false" style="-fx-graphic: url('images/cursor.png');" />-->
+                        <!--<JFXButton fx:id="editorLineBtn" mnemonicParsing="false" style="-fx-graphic: url('images/line.png');" />-->
+                        <!--<JFXButton fx:id="editorAngBtn" mnemonicParsing="false" style="-fx-graphic: url('images/perpendicular.png');" />-->
+                        <!--<HBox fx:id="imageEditorToolsSecondaryPane" style="-fx-background-color: #FFFFFF;" HBox.hgrow="ALWAYS">-->
+                        <!--<children>-->
+                        <!--<Separator opacity="0.5" orientation="VERTICAL" prefHeight="200.0" HBox.hgrow="NEVER">-->
+                        <!--<opaqueInsets>-->
+                        <!--<Insets />-->
+                        <!--</opaqueInsets>-->
+                        <!--<HBox.margin>-->
+                        <!--<Insets bottom="5.0" top="5.0" />-->
+                        <!--</HBox.margin>-->
+                        <!--</Separator>-->
+                        <!--</children>-->
+                        <!--<HBox.margin>-->
+                        <!--<Insets left="7.0" />-->
+                        <!--</HBox.margin>-->
+                        <!--</HBox>-->
+                    </children>
+                </HBox>
+            </children>
+        </AnchorPane>
+    </children>
+</AnchorPane>

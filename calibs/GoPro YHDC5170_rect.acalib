@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<calibration>
+    <name>GoPro YHDC5170_rect</name>
+    <lens>Rectilinear</lens>
+    <intrinsic>1135.34632672901 0.0 1272.3954022775138 0.0 1131.9755077349955 962.1963052156322 0.0 0.0 1.0</intrinsic>
+    <distortion_coefficients>-0.3111906044734215 0.13293998847913302 7.608018235387674E-4 -0.001135141875994494 -0.03099465775072634</distortion_coefficients>
+</calibration>
