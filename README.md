@@ -12,8 +12,7 @@ Latest release can be found **[here.](../../releases/latest)**
 Any info about the app, including description and usage can be found on the **[AragoJ Wiki](../../wiki)**.
 A printable pdf version is also available **[here](https://github.com/franciscoaleixo/AragoJ/blob/master/wiki/AragoJ_0_4.pdf)**
 
-## Where is the code?
-Currently it's not available to the public. There are plans to make it open-source but no firm ETA.
-
+## Contributions & status
+Any contribution is more than welcome, however note that for code condtributions the application is currently being majorly rewritten to match current programming paradigms, see [#39](https://github.com/franciscoaleixo/AragoJ/issues/39)
 
 
