@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.input.KeyCodeCombination?>
+<MenuBar style="-fx-background-color: #FFFFFF;" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aragoj.mainscreen.menuitems.MenuItemView">
+    <menus>
+        <Menu text="%file">
+            <items>
+                <MenuItem fx:id="newSessionMenuItem" mnemonicParsing="false" text="%newsession" onAction="#newSessionClick">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <MenuItem fx:id="openSessionMenuItem" mnemonicParsing="false" text="%open" onAction="#openSessionClick">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <MenuItem fx:id="saveSessionMenuItem" mnemonicParsing="false" onAction="#saveSessionClick" text="%save" >
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <MenuItem fx:id="saveSessionAsMenuItem" mnemonicParsing="false" onAction="#saveSessionAsClick" text="%saveAs" >
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <SeparatorMenuItem mnemonicParsing="false" />
+                <MenuItem fx:id="importImagesMenuItem" mnemonicParsing="false" onAction="#importImagesClick" text="%importimages" >
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="I" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <SeparatorMenuItem mnemonicParsing="false" />
+                <MenuItem fx:id="exportCSVMenuItem" mnemonicParsing="false" onAction="#exportCSVClick" text="%exportcsv" >
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <SeparatorMenuItem mnemonicParsing="false" />
+                <MenuItem mnemonicParsing="false" text="%exit" onAction="#exitClick" />
+            </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%view">
+            <items>
+                <Menu mnemonicParsing="false" text="%layer">
+                    <CheckMenuItem fx:id="precisionLinesCheckItem" mnemonicParsing="false" onAction="#precisionLinesCheckClick" text="%precisionLines" selected="true" />
+                    <CheckMenuItem fx:id="identifierLinesCheckItem" mnemonicParsing="false" onAction="#identifierLinesCheckClick" text="%identifierLines" selected="true" />
+                </Menu>
+            </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%module">
+            <items>
+                <Menu fx:id="calibrationMenu" mnemonicParsing="false" text="%calibration">
+                    <MenuItem mnemonicParsing="false" text="%calibrateCamera" onAction="#calibrateCameraClick" />
+                    <SeparatorMenuItem mnemonicParsing="false" />
+                    <MenuItem fx:id="undistortMenuItem" disable="true" mnemonicParsing="false" text="%undistortDots" onAction="#undistortImageClick" />
+                    <!--<CheckMenuItem fx:id="autoUndistortCheckMenuItem" text="%autoUndistort"/>-->
+                </Menu>
+                <Menu fx:id="conversionMenu" mnemonicParsing="false" text="%scale">
+                    <MenuItem fx:id="scaleMenuItem" mnemonicParsing="false" onAction="#convertViaScaleClick" text="%reference"/>
+                    <MenuItem fx:id="ratioDfMenuItem" mnemonicParsing="false" onAction="#convertViaRatioDfClick" text="%ratioDf"/>
+                    <MenuItem fx:id="convertUnitsMenuItem" disable="true" mnemonicParsing="false" onAction="#convertUnitsClick" text="%convertUnits"/>
+                </Menu>
+            </items>
+        </Menu>
+    </menus>
+</MenuBar>

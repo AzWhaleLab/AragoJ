@@ -3,7 +3,6 @@ apply plugin: "kotlin"
 apply plugin: "application"
 
 group 'com.aragoj'
-version '0.1'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -11,14 +10,30 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 mainClassName = 'com.aragoj.MainApplication'
 
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+repositories {
+    maven {
+        url  "https://dl.bintray.com/halfhp/rxtracer"
+    }
+}
 
 dependencies {
+    implementation project(path: ':reports')
     implementation(name:'opencv-342', ext:'jar')
 
     implementation "io.reactivex.rxjava2:rxjava:2.2.11"
+    implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
+
     implementation "io.reactivex.rxjava2:rxjavafx:2.2.2" // 2.11.0 to JDK 11 support
     implementation "com.github.thomasnield:rxkotlinfx:2.2.2"
-    implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
+
+    implementation 'com.halfhp.rxtracer:rxtracer:0.1.2'
+    implementation 'com.uber.autodispose:autodispose:1.3.0'
+    implementation 'com.uber.autodispose:autodispose-lifecycle:1.3.0'
+
     implementation 'de.saxsys:mvvmfx:1.8.0'
 
     implementation 'javax.xml.bind:jaxb-api:2.3.0'

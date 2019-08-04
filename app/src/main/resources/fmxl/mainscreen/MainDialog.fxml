@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXColorPicker?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import com.aragoj.utils.jfx.JFXTabPane?>
+
+<?import javafx.scene.layout.StackPane?>
+<StackPane fx:id="stackPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+    <AnchorPane prefHeight="400.0" prefWidth="600.0"  >
+        <children>
+            <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <top>
+                    <fx:include fx:id="menuView" source="MainDialogMenu.fxml" />
+                </top>
+                <center>
+                    <SplitPane dividerPositions="0.2157190635451505, 0.7725752508361204" prefHeight="362.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+                        <items>
+                            <AnchorPane prefHeight="200.0" prefWidth="200.0" SplitPane.resizableWithParent="false">
+                                <children>
+                                    <JFXListView fx:id="imageListView" onDragOver="#onImageListDragOver" onDragDropped="#onImageDropped" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                </children>
+                            </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                <children>
+                                    <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <children>
+                                            <AnchorPane fx:id="imageEditorToolsAnchorPane" prefHeight="30.0" prefWidth="200.0" style="-fx-background-color: #FFFFFF;">
+                                                <children>
+                                                    <HBox style="-fx-background-color: #FFFFFF;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <children>
+                                                            <JFXButton fx:id="handButton" mnemonicParsing="false" style="-fx-graphic: url('images/hand.png');" />
+                                                            <JFXButton fx:id="zoomButton" mnemonicParsing="false" style="-fx-graphic: url('images/magnifier.png');" />
+                                                            <Separator opacity="0.5" orientation="VERTICAL" prefHeight="200.0" HBox.hgrow="NEVER">
+                                                                <opaqueInsets>
+                                                                    <Insets />
+                                                                </opaqueInsets>
+                                                                <HBox.margin>
+                                                                    <Insets bottom="5.0" top="5.0" />
+                                                                </HBox.margin>
+                                                            </Separator>
+                                                            <JFXButton fx:id="editorCursorBtn" mnemonicParsing="false" style="-fx-graphic: url('images/cursor.png');" />
+                                                            <JFXButton fx:id="editorLineBtn" mnemonicParsing="false" style="-fx-graphic: url('images/line.png');" />
+                                                            <JFXButton fx:id="editorAngBtn" mnemonicParsing="false" style="-fx-graphic: url('images/perpendicular.png');" />
+                                                            <JFXButton fx:id="editorAreaBtn" mnemonicParsing="false" style="-fx-graphic: url('images/area.png');" />
+                                                            <HBox fx:id="imageEditorToolsSecondaryPane" style="-fx-background-color: #FFFFFF;" HBox.hgrow="ALWAYS">
+                                                                <children>
+                                                                    <Separator opacity="0.5" orientation="VERTICAL" prefHeight="200.0" HBox.hgrow="NEVER">
+                                                                        <opaqueInsets>
+                                                                            <Insets />
+                                                                        </opaqueInsets>
+                                                                        <HBox.margin>
+                                                                            <Insets bottom="5.0" top="5.0" />
+                                                                        </HBox.margin>
+                                                                    </Separator>
+                                                                    <JFXColorPicker fx:id="ieColorPicker" prefWidth="25.0">
+                                                                        <HBox.margin>
+                                                                            <Insets bottom="7.0" left="10.0" top="7.0" />
+                                                                        </HBox.margin>
+                                                                    </JFXColorPicker>
+                                                                    <JFXTextField fx:id="ieDegreePicker" focusColor="#0096c9" maxHeight="20.0" minHeight="20.0" prefColumnCount="3" prefWidth="30.0" unFocusColor="#6b6b6b" HBox.hgrow="NEVER">
+                                                                        <HBox.margin>
+                                                                            <Insets top="5.0" left="10.0" />
+                                                                        </HBox.margin>
+                                                                    </JFXTextField>
+                                                                    <Label fx:id="ieDegreeLabel" alignment="CENTER" text="º" textFill="#6b6b6b">
+                                                                        <padding>
+                                                                            <Insets top="7.0" />
+                                                                        </padding>
+                                                                        <HBox.margin>
+                                                                            <Insets left="4.0" />
+                                                                        </HBox.margin>
+                                                                    </Label>
+                                                                </children>
+                                                                <HBox.margin>
+                                                                    <Insets left="7.0" />
+                                                                </HBox.margin></HBox>
+                                                        </children>
+                                                    </HBox>
+                                                </children>
+                                            </AnchorPane>
+                                            <AnchorPane fx:id="imageEditorAnchorPane" VBox.vgrow="ALWAYS" />
+                                        </children>
+                                    </VBox>
+                                </children>
+                            </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
+                                <children>
+                                    <JFXTabPane fx:id="miscTabPane" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <tabs>
+                                            <Tab fx:id="layerTab" text="%layers">
+                                                <content>
+                                                    <fx:include fx:id="layerTabPage" source="LayerTabPage.fxml" />
+                                                </content>
+                                            </Tab>
+                                            <Tab fx:id="metaTab" text="%metadata">
+                                                <content>
+                                                    <fx:include fx:id="metaTabPage" source="MetaTabPage.fxml" />
+                                                </content>
+                                            </Tab>
+                                        </tabs>
+                                    </JFXTabPane>
+                                </children>
+                            </AnchorPane>
+                        </items>
+                    </SplitPane>
+                </center>
+            </BorderPane>
+        </children>
+    </AnchorPane>
+</StackPane>
