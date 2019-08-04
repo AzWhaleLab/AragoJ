@@ -1,2 +1,3 @@
-rootProject.name = 'anigram'
+include 'app',
+        'reports'
 

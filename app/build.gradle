@@ -1,0 +1,31 @@
+apply plugin: "java"
+apply plugin: "kotlin"
+apply plugin: "application"
+
+group 'com.aragoj'
+version '0.1'
+
+sourceCompatibility = 1.8
+
+mainClassName = 'com.aragoj.MainApplication'
+
+
+dependencies {
+    implementation(name:'opencv-342', ext:'jar')
+
+    implementation "io.reactivex.rxjava2:rxjava:2.2.11"
+    implementation "io.reactivex.rxjava2:rxjavafx:2.2.2" // 2.11.0 to JDK 11 support
+    implementation "com.github.thomasnield:rxkotlinfx:2.2.2"
+    implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
+    implementation 'de.saxsys:mvvmfx:1.8.0'
+
+    implementation 'javax.xml.bind:jaxb-api:2.3.0'
+    implementation 'com.drewnoakes:metadata-extractor:2.10.1'
+    implementation 'org.mariuszgromada.math:MathParser.org-mXparser:4.1.1'
+    implementation 'org.fxmisc.richtext:richtextfx:0.9.1'
+    implementation 'org.apache.commons:commons-imaging:1.0-SNAPSHOT'
+
+    implementation 'com.jfoenix:jfoenix:1.6.0'
+
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+}
