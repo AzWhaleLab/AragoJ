@@ -225,20 +225,27 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         currentItem = index;
     }
 
+    private void addImages(List<File> files){
+        if(files == null || files.size() <= 0) return;
 
-    private void addImage(File file) {
-        Task task = new Task<ImageItem>() {
+        Task task = new Task<List<ImageItem>>() {
             @Override
-            protected ImageItem call() throws Exception {
-                ImageItem item = ImageManager.retrieveImage(file.getAbsolutePath());
-                item.preloadThumbnail();
-                return item;
+            protected List<ImageItem> call() throws Exception {
+                ArrayList<ImageItem> items = new ArrayList<>();
+                for(File file : files) {
+                    if(file.exists()) {
+                        ImageItem item = ImageManager.retrieveImage(file.getAbsolutePath());
+                        item.preloadThumbnail();
+                        items.add(item);
+                    }
+                }
+                return items;
             }
 
             @Override
             protected void succeeded() {
                 try {
-                    imageListView.getItems().add(get());
+                    imageListView.getItems().addAll(get());
                     exportCSVMenuItem.setDisable(false);
                     System.out.println("ImageListView size:" + imageListView.getItems().size());
                     System.out.println("Free Memory: " + Runtime.getRuntime().freeMemory());
@@ -255,8 +262,6 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         };
         new Thread(task).start();
     }
-
-
 
     /**
      * Main editor methods
@@ -720,15 +725,12 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
 
         // Set the new session
         ArrayList<EditorItem> items = session.getItems();
+        ArrayList<File> itemsFiles = new ArrayList<>();
         for(EditorItem item : items){
             File file = new File(item.getSourceImagePath());
-            if(file.exists()){
-                addImage(file);
-            }
-            else{
-                //TODO: Show error / locate missing file
-            }
+            itemsFiles.add(file);
         }
+        addImages(itemsFiles);
         this.session = session;
         setEditorEnable(false);
         if(session.getPath() != null && !session.getPath().isEmpty()){
@@ -810,9 +812,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         List<File> files = ch.showOpenMultipleDialog(imageListView.getScene().getWindow());
         if (files != null && files.size() > 0) {
             prefs.put(Constants.STTGS_FILECHOOSER_LASTOPENED, files.get(0).getParent());
-            for (File file : files) {
-                addImage(file);
-            }
+            addImages(files);
         }
     }
 
@@ -863,13 +863,14 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
     public void onImageDropped(DragEvent dragEvent) {
         Dragboard board = dragEvent.getDragboard();
         List<File> files = board.getFiles();
+        List<File> finalFiles = board.getFiles();
         for(File file : files){
             String extension = Utility.getFilePathExtension(file.getPath());
             if(extension != null && Utility.isImageExtensionSupported(extension)){
-                addImage(file);
+                finalFiles.add(file);
             }
         }
-
+        addImages(finalFiles);
     }
 
     public void onImageListDragOver(DragEvent dragEvent) {
