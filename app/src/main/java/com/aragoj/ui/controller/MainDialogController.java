@@ -28,8 +28,8 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import com.aragoj.session.SessionManager;
-import com.aragoj.session.export.ExportPreferences;
+import com.aragoj.session.SessionUtils;
+import com.aragoj.mainscreen.io.preferences.MetadataExportPreferencesManager;
 import com.aragoj.ui.MainApplication;
 import com.aragoj.ui.cellfactory.ImageListViewCell;
 import com.aragoj.session.model.EditorItem;
@@ -113,7 +113,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
     @FXML
     private void initialize(){
         prefs = Preferences.userNodeForPackage(MainApplication.class);
-        ExportPreferences.importExportPreferences();
+        MetadataExportPreferencesManager.importExportPreferences();
 
         loadPreferencesAndPanes();
 
@@ -131,7 +131,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
                 newValue.getWindow().setOnCloseRequest(new EventHandler<WindowEvent>() {
                     @Override
                     public void handle(WindowEvent event) {
-                        ExportPreferences.exportExportPreferences();
+                        MetadataExportPreferencesManager.exportExportPreferences();
                         if(session != null){
                             event.consume();
                             closeAppWithSureDialog(session);
@@ -675,7 +675,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         if (file != null && file.exists()) {
             prefs.put(Constants.STTGS_FILECHOOSER_OPEN, file.getParent());
             try {
-                Session session = SessionManager.openSession(file);
+                Session session = SessionUtils.openSession(file);
                 if(this.session != null){
                     loadSessionWithSureDialog(session);
                 } else {
@@ -761,7 +761,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         }
         else{
             saveCurrentItem();
-            return SessionManager.saveSession(session);
+            return SessionUtils.saveSession(session);
         }
     }
 
@@ -784,7 +784,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
             prefs.put(Constants.STTGS_FILECHOOSER_SAVEAS, file.getParent());
             session.setPath(file.getPath());
             MainApplication.setStageName("AragoJ - " + session.getName());
-            return SessionManager.saveSession(session);
+            return SessionUtils.saveSession(session);
         }
         return false;
     }
@@ -843,7 +843,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
 
     @FXML
     public void onExitClick(ActionEvent actionEvent) {
-        ExportPreferences.exportExportPreferences();
+        MetadataExportPreferencesManager.exportExportPreferences();
         if(session != null){
             closeAppWithSureDialog(session);
         } else {

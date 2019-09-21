@@ -11,7 +11,6 @@ public final class TagRow extends RecursiveTreeObject<TagRow> {
     private final StringProperty value;
     private final BooleanProperty directory;
 
-
     private final BooleanProperty toExport;
 
     public TagRow(String tag, String value, boolean directory) {

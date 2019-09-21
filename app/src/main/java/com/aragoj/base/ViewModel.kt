@@ -4,7 +4,9 @@ import com.uber.autodispose.lifecycle.CorrespondingEventsFunction
 import com.uber.autodispose.lifecycle.LifecycleEndedException
 import com.uber.autodispose.lifecycle.LifecycleScopeProvider
 import de.saxsys.mvvmfx.SceneLifecycle
+import io.reactivex.Flowable
 import io.reactivex.Observable
+import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.subjects.BehaviorSubject
 
 abstract class ViewModel : de.saxsys.mvvmfx.ViewModel, SceneLifecycle, LifecycleScopeProvider<ViewModel.ViewModelEvent> {
@@ -21,7 +23,7 @@ abstract class ViewModel : de.saxsys.mvvmfx.ViewModel, SceneLifecycle, Lifecycle
 
     override fun onViewRemoved() {
         lifecycleEvents.onNext(ViewModelEvent.DESTROYED)
-    }
+    }z
 
     override fun lifecycle(): Observable<ViewModelEvent> {
         return lifecycleEvents.hide()
@@ -35,12 +37,16 @@ abstract class ViewModel : de.saxsys.mvvmfx.ViewModel, SceneLifecycle, Lifecycle
         return lifecycleEvents.value
     }
 
+    fun exitApp(){
+        Platform.exit()
+    }
+
     companion object {
         private val CORRESPONDING_EVENTS = CorrespondingEventsFunction<ViewModelEvent> { event ->
             when (event) {
                 ViewModelEvent.CREATED -> ViewModelEvent.DESTROYED
                 else -> throw LifecycleEndedException(
-                        "Cannot bind to ViewModel lifecycle after onDestroyed.")
+                    "Cannot bind to ViewModel lifecycle after onDestroyed.")
             }
         }
     }

@@ -1,4 +1,5 @@
 rootProject.name = 'AragoJ'
 include 'app'
 include 'reports'
+include 'imageprocessor'
 

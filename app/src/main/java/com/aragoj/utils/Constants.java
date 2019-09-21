@@ -1,13 +1,6 @@
 package com.aragoj.utils;
 
 public class Constants {
-    public final static String STTGS_FILECHOOSER_LASTOPENED = "filechooser_location";
-    public final static String STTGS_FILECHOOSER_EXPORTCSV_LASTOPENED = "filechooser_exportcsv_location";
-    public final static String STTGS_FILECHOOSER_SAVEAS = "filechooser_saveas_location";
-    public final static String STTGS_FILECHOOSER_OPEN = "filechooser_open_location";
-
-    public final static String STTGS_EXPORT_PREFS = "export_prefs";
-
     public final static String STTGS_COLOR_PICKER = "color_picker";
     public final static String STTGS_ANGLE_PICKER = "angle_picker";
 

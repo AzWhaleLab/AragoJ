@@ -7,7 +7,7 @@ import javax.xml.bind.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public class SessionManager {
+public class SessionUtils {
 
 
     public static boolean saveSession(Session session){

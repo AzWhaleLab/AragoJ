@@ -16,19 +16,22 @@
 <?import com.aragoj.utils.jfx.JFXTabPane?>
 
 <?import javafx.scene.layout.StackPane?>
-<StackPane fx:id="stackPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane fx:id="stackPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aragoj.mainscreen.MainScreenView">
     <AnchorPane prefHeight="400.0" prefWidth="600.0"  >
         <children>
             <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <top>
-                    <fx:include fx:id="menuView" source="MainDialogMenu.fxml" />
+
+                    <VBox style="-fx-background-color: #FFFFFF;" fx:id="menuView"/>
+
+<!--                    <fx:include fx:id="menuView" source="MainDialogMenu.fxml" />-->
                 </top>
                 <center>
                     <SplitPane dividerPositions="0.2157190635451505, 0.7725752508361204" prefHeight="362.0" prefWidth="600.0" BorderPane.alignment="CENTER">
                         <items>
                             <AnchorPane prefHeight="200.0" prefWidth="200.0" SplitPane.resizableWithParent="false">
                                 <children>
-                                    <JFXListView fx:id="imageListView" onDragOver="#onImageListDragOver" onDragDropped="#onImageDropped" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+<!--                                    <JFXListView fx:id="imageListView" onDragOver="#onImageListDragOver" onDragDropped="#onImageDropped" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />-->
                                 </children>
                             </AnchorPane>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
@@ -100,12 +103,12 @@
                                         <tabs>
                                             <Tab fx:id="layerTab" text="%layers">
                                                 <content>
-                                                    <fx:include fx:id="layerTabPage" source="LayerTabPage.fxml" />
+<!--                                                    <fx:include fx:id="layerTabPage" source="LayerTabPage.fxml" />-->
                                                 </content>
                                             </Tab>
                                             <Tab fx:id="metaTab" text="%metadata">
                                                 <content>
-                                                    <fx:include fx:id="metaTabPage" source="MetaTabPage.fxml" />
+<!--                                                    <fx:include fx:id="metaTabPage" source="MetaTabPage.fxml" />-->
                                                 </content>
                                             </Tab>
                                         </tabs>

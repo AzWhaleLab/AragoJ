@@ -18,8 +18,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-import com.aragoj.session.export.ExportPreferences;
+import com.aragoj.mainscreen.io.preferences.MetadataExportPreferencesManager;
 import com.aragoj.ui.model.LabeledComboOption;
 import com.aragoj.ui.model.TagRow;
 import com.aragoj.utils.Utility;
@@ -142,13 +141,13 @@ public class ImageItem {
             if(fileDirectory.containsTag(FileMetadataDirectory.TAG_FILE_MODIFIED_DATE)){
                 Date date = fileDirectory.getDate(FileMetadataDirectory.TAG_FILE_MODIFIED_DATE);
                 TagRow tModDate = new TagRow("Modified date", getDate(date), false);
-                tModDate.setToExport(ExportPreferences.containsPreference("Modified date"));
+                tModDate.setToExport(MetadataExportPreferencesManager.containsPreference("Modified date"));
                 tags.add(tModDate);
             }
             if(fileDirectory.containsTag(FileMetadataDirectory.TAG_FILE_SIZE)){
                 try {
                     TagRow tSize = new TagRow("Size", Utility.formatFileSize(fileDirectory.getLong(FileMetadataDirectory.TAG_FILE_SIZE)), false);
-                    tSize.setToExport(ExportPreferences.containsPreference("Size"));
+                    tSize.setToExport(MetadataExportPreferencesManager.containsPreference("Size"));
                     tags.add(tSize);
                 } catch (MetadataException e) {
                     // Just don't add
@@ -156,9 +155,9 @@ public class ImageItem {
             }
         }
         TagRow tWidth = new TagRow("Width", String.valueOf(width) + " pixels", false);
-        tWidth.setToExport(ExportPreferences.containsPreference("Width"));
+        tWidth.setToExport(MetadataExportPreferencesManager.containsPreference("Width"));
         TagRow tHeight = new TagRow("Height", String.valueOf(height) + " pixels", false);
-        tHeight.setToExport(ExportPreferences.containsPreference("Height"));
+        tHeight.setToExport(MetadataExportPreferencesManager.containsPreference("Height"));
         tags.addAll(tWidth, tHeight);
 
         // Exif
@@ -171,22 +170,22 @@ public class ImageItem {
             TagRow exif = new TagRow("Exif", "", true);
             if(exifIFD0Directory.containsTag(ExifIFD0Directory.TAG_MAKE)) {
                 TagRow row = new TagRow("Make", exifIFD0Directory.getString(ExifIFD0Directory.TAG_MAKE), false);
-                row.setToExport(ExportPreferences.containsPreference("Make"));
+                row.setToExport(MetadataExportPreferencesManager.containsPreference("Make"));
                 exif.getChildren().add(row);
             }
             if(exifIFD0Directory.containsTag(ExifIFD0Directory.TAG_MODEL)) {
                 TagRow row = new TagRow("Model", exifIFD0Directory.getString(ExifIFD0Directory.TAG_MODEL), false);
-                row.setToExport(ExportPreferences.containsPreference("Model"));
+                row.setToExport(MetadataExportPreferencesManager.containsPreference("Model"));
                 exif.getChildren().add(row);
             }
             if(exifIFD0Directory.containsTag(ExifIFD0Directory.TAG_X_RESOLUTION)) {
                 TagRow row = new TagRow("X Resolution", exifIFD0Directory.getString(ExifIFD0Directory.TAG_X_RESOLUTION), false);
-                row.setToExport(ExportPreferences.containsPreference("X Resolution"));
+                row.setToExport(MetadataExportPreferencesManager.containsPreference("X Resolution"));
                 exif.getChildren().add(row);
             }
             if(exifIFD0Directory.containsTag(ExifIFD0Directory.TAG_Y_RESOLUTION)) {
                 TagRow row = new TagRow("Y Resolution", exifIFD0Directory.getString(ExifIFD0Directory.TAG_Y_RESOLUTION), false);
-                row.setToExport(ExportPreferences.containsPreference("Y Resolution"));
+                row.setToExport(MetadataExportPreferencesManager.containsPreference("Y Resolution"));
                 exif.getChildren().add(row);
             }
 
@@ -220,7 +219,7 @@ public class ImageItem {
 
             for(Tag tag: exifSubIFDDirectory.getTags()){
                 TagRow row = new TagRow(tag.getTagName(), tag.getDescription(), false);
-                row.setToExport(ExportPreferences.containsPreference(tag.getTagName()));
+                row.setToExport(MetadataExportPreferencesManager.containsPreference(tag.getTagName()));
                 exif.getChildren().add(row);
             }
             tags.add(exif);
@@ -232,19 +231,19 @@ public class ImageItem {
             GeoLocation location = gpsDirectory.getGeoLocation();
             if(location != null){
                 TagRow latRow = new TagRow("Latitude", String.valueOf(location.getLatitude()), false);
-                latRow.setToExport(ExportPreferences.containsPreference("Latitude"));
+                latRow.setToExport(MetadataExportPreferencesManager.containsPreference("Latitude"));
                 TagRow longRow = new TagRow("Longitude", String.valueOf(location.getLongitude()), false);
-                longRow.setToExport(ExportPreferences.containsPreference("Longitude"));
+                longRow.setToExport(MetadataExportPreferencesManager.containsPreference("Longitude"));
                 gps.getChildren().addAll(latRow, longRow);
 
                 if(gpsDirectory.containsTag(GpsDirectory.TAG_ALTITUDE_REF)){
                     TagRow row = new TagRow("Altitude Ref", gpsDirectory.getDescription(GpsDirectory.TAG_ALTITUDE_REF), false);
-                    row.setToExport(ExportPreferences.containsPreference("Altitude Ref"));
+                    row.setToExport(MetadataExportPreferencesManager.containsPreference("Altitude Ref"));
                     gps.getChildren().add(row);
                 }
                 if(gpsDirectory.containsTag(GpsDirectory.TAG_ALTITUDE)){
                     TagRow row = new TagRow("Altitude", gpsDirectory.getDescription(GpsDirectory.TAG_ALTITUDE), false);
-                    row.setToExport(ExportPreferences.containsPreference("Altitude"));
+                    row.setToExport(MetadataExportPreferencesManager.containsPreference("Altitude"));
                     gps.getChildren().add(row);
                 }
                 tags.add(gps);
@@ -264,7 +263,7 @@ public class ImageItem {
                         String tag = ImageUtility.getXMPTagOfInterest(xmpPropertyInfo.getPath());
                         if(tag != null){
                             TagRow row = new TagRow(tag, xmpPropertyInfo.getValue(), false);
-                            row.setToExport(ExportPreferences.containsPreference(tag));
+                            row.setToExport(MetadataExportPreferencesManager.containsPreference(tag));
                             xmp.getChildren().add(row);
                         }
                     }
@@ -286,22 +285,22 @@ public class ImageItem {
             TagRow scaleFactor = new TagRow(("Scale Factor to 35mm"), String.format("%.1f", eqFactor), false);
             TagRow cocRow = new TagRow(("Circle of Confusion"), String.format("%.3f", coc) + " mm", false);
             TagRow fov = new TagRow(("Field of View"), String.format("%.1f", fovValue) + " deg", false);
-            scaleFactor.setToExport(ExportPreferences.containsPreference("Scale Factor to 35mm"));
-            cocRow.setToExport(ExportPreferences.containsPreference("Circle of Confusion"));
-            fov.setToExport(ExportPreferences.containsPreference("Field of View"));
+            scaleFactor.setToExport(MetadataExportPreferencesManager.containsPreference("Scale Factor to 35mm"));
+            cocRow.setToExport(MetadataExportPreferencesManager.containsPreference("Circle of Confusion"));
+            fov.setToExport(MetadataExportPreferencesManager.containsPreference("Field of View"));
             derived.getChildren().addAll(scaleFactor, cocRow, fov);
 
             if(aperture != 0){
                 double hyperfocalDistance = ImageUtility.getHyperfocalDistance(eqFactor, focalLength, aperture);
                 TagRow hyperFocal = new TagRow(("Hyperfocal Distance"), String.format("%.2f", hyperfocalDistance) + " m", false);
-                hyperFocal.setToExport(ExportPreferences.containsPreference("Hyperfocal Distance"));
+                hyperFocal.setToExport(MetadataExportPreferencesManager.containsPreference("Hyperfocal Distance"));
                 derived.getChildren().add(hyperFocal);
             }
         }
         if(aperture != 0 && iso != 0 && shutterSpeed != 0){
             double lightValue = ImageUtility.getLightValue(aperture, shutterSpeed, iso);
             TagRow lightV = new TagRow(("Light Value"), String.format("%.1f", lightValue) , false);
-            lightV.setToExport(ExportPreferences.containsPreference("Light Value"));
+            lightV.setToExport(MetadataExportPreferencesManager.containsPreference("Light Value"));
             derived.getChildren().add(lightV);
         }
         if(derived.getChildren().size() != 0){

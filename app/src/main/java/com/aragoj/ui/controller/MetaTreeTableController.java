@@ -14,7 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
 import javafx.util.Callback;
-import com.aragoj.session.export.ExportPreferences;
+import com.aragoj.mainscreen.io.preferences.MetadataExportPreferencesManager;
 import com.aragoj.ui.cellfactory.MetadataTagTreeCell;
 import com.aragoj.ui.model.TagRow;
 import com.aragoj.utils.Translator;
@@ -130,9 +130,9 @@ public class MetaTreeTableController {
                 TagRow tagRow = row.getItem();
                 tagRow.setToExport(!tagRow.isToExportVisible());
                 if(tagRow.isToExportVisible()){
-                    ExportPreferences.addToExportList(tagRow.getTag());
+                    MetadataExportPreferencesManager.addToExportList(tagRow.getTag());
                 } else {
-                    ExportPreferences.removeToExportList(tagRow.getTag());
+                    MetadataExportPreferencesManager.removeToExportList(tagRow.getTag());
                 }
                 treeTableView.refresh();
             });
@@ -150,9 +150,9 @@ public class MetaTreeTableController {
 //                        tagRow.setToExport(false);
 //                    }
                     if(tagRow.isToExportVisible()){
-                        ExportPreferences.addToExportList(tagRow.getTag());
+                        MetadataExportPreferencesManager.addToExportList(tagRow.getTag());
                     } else {
-                        ExportPreferences.removeToExportList(tagRow.getTag());
+                        MetadataExportPreferencesManager.removeToExportList(tagRow.getTag());
                     }
                 }
                 treeTableView.refresh();

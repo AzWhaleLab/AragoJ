@@ -1,5 +1,6 @@
 package com.aragoj.session.export;
 
+import com.aragoj.mainscreen.io.preferences.MetadataExportPreferencesManager;
 import com.aragoj.session.model.*;
 import com.drew.imaging.ImageProcessingException;
 import com.aragoj.equation.Equation;
@@ -35,14 +36,14 @@ public class ExportCSV {
                 List<TagRow> metadataList = imageItem.getMetadata();
                 metadataMap.put(item.getSourceImagePath(), metadataList);
                 for (TagRow tag : metadataList) {
-                    if (ExportPreferences.containsPreference(tag.getTag()) && tag.isToExportToFile()) {
+                    if (MetadataExportPreferencesManager.containsPreference(tag.getTag()) && tag.isToExportToFile()) {
                         if (!metadataNameList.contains(tag.getTag())) {
                             metadataNameList.add(tag.getTag().replaceAll(",", "."));
                         }
                     }
                     List<TagRow> tagList = tag.getChildren();
                     for (TagRow tag2 : tagList) {
-                        if (ExportPreferences.containsPreference(tag2.getTag()) && tag2.isToExportToFile()) {
+                        if (MetadataExportPreferencesManager.containsPreference(tag2.getTag()) && tag2.isToExportToFile()) {
                             if (!metadataNameList.contains(tag2.getTag())) {
                                 metadataNameList.add(tag2.getTag().replaceAll(",", "."));
                             }
