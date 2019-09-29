@@ -161,7 +161,7 @@ public class LineGroup extends Group implements LayerListItem {
         helperLine.setStartY(startPointY);
         startPointCross.setPoint(startPointX, startPointY);
 
-        if(handler != null) handler.onLineChange();
+        if(handler != null) handler.onLineChange(LineGroup.this);
 
     }
 
@@ -179,7 +179,7 @@ public class LineGroup extends Group implements LayerListItem {
         helperLine.setEndY(endPointY);
         endPointCross.setPoint(endPointX, endPointY);
 
-        if(handler != null) handler.onLineChange();
+        if(handler != null) handler.onLineChange(LineGroup.this);
     }
 
     public void setEndPoint(Point2D point){
@@ -231,7 +231,7 @@ public class LineGroup extends Group implements LayerListItem {
 
     public void setName(String name){
         this.name = name;
-        if(handler != null) handler.onLineChange();
+        if(handler != null) handler.onLineChange(LineGroup.this);
     }
 
     public double getLength(){
@@ -297,7 +297,7 @@ public class LineGroup extends Group implements LayerListItem {
         void onAngledStartPointChange(LineGroup line, double x, double y);
         void onAngledEndPointChange(LineGroup line, double x, double y);
         void onLineChange(LineGroup line, double dx, double dy);
-        void onLineChange();
+        void onLineChange(LineGroup line);
     }
 
 

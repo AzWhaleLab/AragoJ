@@ -28,23 +28,10 @@ public class EditorItem {
     private ScaleRatio scaleRatio;
     private String sourceImagePath;
 
-//    public EditorItem(ZoomableScrollPane scrollPane){
-//        zoom = new EditorItemZoom(scrollPane.getHvalue(), scrollPane.getVvalue(), scrollPane.getScaleValue());
-//        layers = new ArrayList<>();
-//
-//        ImageEditorStackGroup stackGroup = (ImageEditorStackGroup) scrollPane.getTarget();
-//        lineCount = stackGroup.getLineCount();
-//        for(Node node : stackGroup.getChildren()){
-//            if(node instanceof LineGroup){
-//                LineGroup lineGroup = (LineGroup) node;
-//                layers.add(new EditorItemLine(lineGroup.getName(), lineGroup.getStartPointX(), lineGroup.getStartPointY(), lineGroup.getEndPointX(), lineGroup.getEndPointY(), lineGroup.getColorObj()));
-//            }
-//        }
-//        this.scaleRatio = stackGroup.getCurrentScale();
-//    }
-
     public EditorItem(){
         this.layers = new ArrayList<>();
+        this.scaleRatio = new ScaleRatio();
+        this.zoom = new EditorItemZoom();
     }
 
     public EditorItem(ZoomableScrollPane scrollPane, List<LayerListItem> layers){
@@ -78,6 +65,10 @@ public class EditorItem {
         return scaleRatio;
     }
 
+    public boolean hasScaleRatio(){
+        return  scaleRatio != null && scaleRatio.getRatio() > 0;
+    }
+
     public void setScaleRatio(ScaleRatio scaleRatio) {
         this.scaleRatio = scaleRatio;
     }
@@ -91,6 +82,12 @@ public class EditorItem {
         this.sourceImagePath = sourceImagePath;
     }
 
+    public void updateZoomAndScale(ZoomableScrollPane scrollPane){
+        ImageEditorStackGroup stackGroup = (ImageEditorStackGroup) scrollPane.getTarget();
+        this.zoom = new EditorItemZoom(scrollPane.getHvalue(), scrollPane.getVvalue(), scrollPane.getScaleValue());
+        this.scaleRatio = stackGroup.getCurrentScale();
+
+    }
 
     private ArrayList<EditorItemLayer> convertItemLayer(List<LayerListItem> layers){
         ArrayList<EditorItemLayer> editorList = new ArrayList<>();

@@ -51,4 +51,13 @@ public class EditorItemArea implements EditorItemLayer {
     public void setVertices(List<EditorItemPosition> vertices) {
         this.vertices = vertices;
     }
+
+    @XmlTransient
+    @Override public String getIdentifier() {
+        return name;
+    }
+
+    @Override public void setIdentifier(String name) {
+        this.name = name;
+    }
 }

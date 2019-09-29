@@ -211,7 +211,7 @@ public class AreaGroup extends Group implements LayerListItem {
 
     public void setName(String name) {
         this.name = name;
-        if (areaEventHandler != null) areaEventHandler.onAreaChanged();
+        if (areaEventHandler != null) areaEventHandler.onAreaChanged(AreaGroup.this);
     }
 
     public String getColorString(){
@@ -271,7 +271,7 @@ public class AreaGroup extends Group implements LayerListItem {
     public interface AreaEventHandler extends ToolEventHandler {
         void onVertexChange(AreaGroup line, int vertexIndex, double x, double y);
 
-        void onAreaChanged();
+        void onAreaChanged(AreaGroup areaGroup);
 
         void onAreaComplete(AreaGroup area);
 

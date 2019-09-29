@@ -252,6 +252,8 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
 
     public void clearList() {
         elements.clear();
+        areaCount = 1;
+        lineCount = 1;
     }
 
     public ArrayList<LineGroup> getLines() {
@@ -313,8 +315,8 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
     }
 
     @Override
-    public void onLineChange() {
-        if (elementListener != null) elementListener.onLineChange();
+    public void onLineChange(LineGroup lineGroup) {
+        if (elementListener != null) elementListener.onLineChange(lineGroup);
     }
 
     /**
@@ -326,8 +328,8 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
     }
 
     @Override
-    public void onAreaChanged() {
-        if (elementListener != null) elementListener.onAreaChange();
+    public void onAreaChanged(AreaGroup areaGroup) {
+        if (elementListener != null) elementListener.onAreaChange(areaGroup);
 
     }
 
@@ -343,6 +345,10 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
         helperLineAngle = -1;
         this.currentMode = mode;
         if (modeListener != null) modeListener.onModeChange(currentMode);
+    }
+
+    public Mode getCurrentMode(){
+        return currentMode;
     }
 
     public void setLayerHelperLinesVisible(boolean visible) {
@@ -482,8 +488,8 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
 
         void onAreaAdd(AreaGroup area, boolean sessionLoad);
 
-        void onLineChange();
+        void onLineChange(LineGroup lineGroup);
 
-        void onAreaChange();
+        void onAreaChange(AreaGroup areaGroup);
     }
 }

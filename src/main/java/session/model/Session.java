@@ -1,5 +1,6 @@
 package session.model;
 
+import java.util.List;
 import utils.Utility;
 
 import javax.xml.bind.annotation.*;
@@ -46,6 +47,10 @@ public class Session {
 
     public void addItem(EditorItem item){
         items.add(item);
+    }
+
+    public void setItems(ArrayList<EditorItem> items){
+        this.items = items;
     }
 
     public void removeItem(EditorItem item){

@@ -43,11 +43,11 @@ public class LayerListViewCell extends JFXListCell<LayerListItem> {
             }
             controller.setPrimaryText(item.getPrimaryText());
             String secText = item.getSecondaryText();
-            if(currentScale != null && item instanceof LineGroup){
+            if(currentScale != null && currentScale.hasScale() && item instanceof LineGroup){
                 LineGroup lineGroup = (LineGroup) item;
                 secText += " - " + currentScale.getRoundedScaledValue(lineGroup.getLength())  + " " + currentScale.getUnits();
             }
-            if(currentScale != null && item instanceof AreaGroup){
+            if(currentScale != null && currentScale.hasScale() && item instanceof AreaGroup){
                 AreaGroup areaGroup = (AreaGroup) item;
                 secText += " - " + currentScale.getRoundedScaledValue(areaGroup.calculateArea())  + " " + currentScale.getUnits();
             }
