@@ -1,8 +1,5 @@
 package ui.custom;
 
-import javafx.event.Event;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import opencv.calibration.ui.CalibrationImageItem;
 import equation.model.EquationItem;
 import javafx.geometry.Bounds;
@@ -30,10 +27,13 @@ public class ZoomableScrollPane extends ScrollPane {
 
     private ImageEditorStackGroup.Mode currentMode;
 
-    public ZoomableScrollPane(Node target) {
+    private ZoomChangeListener listener;
+
+    public ZoomableScrollPane(Node target, ZoomChangeListener zoomChangeListener) {
         super();
         this.target = target;
         this.zoomNode = new Group(target);
+        this.listener = zoomChangeListener;
         setContent(outerNode(zoomNode));
 
         setPannable(true);
@@ -95,6 +95,11 @@ public class ZoomableScrollPane extends ScrollPane {
         Bounds updatedInnerBounds = zoomNode.getBoundsInLocal();
         this.setHvalue((valX + adjustment.getX()) / (updatedInnerBounds.getWidth() - viewportBounds.getWidth()));
         this.setVvalue((valY + adjustment.getY()) / (updatedInnerBounds.getHeight() - viewportBounds.getHeight()));
+        if(listener != null) listener.onZoomChange(getHvalue(), getVvalue());
+    }
+
+    public void updateZoom(){
+        if(listener != null) listener.onZoomChange(getHvalue(), getVvalue());
     }
 
     public void setDefaultScale(){
@@ -125,11 +130,15 @@ public class ZoomableScrollPane extends ScrollPane {
     public void loadEditorItem(EditorItem item, ToolEventHandler handler, LayerTabPageController layerTabPageController){
         // Set zoom
         EditorItemZoom zoom = item.getZoom();
-        this.scaleValue = zoom.getScale();
-        updateScale();
-        this.layout();
-        this.setHvalue(zoom.gethValue());
-        this.setVvalue(zoom.getvValue());
+        if(zoom != null && zoom.getScale() >= 0){
+            this.scaleValue = zoom.getScale();
+            updateScale();
+            this.layout();
+            this.setHvalue(zoom.gethValue());
+            this.setVvalue(zoom.getvValue());
+        } else {
+            setDefaultScale();
+        }
 
         if(!(target instanceof  ImageEditorStackGroup)) return;
         // Set layers (assumes image is already set)
@@ -146,7 +155,9 @@ public class ZoomableScrollPane extends ScrollPane {
                 layerTabPageController.getLayers().add((EquationItem) layer);
             }
         }
-        stackGroup.setCurrentScale(item.getScaleRatio());
+        if(item.getScaleRatio().getRatio() > 0){
+            stackGroup.setCurrentScale(item.getScaleRatio());
+        }
     }
 
     public void loadCalibrationItem(CalibrationImageItem item){
@@ -169,5 +180,13 @@ public class ZoomableScrollPane extends ScrollPane {
 
     public void setCurrentMode(ImageEditorStackGroup.Mode mode){
         this.currentMode = mode;
+    }
+
+    public ImageEditorStackGroup.Mode getCurrentMode() {
+        return currentMode;
+    }
+
+    public interface ZoomChangeListener{
+        void onZoomChange(double hValue, double vValue);
     }
 }

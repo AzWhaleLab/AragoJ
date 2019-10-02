@@ -7,11 +7,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
-import javafx.util.Callback;
 import ui.cellfactory.LayerListViewCell;
 import ui.custom.LineGroup;
 import ui.model.LayerListItem;
@@ -31,7 +28,7 @@ public class LayerTabPageController implements EquationDialogController.OnAction
         layerListView.setOnKeyPressed(event -> {
             if(event.getCode() == KeyCode.DELETE){
                 if(listener != null){
-                    removeSelectedLine();
+                    removeSelectedLayer();
                 }
             }
         });
@@ -47,11 +44,9 @@ public class LayerTabPageController implements EquationDialogController.OnAction
         });
     }
 
-    private void removeSelectedLine() {
+    private void removeSelectedLayer() {
         int index = layerListView.getSelectionModel().getSelectedIndex();
-        if(layerListView.getSelectionModel().getSelectedItem() instanceof LineGroup){
-            listener.onRemoveLine(((LineGroup) layerListView.getSelectionModel().getSelectedItem()).getName());
-        }
+        listener.onRemoveLayer(layerListView.getItems().get(index).getPrimaryText());
         layerListView.getItems().remove(index);
     }
 
@@ -60,7 +55,7 @@ public class LayerTabPageController implements EquationDialogController.OnAction
         MenuItem removeContextItem = new MenuItem(Translator.getString("delete"));
 
         removeContextItem.setOnAction(event -> {
-            removeSelectedLine();
+            removeSelectedLayer();
         });
         listItemContextMenu.getItems().setAll(removeContextItem);
         layerListView.setContextMenu(listItemContextMenu);
@@ -100,14 +95,8 @@ public class LayerTabPageController implements EquationDialogController.OnAction
             }
         }
         LayerListItem item = layerListView.getItems().get(index);
-        if(item instanceof LineGroup){
-            LineGroup line = (LineGroup) item;
-            listener.onRenameLine(line.getName(), name);
-            line.setName(name);
-        }
-        else if(item instanceof EquationItem){
-            ((EquationItem) item).setName(name);
-        }
+        item.setPrimaryText(name);
+        listener.onRenameLayer(item.getPrimaryText(), name);
     }
 
 
@@ -115,8 +104,9 @@ public class LayerTabPageController implements EquationDialogController.OnAction
      * Listener interface to be notified when a layer changes
      */
     public interface LineChangeListener{
-        void onRemoveLine(String name);
-        void onRenameLine(String oldName, String newName);
+        void onRemoveLayer(String name);
+        void onRenameLayer(String oldName, String newName);
+        void onEquationAdd(EquationItem equationItem);
     }
 
     /**
@@ -130,7 +120,7 @@ public class LayerTabPageController implements EquationDialogController.OnAction
     }
 
     public void onRemoveBtnLayer(ActionEvent actionEvent) {
-        removeSelectedLine();
+        removeSelectedLayer();
     }
 
     private List<LineGroup> getLines(){
@@ -158,6 +148,7 @@ public class LayerTabPageController implements EquationDialogController.OnAction
     @Override
     public void onAddEquation(EquationItem equation) {
         layerListView.getItems().add(equation);
+        listener.onEquationAdd(equation);
     }
 
     public class NameAlreadyTaken extends Exception{

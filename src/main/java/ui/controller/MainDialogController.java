@@ -1,6 +1,8 @@
 package ui.controller;
 
 import com.drew.imaging.ImageProcessingException;
+import equation.model.EquationItem;
+import java.lang.reflect.Array;
 import javafx.fxml.FXMLLoader;
 import opencv.OpenCVManager;
 import opencv.calibration.model.CalibrationModel;
@@ -29,12 +31,16 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import session.SessionManager;
 import session.export.ExportPreferences;
+import session.model.EditorItemArea;
+import session.model.EditorItemLayer;
+import session.model.EditorItemLine;
 import ui.MainApplication;
 import ui.custom.*;
 import ui.cellfactory.ImageListViewCell;
 import session.model.EditorItem;
 import ui.model.ScaleRatio;
 import session.model.Session;
+import ui.model.UIEditorItem;
 import utils.Constants;
 import utils.Translator;
 import utils.Utility;
@@ -52,7 +58,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
-public class MainDialogController  implements ImageEditorStackGroup.ModeListener, ImageEditorStackGroup.ElementListener, LayerTabPageController.LineChangeListener, ScaleDialogController.OnActionListener, ConvertUnitsDialogController.OnActionListener, UndistortDialog.OnActionListener, UndistortProgressDialogController.UndistortCallback {
+public class MainDialogController
+    implements ImageEditorStackGroup.ModeListener, ImageEditorStackGroup.ElementListener,
+    LayerTabPageController.LineChangeListener, ScaleDialogController.OnActionListener,
+    ConvertUnitsDialogController.OnActionListener, UndistortDialog.OnActionListener,
+    UndistortProgressDialogController.UndistortCallback, ZoomableScrollPane.ZoomChangeListener {
 
 
     private Preferences prefs;
@@ -72,26 +82,21 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
     @FXML public MenuItem undistortMenuItem;
     @FXML public MenuItem autoUndistortCheckMenuItem;
 
-
     // Module items
     @FXML private Menu conversionMenu;
 
-    // Session related variables
-    private Session session;
-    private int currentItem = -1;
-
     // Left side controllers & views
-    @FXML private JFXListView<ImageItem> imageListView;
+    @FXML private JFXListView<UIEditorItem> imageListView;
 
     // Right side controllers & views
     @FXML public JFXTabPane miscTabPane;
     @FXML private MetaTreeTableController metaTabPageController;
     @FXML private LayerTabPageController layerTabPageController;
 
+    private SessionManager sessionManager;
     // Main Editor
     private ImageEditorStackGroup imageEditorStackGroup;
     private ZoomableScrollPane imageEditorScrollPane;
-    private PixelatedImageView img;
 
     @FXML private StackPane stackPane;
 
@@ -108,7 +113,9 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
     @FXML private JFXButton zoomButton;
 
 
-    public MainDialogController(){ }
+    public MainDialogController(){
+        this.sessionManager = new SessionManager();
+    }
 
     @FXML
     private void initialize(){
@@ -128,14 +135,12 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
 
         handButton.sceneProperty().addListener((observable, oldValue, newValue) -> {
             if(oldValue == null && newValue != null){
-                newValue.getWindow().setOnCloseRequest(new EventHandler<WindowEvent>() {
-                    @Override
-                    public void handle(WindowEvent event) {
-                        ExportPreferences.exportExportPreferences();
-                        if(session != null){
-                            event.consume();
-                            closeAppWithSureDialog(session);
-                        }
+                newValue.getWindow().setOnCloseRequest(event -> {
+                    ExportPreferences.exportExportPreferences();
+                    Session session = sessionManager.getSession();
+                    if(session != null){
+                        event.consume();
+                        closeAppWithSureDialog(session);
                     }
                 });
             }
@@ -154,47 +159,36 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         });
 
         // On selection, prepare editor and load scaled image
-        imageListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ImageItem>() {
-            @Override
-            public void changed(ObservableValue<? extends ImageItem> observable, ImageItem oldValue, ImageItem newValue) {
+        imageListView.getSelectionModel().selectedItemProperty().addListener(
+            (observable, oldValue, newValue) -> {
                 if(newValue != null){
-                    metaTabPageController.addRootTreeItem(newValue.getMetadata());
+                    ImageItem imageItem = newValue.getImageItem();
+                    EditorItem editorItem = newValue.getEditorItem();
                     try {
-                        int index = imageListView.getSelectionModel().getSelectedIndex();
-
-                        // Save the current item before switching
-                        if(index != currentItem && currentItem < imageListView.getItems().size()){
-                            saveCurrentItem();
-                        }
-                        // Load the base image and clear the StackGroup
-                        img = new PixelatedImageView(newValue.getImage());
-                        imageEditorStackGroup.getChildren().setAll(img);
+                        metaTabPageController.addRootTreeItem(imageItem.getMetadata());
+                        imageEditorStackGroup.getChildren().setAll(new PixelatedImageView(imageItem.getImage()));
                         imageEditorStackGroup.clearList();
                         layerTabPageController.clearList();
-                        // It doesn't exist in session, so add it and set default scale
-                        if(index > session.getLastIndex() || oldValue == null){
-                            imageEditorStackGroup.setLineCount(1);
-                            imageEditorStackGroup.setCurrentScale(null);
-                            EditorItem item = new EditorItem(imageEditorScrollPane, layerTabPageController.getLayers());
-                            item.setSourceImagePath(imageListView.getSelectionModel().getSelectedItem().getPath());
-                            session.addItem(item);
-                            currentItem = session.getLastIndex();
-                            imageEditorScrollPane.setDefaultScale();
-                        }
-                        // It already exists in session, so load it
-                        else{
-                            loadEditorItem(index);
+                        imageEditorStackGroup.setCurrentScale(editorItem.getScaleRatio());
+                        imageEditorScrollPane.loadEditorItem(editorItem, imageEditorStackGroup, layerTabPageController);
+                        if(editorItem.hasScaleRatio()){
+                            convertUnitsMenuItem.setDisable(false);
+                        } else{
+                            convertUnitsMenuItem.setDisable(true);
                         }
                         layerTabPageController.setListener(MainDialogController.this);
                         layerTabPageController.setCurrentScale(imageEditorStackGroup.getCurrentScale());
                         imageEditorStackGroup.setBounds(imageEditorStackGroup.parentToLocal(imageEditorStackGroup.getBoundsInParent()));
                         setEditorEnable(true);
+
+                        if(oldValue == null && !editorItem.getLayers().isEmpty()){
+                            miscTabPane.getSelectionModel().select(0);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-            }
-        });
+            });
 
         ContextMenu listItemContextMenu = new ContextMenu();
         MenuItem removeContextItem = new MenuItem(Translator.getString("delete"));
@@ -211,34 +205,30 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         });
     }
 
-    private void loadEditorItem(int index) {
-        EditorItem item = session.getItem(index);
-        imageEditorStackGroup.clearList();
-        imageEditorScrollPane.loadEditorItem(item, imageEditorStackGroup, layerTabPageController);
+    private void addImageFiles(List<File> files){
+        if(files == null || files.size() <= 0) return;
 
-        ScaleRatio scaleRatio = item.getScaleRatio();
-        if(scaleRatio != null){
-            convertUnitsMenuItem.setDisable(false);
-        } else{
-            convertUnitsMenuItem.setDisable(true);
-        }
-        currentItem = index;
-    }
-
-
-    private void addImage(File file) {
-        Task task = new Task<ImageItem>() {
+        Task task = new Task<List<ImageItem>>() {
             @Override
-            protected ImageItem call() throws Exception {
-                ImageItem item = ImageManager.retrieveImage(file.getAbsolutePath());
-                item.preloadThumbnail();
-                return item;
+            protected List<ImageItem> call() throws Exception {
+                ArrayList<ImageItem> items = new ArrayList<>();
+                for(File file : files) {
+                    if(file.exists()) {
+                        ImageItem item = ImageManager.retrieveImage(file.getAbsolutePath());
+                        item.preloadThumbnail();
+                        items.add(item);
+                    }
+                }
+                return items;
             }
 
             @Override
             protected void succeeded() {
                 try {
-                    imageListView.getItems().add(get());
+                    List<ImageItem> imageItems = get();
+                    for(ImageItem item : imageItems){
+                        imageListView.getItems().add(new UIEditorItem(item));
+                    }
                     exportCSVMenuItem.setDisable(false);
                     System.out.println("ImageListView size:" + imageListView.getItems().size());
                     System.out.println("Free Memory: " + Runtime.getRuntime().freeMemory());
@@ -256,7 +246,45 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         new Thread(task).start();
     }
 
+    private void addImages(List<EditorItem> items){
+        Task task = new Task<List<UIEditorItem>>() {
+            @Override
+            protected List<UIEditorItem> call() throws Exception {
+                ArrayList<UIEditorItem> uiEditorItems = new ArrayList<>();
+                for(EditorItem item : items) {
+                    File file = new File(item.getSourceImagePath());
+                    if(file.exists()) {
+                        ImageItem imageItem = ImageManager.retrieveImage(file.getAbsolutePath());
+                        imageItem.preloadThumbnail();
+                        uiEditorItems.add(new UIEditorItem(item, imageItem));
+                    }
+                }
+                return uiEditorItems;
+            }
 
+            @Override
+            protected void succeeded() {
+                try {
+                    List<UIEditorItem> editorItems = get();
+                    for(UIEditorItem item : editorItems){
+                        imageListView.getItems().add(item);
+                    }
+                    exportCSVMenuItem.setDisable(false);
+                    System.out.println("ImageListView size:" + imageListView.getItems().size());
+                    System.out.println("Free Memory: " + Runtime.getRuntime().freeMemory());
+                } catch (InterruptedException e) {
+                    //e.printStackTrace();
+                    //TODO: Catch exception
+
+                } catch (ExecutionException e) {
+                    //e.printStackTrace();
+                    //TODO: Catch exception
+                }
+                super.succeeded();
+            }
+        };
+        new Thread(task).start();
+    }
 
     /**
      * Main editor methods
@@ -273,7 +301,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
 
         // Initalize editor panes + groups.
         imageEditorStackGroup = new ImageEditorStackGroup(this, this, currentPickedColor, angle);
-        imageEditorScrollPane = new ZoomableScrollPane(imageEditorStackGroup);
+        imageEditorScrollPane = new ZoomableScrollPane(imageEditorStackGroup, this);
         AnchorPane.setBottomAnchor(imageEditorScrollPane, 0.0);
         AnchorPane.setTopAnchor(imageEditorScrollPane, 0.0);
         AnchorPane.setLeftAnchor(imageEditorScrollPane, 0.0);
@@ -429,7 +457,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
             miscTabPane.setDisable(false);
             conversionMenu.setDisable(false);
         }
-        if(session != null){
+        if(sessionManager.getSession() != null){
             imageListView.setDisable(false);
             saveSessionAsMenuItem.setDisable(false);
             saveSessionMenuItem.setDisable(false);
@@ -455,7 +483,10 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
 
     @Override
     public void onLineAdd(LineGroup line, boolean editorItemLoad) {
-        if(!editorItemLoad) miscTabPane.getSelectionModel().select(0);
+        if(!editorItemLoad) {
+            getSelectedEditorItem().getEditorItem().getLayers().add(new EditorItemLine(line));
+            miscTabPane.getSelectionModel().select(0);
+        }
         layerTabPageController.addLayer(line);
 
         imageEditorStackGroup.setColorHelperLinesVisible(identifierLinesCheckItem.isSelected());
@@ -465,17 +496,38 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
 
     @Override
     public void onAreaAdd(AreaGroup area, boolean sessionLoad) {
-        if(!sessionLoad) miscTabPane.getSelectionModel().select(0);
+        if(!sessionLoad) {
+            getSelectedEditorItem().getEditorItem().getLayers().add(new EditorItemArea(area));
+            miscTabPane.getSelectionModel().select(0);
+        }
         layerTabPageController.addLayer(area);
     }
 
     @Override
-    public void onLineChange() {
+    public void onLineChange(LineGroup lineGroup) {
+        ArrayList<EditorItemLayer> list = getSelectedEditorItem().getEditorItem().getLayers();
+        for(int i = 0; i<list.size(); i++){
+            EditorItemLayer item = list.get(i);
+            if(item.getIdentifier().equals(lineGroup.getName())){
+                list.set(i, new EditorItemLine(lineGroup));
+                break;
+            }
+        }
+
         layerTabPageController.refreshList();
     }
 
     @Override
-    public void onAreaChange() {
+    public void onAreaChange(AreaGroup areaGroup) {
+        ArrayList<EditorItemLayer> list = getSelectedEditorItem().getEditorItem().getLayers();
+        for(int i = 0; i<list.size(); i++){
+            if(list.get(i) instanceof AreaGroup){
+                AreaGroup item = (AreaGroup) list.get(i);
+                if(item.getPrimaryText().equals(areaGroup.getPrimaryText())){
+                    list.set(i, new EditorItemArea(areaGroup));
+                }
+            }
+        }
         layerTabPageController.refreshList();
     }
 
@@ -514,7 +566,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
     @FXML
     public void convertViaRatioDf(ActionEvent actionEvent) {
         DistanceScaleDialogController scaleDialog = new DistanceScaleDialogController();
-        scaleDialog.init(editorCursorBtn.getScene().getWindow(), this, imageListView.getSelectionModel().getSelectedItem());
+        scaleDialog.init(editorCursorBtn.getScene().getWindow(), this, getSelectedEditorItem().getImageItem());
     }
 
     @FXML
@@ -524,6 +576,9 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         converUnitsDialog.init(editorCursorBtn.getScene().getWindow(), this, imageEditorStackGroup.getLines(), imageEditorStackGroup.getCurrentScale());
     }
 
+    private UIEditorItem getSelectedEditorItem(){
+        return imageListView.getSelectionModel().getSelectedItem();
+    }
 
     /**
      * For reference scaling
@@ -534,9 +589,12 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         layerTabPageController.setCurrentScale(scaleRatio);
 
         if(allImages){
-            for(EditorItem item : session.getItems()){
-                item.setScaleRatio(scaleRatio);
-            }
+            imageListView.getItems().forEach((item) -> {
+                item.getEditorItem().setScaleRatio(scaleRatio);
+
+            });
+        } else {
+            getSelectedEditorItem().getEditorItem().setScaleRatio(scaleRatio);
         }
         convertUnitsMenuItem.setDisable(false);
     }
@@ -546,12 +604,14 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         imageEditorStackGroup.setCurrentScale(newScale);
         layerTabPageController.setCurrentScale(newScale);
         if(allImages){
-            for(EditorItem item : session.getItems()){
-                ScaleRatio itemScaleRatio = item.getScaleRatio();
-                if(itemScaleRatio != null && itemScaleRatio.getUnits() != null && item.getScaleRatio().getUnits().equals(oldScale.getUnits())){
-                    item.setScaleRatio(newScale);
+            imageListView.getItems().forEach((item) -> {
+                ScaleRatio itemScaleRatio = item.getEditorItem().getScaleRatio();
+                if(itemScaleRatio != null && itemScaleRatio.getUnits() != null && item.getEditorItem().getScaleRatio().getUnits().equals(oldScale.getUnits())){
+                    item.getEditorItem().setScaleRatio(newScale);
                 }
-            }
+            });
+        } else {
+            getSelectedEditorItem().getEditorItem().setScaleRatio(newScale);
         }
         convertUnitsMenuItem.setDisable(false);
     }
@@ -576,13 +636,38 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
      */
 
     @Override
-    public void onRemoveLine(String name) {
+    public void onRemoveLayer(String name) {
+        ArrayList<EditorItemLayer> list = getSelectedEditorItem().getEditorItem().getLayers();
+        for(int i = 0; i<list.size(); i++){
+            EditorItemLayer item = list.get(i);
+            if(item.getIdentifier().equals(name)){
+                list.remove(i);
+                break;
+            }
+        }
         imageEditorStackGroup.removeLineGroup(name);
     }
 
     @Override
-    public void onRenameLine(String oldName, String newName) {
+    public void onRenameLayer(String oldName, String newName) {
+        ArrayList<EditorItemLayer> list = getSelectedEditorItem().getEditorItem().getLayers();
+        for(int i = 0; i<list.size(); i++){
+            EditorItemLayer item = list.get(i);
+            if(item.getIdentifier().equals(oldName)){
+                item.setIdentifier(newName);
+                break;
+            }
+        }
         imageEditorStackGroup.renameLineGroup(oldName, newName);
+    }
+
+    @Override public void onEquationAdd(EquationItem equationItem) {
+        getSelectedEditorItem().getEditorItem().getLayers().add(equationItem);
+
+    }
+
+    @Override public void onZoomChange(double hValue, double vValue) {
+        getSelectedEditorItem().getEditorItem().updateZoomAndScale(imageEditorScrollPane);
     }
 
     /**
@@ -590,16 +675,16 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
      */
     @FXML
     public void onNewSession(ActionEvent actionEvent) {
-        if(session != null){
-            loadSessionWithSureDialog(new Session());
+        if(sessionManager.getSession() != null){
+            loadSessionWithSureDialog(sessionManager.getSession(), sessionManager.newSession());
         } else {
-            loadSession(new Session());
+            loadSession(sessionManager.newSession());
         }
     }
 
     //TODO: Refactor this so we dont repeat code
-    private void loadSessionWithSureDialog(Session session) {
-        String sessionName = this.session.getName();
+    private void loadSessionWithSureDialog(Session oldSession, Session newSession) {
+        String sessionName = oldSession.getName();
         if(sessionName == null) sessionName = "Unnamed";
         String dialogMessage = "Do you want to save changes to "+ sessionName+ "?";
         JFXAlert alert = new JFXAlert((Stage) zoomButton.getScene().getWindow());
@@ -613,12 +698,12 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         cancelButton.getStyleClass().add("dialog-accept");
         cancelButton.setOnAction(event -> alert.hideWithAnimation());
         dontSaveButton.setOnAction(event -> {
-            loadSession(session);
+            loadSession(newSession);
             alert.hideWithAnimation();
         });
         saveButton.setOnAction(event -> {
             boolean saved = saveCurrentSession();
-            if(saved) loadSession(session);
+            if(saved) loadSession(newSession);
             alert.hideWithAnimation();
         });
         layout.setActions(saveButton, dontSaveButton, cancelButton);
@@ -627,7 +712,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
     }
 
     private void closeAppWithSureDialog(Session session){
-        String sessionName = this.session.getName();
+        String sessionName = session.getName();
         if(sessionName == null) sessionName = "Unnamed";
         String dialogMessage = "Do you want to save changes to "+ sessionName+ "?";
         JFXAlert alert = new JFXAlert((Stage) zoomButton.getScene().getWindow());
@@ -675,11 +760,10 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         if (file != null && file.exists()) {
             prefs.put(Constants.STTGS_FILECHOOSER_OPEN, file.getParent());
             try {
-                Session session = SessionManager.openSession(file);
-                if(this.session != null){
-                    loadSessionWithSureDialog(session);
+                if(sessionManager.getSession() != null){
+                    loadSessionWithSureDialog(sessionManager.getSession(), sessionManager.openSession(file));
                 } else {
-                    loadSession(session);
+                    loadSession(sessionManager.openSession(file));
                 }
             } catch (FileNotFoundException e) {
                 //TODO
@@ -689,24 +773,13 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
 
     }
     private void removeCurrentEditorItem(){
-        int index = imageListView.getSelectionModel().getSelectedIndex();
-        ImageItem item = imageListView.getItems().get(index);
-        session.removeItemByPath(item.getPath());
-        imageListView.getItems().remove(index);
-        currentItem = imageListView.getSelectionModel().getSelectedIndex();
+        imageListView.getItems().remove(imageListView.getSelectionModel().getSelectedIndex());
         if(imageListView.getItems().size() == 0){
             imageEditorStackGroup.clearList();
             imageEditorStackGroup.getChildren().clear();
             metaTabPageController.clearRootTreeItem();
             layerTabPageController.clearList();
         }
-//        if(imageListView.getItems().size() > 0){
-//            if(index > 0){
-//                imageListView.getSelectionModel().select(index-1);
-//            } else if (index == 0){
-//                imageListView.getSelectionModel().select(index);
-//            }
-//        }
     }
 
     private void loadSession(Session session) {
@@ -716,20 +789,10 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         imageEditorStackGroup.getChildren().clear();
         metaTabPageController.clearRootTreeItem();
         layerTabPageController.clearList();
-        currentItem = -1;
 
         // Set the new session
         ArrayList<EditorItem> items = session.getItems();
-        for(EditorItem item : items){
-            File file = new File(item.getSourceImagePath());
-            if(file.exists()){
-                addImage(file);
-            }
-            else{
-                //TODO: Show error / locate missing file
-            }
-        }
-        this.session = session;
+        addImages(items);
         setEditorEnable(false);
         if(session.getPath() != null && !session.getPath().isEmpty()){
             File file = new File(session.getPath());
@@ -755,19 +818,15 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
     }
 
     private boolean saveCurrentSession() {
-        if(session == null) return false;
-        if(session.getPath() == null || !new File(session.getPath()).exists()){
+        sessionManager.syncSession(new ArrayList<>(imageListView.getItems()));
+        if(!sessionManager.saveSession()){
             return saveCurrentSessionAs();
         }
-        else{
-            saveCurrentItem();
-            return SessionManager.saveSession(session);
-        }
+        return true;
     }
 
     private boolean saveCurrentSessionAs() {
-        if(session == null) return false;
-        saveCurrentItem();
+        if(sessionManager.getSession() == null) return false;
 
         FileChooser ch = new FileChooser();
         String path = prefs.get(Constants.STTGS_FILECHOOSER_SAVEAS, "");
@@ -782,16 +841,17 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         File file = ch.showSaveDialog(imageListView.getScene().getWindow());
         if(file != null){
             prefs.put(Constants.STTGS_FILECHOOSER_SAVEAS, file.getParent());
-            session.setPath(file.getPath());
-            MainApplication.setStageName("AragoJ - " + session.getName());
-            return SessionManager.saveSession(session);
+            sessionManager.getSession().setPath(file.getPath());
+            MainApplication.setStageName("AragoJ - " + sessionManager.getSession().getName());
+            sessionManager.syncSession(new ArrayList<>(imageListView.getItems()));
+            return sessionManager.saveSession();
         }
         return false;
     }
 
     @FXML
     private void onImportImages(){
-        if(session == null) return;
+        if(sessionManager.getSession() == null) return;
         FileChooser ch = new FileChooser();
         String path = prefs.get(Constants.STTGS_FILECHOOSER_LASTOPENED, "");
         if (path.length() > 0) {
@@ -810,15 +870,13 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
         List<File> files = ch.showOpenMultipleDialog(imageListView.getScene().getWindow());
         if (files != null && files.size() > 0) {
             prefs.put(Constants.STTGS_FILECHOOSER_LASTOPENED, files.get(0).getParent());
-            for (File file : files) {
-                addImage(file);
-            }
+            addImageFiles(files);
         }
     }
 
     @FXML
     public void onExportCSV(ActionEvent actionEvent) {
-        if(session == null) return;
+        if(sessionManager.getSession() == null) return;
         FileChooser ch = new FileChooser();
         String path = prefs.get(Constants.STTGS_FILECHOOSER_EXPORTCSV_LASTOPENED, "");
         if (path.length() > 0) {
@@ -832,11 +890,9 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
 
         File file = ch.showSaveDialog(imageListView.getScene().getWindow());
         if(file != null){
-            // Save the current item before exporting
-            saveCurrentItem();
-
             prefs.put(Constants.STTGS_FILECHOOSER_EXPORTCSV_LASTOPENED, file.getParent());
-            ExportCSV.export(file, session);
+            sessionManager.syncSession(new ArrayList<>(imageListView.getItems()));
+            ExportCSV.export(file, sessionManager.getSession());
         }
     }
 
@@ -844,32 +900,24 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
     @FXML
     public void onExitClick(ActionEvent actionEvent) {
         ExportPreferences.exportExportPreferences();
-        if(session != null){
-            closeAppWithSureDialog(session);
+        if(sessionManager.getSession() != null){
+            closeAppWithSureDialog(sessionManager.getSession());
         } else {
             Platform.exit();
         }
     }
 
-    private void saveCurrentItem() {
-        if(currentItem != -1){
-            EditorItem item = new EditorItem(imageEditorScrollPane, layerTabPageController.getLayers());
-            item.setSourceImagePath(session.getItem(currentItem).getSourceImagePath());
-            session.setItem(currentItem, item);
-        }
-    }
-
-
     public void onImageDropped(DragEvent dragEvent) {
         Dragboard board = dragEvent.getDragboard();
         List<File> files = board.getFiles();
+        List<File> finalFiles = new ArrayList<>();
         for(File file : files){
             String extension = Utility.getFilePathExtension(file.getPath());
             if(extension != null && Utility.isImageExtensionSupported(extension)){
-                addImage(file);
+                finalFiles.add(file);
             }
         }
-
+        addImageFiles(finalFiles);
     }
 
     public void onImageListDragOver(DragEvent dragEvent) {
@@ -898,7 +946,6 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
 
     @Override
     public void onApplyUndistort(CalibrationModel calibrationModel, boolean applyToAll) {
-        saveCurrentItem();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fmxl/ProgressDialog.fxml"), Translator.getBundle());
         UndistortProgressDialogController controller = new UndistortProgressDialogController(this);
         loader.setController(controller);
@@ -908,12 +955,13 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
             e.printStackTrace();
            return;
         }
-        List<ImageItem> imageItems;
+        final List<ImageItem> imageItems = new ArrayList<>();
         if(applyToAll){
-            imageItems = imageListView.getItems();
+            imageListView.getItems().forEach((item)->{
+                imageItems.add(item.getImageItem());
+            });
         } else {
-            imageItems = new ArrayList<>();
-            imageItems.add(imageListView.getSelectionModel().getSelectedItem());
+            imageItems.add(imageListView.getSelectionModel().getSelectedItem().getImageItem());
         }
         controller.undistortImages(calibrationModel, imageItems, imageListView.getSelectionModel().getSelectedIndices().get(0), stackPane);
 
@@ -922,10 +970,7 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
     @Override
     public void onImageItemUndistorted(int index, String newPath, boolean select) {
         try {
-            imageListView.getItems().set(index, ImageManager.retrieveImage(newPath));
-            EditorItem item = session.getItem(index);
-            item.setSourceImagePath(newPath);
-            session.setItem(index, item);
+            imageListView.getItems().get(index).setImageItem(ImageManager.retrieveImage(newPath));
             if(select){
                 imageListView.getSelectionModel().select(index);
             }
@@ -933,6 +978,5 @@ public class MainDialogController  implements ImageEditorStackGroup.ModeListener
             // Do nothing
         }
     }
-
 
 }

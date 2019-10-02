@@ -9,7 +9,11 @@ public class EditorItemZoom {
     private double vValue;
     private double scale;
 
-    public EditorItemZoom(){ }
+    public EditorItemZoom(){
+        this.hValue = -1.0;
+        this.vValue = -1.0;
+        this.scale = -1.0;
+    }
 
     public EditorItemZoom(double hValue, double vValue, double scale) {
         this.hValue = hValue;

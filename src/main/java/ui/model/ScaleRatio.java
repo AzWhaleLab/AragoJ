@@ -10,7 +10,8 @@ public class ScaleRatio {
     private String units;
 
     public ScaleRatio(){
-
+        ratio = -1.0;
+        units = "";
     }
 
     public ScaleRatio(double ratio, String units) {
@@ -40,6 +41,10 @@ public class ScaleRatio {
 
     public double getRoundedScaledValue(double length){
         return Utility.roundTwoDecimals(getScaledValue(length));
+    }
+
+    public boolean hasScale(){
+        return  ratio > 0;
     }
 
 }

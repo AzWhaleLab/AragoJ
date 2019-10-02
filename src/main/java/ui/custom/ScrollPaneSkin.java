@@ -89,6 +89,8 @@ public class ScrollPaneSkin extends BehaviorSkinBase<ScrollPane, ScrollPaneBehav
 
     Rectangle clipRect;
 
+    private ZoomableScrollPane zoomableScrollPane;
+
     /***************************************************************************
      *                                                                         *
      * Constructors                                                            *
@@ -97,6 +99,9 @@ public class ScrollPaneSkin extends BehaviorSkinBase<ScrollPane, ScrollPaneBehav
 
     public ScrollPaneSkin(final ScrollPane scrollpane) {
         super(scrollpane, new ScrollPaneBehavior(scrollpane));
+        if(scrollpane instanceof ZoomableScrollPane){
+            zoomableScrollPane = (ZoomableScrollPane) scrollpane;
+        }
         initialize();
         // Register listeners
         registerChangeListener(scrollpane.contentProperty(), "NODE");
@@ -200,6 +205,10 @@ public class ScrollPaneSkin extends BehaviorSkinBase<ScrollPane, ScrollPaneBehav
             }
         }
     };
+
+    private boolean isInPanMode(){
+        return zoomableScrollPane != null && zoomableScrollPane.getCurrentMode() == ImageEditorStackGroup.Mode.PAN;
+    }
 
     private void initialize() {
         // requestLayout calls below should not trigger requestLayout above ScrollPane
@@ -326,7 +335,7 @@ public class ScrollPaneSkin extends BehaviorSkinBase<ScrollPane, ScrollPaneBehav
             if (IS_TOUCH_SUPPORTED) {
                 startSBReleasedAnimation();
             }
-            if (getSkinnable().isPannable() && e.isControlDown()) {
+            if (getSkinnable().isPannable() && (e.isControlDown() || isInPanMode())) {
                 dragDetected = true;
                 if (saveCursor == null) {
                     saveCursor = getSkinnable().getCursor();
@@ -360,7 +369,7 @@ public class ScrollPaneSkin extends BehaviorSkinBase<ScrollPane, ScrollPaneBehav
             }
         });
         getNode().setOnKeyReleased(e -> {
-            if (!e.isControlDown()) {
+            if (!e.isControlDown() && !isInPanMode()) {
                 mouseDown = false;
                 if (dragDetected == true) {
                     if (saveCursor != null) {
@@ -385,13 +394,13 @@ public class ScrollPaneSkin extends BehaviorSkinBase<ScrollPane, ScrollPaneBehav
             /*
              ** for mobile-touch we allow drag, even if not pannagle
              */
-            if (!e.isControlDown()) {
+            if (!e.isControlDown() && !isInPanMode()) {
                 pressX = e.getX();
                 pressY = e.getY();
                 ohvalue = hsb.getValue();
                 ovvalue = vsb.getValue();
             }
-            if ((getSkinnable().isPannable() || IS_TOUCH_SUPPORTED) && e.isControlDown()) {
+            if ((getSkinnable().isPannable() || IS_TOUCH_SUPPORTED) && (e.isControlDown() || isInPanMode())) {
                 double deltaX = pressX - e.getX();
                 double deltaY = pressY - e.getY();
                 /*
@@ -433,6 +442,7 @@ public class ScrollPaneSkin extends BehaviorSkinBase<ScrollPane, ScrollPaneBehav
                         }
                     }
                 }
+                updateZoomListener();
             }
             /*
              ** we need to consume drag events, as we don't want
@@ -577,6 +587,11 @@ public class ScrollPaneSkin extends BehaviorSkinBase<ScrollPane, ScrollPaneBehav
         vsb.setValue(control.getVvalue());
     }
 
+    private void updateZoomListener() {
+        if(zoomableScrollPane != null){
+            zoomableScrollPane.updateZoom();
+        }
+    }
 
     @Override
     protected void handleControlPropertyChanged(String p) {

@@ -136,4 +136,13 @@ public class EquationItem implements LayerListItem, EditorItemLayer{
     public boolean isVisualElement() {
         return false;
     }
+
+    @XmlTransient
+    @Override public String getIdentifier() {
+        return name;
+    }
+
+    @Override public void setIdentifier(String name) {
+        this.name = name;
+    }
 }

@@ -1,5 +1,6 @@
 package session.model;
 
+import javax.xml.bind.annotation.XmlTransient;
 import ui.custom.LineGroup;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -83,5 +84,14 @@ public class EditorItemLine implements EditorItemLayer{
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    @XmlTransient
+    @Override public String getIdentifier() {
+        return name;
+    }
+
+    @Override public void setIdentifier(String name) {
+        this.name = name;
     }
 }
