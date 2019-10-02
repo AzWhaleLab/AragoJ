@@ -140,7 +140,7 @@ public class ConvertUnitsDialogController {
 
         for(LineGroup line : lines) {
             double value = currentScale.getScaledValue(line.getLength());
-            lengthReferenceComboBox.getItems().add(new LabeledComboOption(line.getName() + ": " + value, String.valueOf(value)));
+            lengthReferenceComboBox.getItems().add(new LabeledComboOption(line.getName() + ": " + value + " " + currentScale.getUnits(), String.valueOf(value)));
         }
     }
 
@@ -177,7 +177,7 @@ public class ConvertUnitsDialogController {
     public void onOkAction(ActionEvent actionEvent) {
         stage.close();
         if(ratio > -1 && unitsTextField.getText().length() > 0){
-            listener.onChangeScale(currentScale, new ScaleRatio(ratio, unitsTextField.getText()), applyToAllCheckBox.isSelected());
+            listener.onChangeScale(currentScale, new ScaleRatio(currentScale.getRatio()*ratio, unitsTextField.getText()), applyToAllCheckBox.isSelected());
         }
     }
 

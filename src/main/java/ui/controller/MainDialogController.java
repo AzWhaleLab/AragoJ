@@ -910,7 +910,7 @@ public class MainDialogController
     public void onImageDropped(DragEvent dragEvent) {
         Dragboard board = dragEvent.getDragboard();
         List<File> files = board.getFiles();
-        List<File> finalFiles = board.getFiles();
+        List<File> finalFiles = new ArrayList<>();
         for(File file : files){
             String extension = Utility.getFilePathExtension(file.getPath());
             if(extension != null && Utility.isImageExtensionSupported(extension)){
