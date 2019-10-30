@@ -1,4 +1,4 @@
-package ui.custom;
+package ui.custom.area;
 
 import com.jfoenix.svg.SVGGlyph;
 import com.jfoenix.svg.SVGGlyphLoader;
@@ -11,13 +11,13 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
 import session.model.EditorItemArea;
 import session.model.EditorItemPosition;
+import ui.custom.Cross;
+import ui.custom.ToolEventHandler;
 import ui.model.LayerListItem;
 import utils.AreaUtils;
 import utils.Utility;
 
 import java.awt.geom.Area;
-import java.awt.geom.PathIterator;
-import java.beans.EventHandler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -248,6 +248,10 @@ public class AreaGroup extends Group implements LayerListItem {
     @Override
     public String getSecondaryText() {
         return calculateArea() + " pixels";
+    }
+
+    @Override public String getStatus() {
+        return "";
     }
 
     @Override

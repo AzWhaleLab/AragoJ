@@ -10,7 +10,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
 import ui.cellfactory.LayerListViewCell;
-import ui.custom.LineGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.model.LayerListItem;
 import ui.model.ScaleRatio;
 import utils.Translator;
@@ -123,12 +123,12 @@ public class LayerTabPageController implements EquationDialogController.OnAction
         removeSelectedLayer();
     }
 
-    private List<LineGroup> getLines(){
-        ArrayList<LineGroup> lines = new ArrayList<>();
+    private List<SegLineGroup> getLines(){
+        ArrayList<SegLineGroup> lines = new ArrayList<>();
         List<LayerListItem> items = layerListView.getItems();
         for(LayerListItem item : items){
-            if(item instanceof LineGroup){
-                lines.add((LineGroup) item);
+            if(item instanceof SegLineGroup){
+                lines.add((SegLineGroup) item);
             }
         }
         return lines;

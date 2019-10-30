@@ -2,12 +2,9 @@ package session;
 
 import equation.model.EquationItem;
 import java.util.ArrayList;
-import java.util.List;
 import session.model.*;
-import ui.custom.LineGroup;
 
 import javax.xml.bind.*;
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileNotFoundException;
 import ui.model.UIEditorItem;
@@ -34,7 +31,7 @@ public class SessionManager {
         }
         if(file.exists()){
             try {
-                JAXBContext jaxbContext = JAXBContext.newInstance(Session.class, EditorItem.class, EditorItemLine.class, EquationItem.class, EditorItemZoom.class, EditorItemArea.class, EditorItemPosition.class);
+                JAXBContext jaxbContext = JAXBContext.newInstance(Session.class, EditorItem.class, EditorItemSegLine.class, EquationItem.class, EditorItemZoom.class, EditorItemAngle.class, EditorItemArea.class, EditorItemPosition.class);
                 Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
                 Session session = (Session) jaxbUnmarshaller.unmarshal(file);
                 session.setPath(file.getPath());
@@ -52,7 +49,7 @@ public class SessionManager {
         if(session == null || session.getPath() == null) return false;
         File file = new File(session.getPath());
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Session.class, EditorItem.class, EditorItemLine.class, EquationItem.class, EditorItemZoom.class, EditorItemArea.class, EditorItemPosition.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Session.class, EditorItem.class, EditorItemSegLine.class, EquationItem.class, EditorItemZoom.class, EditorItemAngle.class, EditorItemArea.class, EditorItemPosition.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(session, file);

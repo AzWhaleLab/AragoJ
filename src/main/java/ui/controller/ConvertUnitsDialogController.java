@@ -22,7 +22,7 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import ui.MainApplication;
-import ui.custom.LineGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.model.LabeledComboOption;
 import ui.model.ScaleRatio;
 import utils.Translator;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
 public class ConvertUnitsDialogController {
 
     private Stage stage;
-    private ArrayList<LineGroup> lines;
+    private ArrayList<SegLineGroup> lines;
 
     @FXML private JFXTextField unitLengthTextField;
     @FXML private JFXTextField unitsTextField;
@@ -46,7 +46,7 @@ public class ConvertUnitsDialogController {
     private ScaleRatio currentScale;
     private double ratio = -1;
 
-    public void init(Window owner, OnActionListener listener, ArrayList<LineGroup> lines, ScaleRatio currentScale){
+    public void init(Window owner, OnActionListener listener, ArrayList<SegLineGroup> lines, ScaleRatio currentScale){
         this.lines = lines;
         this.listener = listener;
         this.currentScale = currentScale;
@@ -138,7 +138,7 @@ public class ConvertUnitsDialogController {
             }
         });
 
-        for(LineGroup line : lines) {
+        for(SegLineGroup line : lines) {
             double value = currentScale.getScaledValue(line.getLength());
             lengthReferenceComboBox.getItems().add(new LabeledComboOption(line.getName() + ": " + value + " " + currentScale.getUnits(), String.valueOf(value)));
         }

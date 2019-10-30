@@ -1,23 +1,16 @@
 package ui.cellfactory;
 
 import com.jfoenix.controls.JFXListCell;
-import com.jfoenix.svg.SVGGlyph;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import ui.controller.LayerTabPageController;
-import ui.custom.AreaGroup;
-import ui.custom.LineGroup;
+import ui.custom.area.AreaGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.model.LayerListItem;
 import ui.model.ScaleRatio;
-import utils.Utility;
 
 import java.io.IOException;
 
@@ -43,8 +36,8 @@ public class LayerListViewCell extends JFXListCell<LayerListItem> {
             }
             controller.setPrimaryText(item.getPrimaryText());
             String secText = item.getSecondaryText();
-            if(currentScale != null && currentScale.hasScale() && item instanceof LineGroup){
-                LineGroup lineGroup = (LineGroup) item;
+            if(currentScale != null && currentScale.hasScale() && item instanceof SegLineGroup){
+                SegLineGroup lineGroup = (SegLineGroup) item;
                 secText += " - " + currentScale.getRoundedScaledValue(lineGroup.getLength())  + " " + currentScale.getUnits();
             }
             if(currentScale != null && currentScale.hasScale() && item instanceof AreaGroup){

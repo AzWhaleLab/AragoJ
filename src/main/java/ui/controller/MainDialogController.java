@@ -2,7 +2,6 @@ package ui.controller;
 
 import com.drew.imaging.ImageProcessingException;
 import equation.model.EquationItem;
-import java.lang.reflect.Array;
 import javafx.fxml.FXMLLoader;
 import opencv.OpenCVManager;
 import opencv.calibration.model.CalibrationModel;
@@ -10,7 +9,6 @@ import opencv.calibration.ui.CalibrationDialogController;
 import com.jfoenix.controls.*;
 
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.scene.input.*;
 import javafx.stage.*;
 import opencv.calibration.ui.UndistortDialog;
@@ -18,8 +16,6 @@ import opencv.calibration.ui.UndistortProgressDialogController;
 import session.export.ExportCSV;
 import imageprocess.ImageItem;
 import imageprocess.ImageManager;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -31,13 +27,17 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import session.SessionManager;
 import session.export.ExportPreferences;
+import session.model.EditorItemAngle;
 import session.model.EditorItemArea;
 import session.model.EditorItemLayer;
-import session.model.EditorItemLine;
+import session.model.EditorItemSegLine;
 import ui.MainApplication;
 import ui.custom.*;
 import ui.cellfactory.ImageListViewCell;
 import session.model.EditorItem;
+import ui.custom.angle.AngleGroup;
+import ui.custom.area.AreaGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.model.ScaleRatio;
 import session.model.Session;
 import ui.model.UIEditorItem;
@@ -64,8 +64,7 @@ public class MainDialogController
     ConvertUnitsDialogController.OnActionListener, UndistortDialog.OnActionListener,
     UndistortProgressDialogController.UndistortCallback, ZoomableScrollPane.ZoomChangeListener {
 
-
-    private Preferences prefs;
+  private Preferences prefs;
 
     //// Menu Items
     // View items
@@ -109,8 +108,12 @@ public class MainDialogController
     @FXML private JFXButton editorLineBtn;
     @FXML private JFXButton editorAngBtn;
     @FXML private JFXButton editorAreaBtn;
+    @FXML private JFXButton angleBtn;
     @FXML private JFXButton handButton;
     @FXML private JFXButton zoomButton;
+
+
+  @FXML private Label statusLabel;
 
 
     public MainDialogController(){
@@ -300,7 +303,7 @@ public class MainDialogController
         ieDegreePicker.setText(NumberFormat.getInstance().format(angle));
 
         // Initalize editor panes + groups.
-        imageEditorStackGroup = new ImageEditorStackGroup(this, this, currentPickedColor, angle);
+        imageEditorStackGroup = new ImageEditorStackGroup(this, this, currentPickedColor, angle, statusLabel.textProperty());
         imageEditorScrollPane = new ZoomableScrollPane(imageEditorStackGroup, this);
         AnchorPane.setBottomAnchor(imageEditorScrollPane, 0.0);
         AnchorPane.setTopAnchor(imageEditorScrollPane, 0.0);
@@ -353,13 +356,13 @@ public class MainDialogController
 
         editorLineBtn.setOnMouseClicked(event -> {
             if(imageEditorStackGroup != null){
-                imageEditorStackGroup.setCurrentMode(ImageEditorStackGroup.Mode.LINE);
+                imageEditorStackGroup.setCurrentMode(ImageEditorStackGroup.Mode.LINE_CREATION);
             }
         });
 
         editorAngBtn.setOnMouseClicked(event -> {
             if(imageEditorStackGroup != null){
-                imageEditorStackGroup.setCurrentMode(ImageEditorStackGroup.Mode.ANG_SEL);
+                imageEditorStackGroup.setCurrentMode(ImageEditorStackGroup.Mode.LINE_ANG_SEL);
             }
         });
 
@@ -368,6 +371,12 @@ public class MainDialogController
                 imageEditorStackGroup.setCurrentMode(ImageEditorStackGroup.Mode.AREA_CREATION);
             }
         });
+
+      angleBtn.setOnAction(event -> {
+        if (imageEditorStackGroup != null) {
+          imageEditorStackGroup.setCurrentMode(ImageEditorStackGroup.Mode.ANGLE_CREATION);
+        }
+      });
     }
 
     private void setLineEditorVisual(ImageEditorStackGroup.Mode mode) {
@@ -377,6 +386,7 @@ public class MainDialogController
         editorAreaBtn.setBackground(null);
         handButton.setBackground(null);
         zoomButton.setBackground(null);
+        angleBtn.setBackground(null);
         ieColorPicker.setVisible(false);
         ieDegreeLabel.setVisible(false);
         ieDegreePicker.setVisible(false);
@@ -398,19 +408,19 @@ public class MainDialogController
             case SELECT:
                 editorCursorBtn.setBackground(new Background(new BackgroundFill(Color.valueOf("#cceaf4"), CornerRadii.EMPTY, Insets.EMPTY)));
                 break;
-            case ANG:
+            case LINE_ANG:
                 editorLineBtn.setBackground(new Background(new BackgroundFill(Color.valueOf("#cceaf4"), CornerRadii.EMPTY, Insets.EMPTY)));
                 imageEditorStackGroup.setCursor(Cursor.CROSSHAIR);
                 imageEditorToolsSecondaryPane.setVisible(true);
                 ieColorPicker.setVisible(true);
                 break;
-            case LINE:
+            case LINE_CREATION:
                 editorLineBtn.setBackground(new Background(new BackgroundFill(Color.valueOf("#cceaf4"), CornerRadii.EMPTY, Insets.EMPTY)));
                 imageEditorStackGroup.setCursor(Cursor.CROSSHAIR);
                 imageEditorToolsSecondaryPane.setVisible(true);
                 ieColorPicker.setVisible(true);
                 break;
-            case ANG_SEL:
+            case LINE_ANG_SEL:
                 editorAngBtn.setBackground(new Background(new BackgroundFill(Color.valueOf("#cceaf4"), CornerRadii.EMPTY, Insets.EMPTY)));
                 imageEditorToolsSecondaryPane.setVisible(true);
                 ieDegreeLabel.setVisible(true);
@@ -422,6 +432,10 @@ public class MainDialogController
                 imageEditorToolsSecondaryPane.setVisible(true);
                 ieColorPicker.setVisible(true);
                 break;
+            case ANGLE_CREATION:
+                angleBtn.setBackground(new Background(new BackgroundFill(Color.valueOf("#cceaf4"), CornerRadii.EMPTY, Insets.EMPTY)));
+                imageEditorStackGroup.setCursor(Cursor.CROSSHAIR);
+              break;
         }
     }
 
@@ -440,6 +454,7 @@ public class MainDialogController
             editorLineBtn.setDisable(true);
             editorAngBtn.setDisable(true);
             editorAreaBtn.setDisable(true);
+            angleBtn.setDisable(true);
             handButton.setDisable(true);
             zoomButton.setDisable(true);
             conversionMenu.setDisable(true);
@@ -452,6 +467,7 @@ public class MainDialogController
             editorLineBtn.setDisable(false);
             editorAngBtn.setDisable(false);
             editorAreaBtn.setDisable(false);
+            angleBtn.setDisable(false);
             handButton.setDisable(false);
             zoomButton.setDisable(false);
             miscTabPane.setDisable(false);
@@ -482,9 +498,9 @@ public class MainDialogController
     }
 
     @Override
-    public void onLineAdd(LineGroup line, boolean editorItemLoad) {
+    public void onLineAdd(SegLineGroup line, boolean editorItemLoad) {
         if(!editorItemLoad) {
-            getSelectedEditorItem().getEditorItem().getLayers().add(new EditorItemLine(line));
+            getSelectedEditorItem().getEditorItem().getLayers().add(new EditorItemSegLine(line));
             miscTabPane.getSelectionModel().select(0);
         }
         layerTabPageController.addLayer(line);
@@ -494,7 +510,16 @@ public class MainDialogController
 
     }
 
-    @Override
+  @Override public void onAngleAdd(AngleGroup angle, boolean editorItemLoad) {
+      if(!editorItemLoad) {
+        getSelectedEditorItem().getEditorItem().getLayers().add(new EditorItemAngle(angle));
+        miscTabPane.getSelectionModel().select(0);
+      }
+      layerTabPageController.addLayer(angle);
+
+  }
+
+  @Override
     public void onAreaAdd(AreaGroup area, boolean sessionLoad) {
         if(!sessionLoad) {
             getSelectedEditorItem().getEditorItem().getLayers().add(new EditorItemArea(area));
@@ -504,12 +529,12 @@ public class MainDialogController
     }
 
     @Override
-    public void onLineChange(LineGroup lineGroup) {
+    public void onLineChange(SegLineGroup lineGroup) {
         ArrayList<EditorItemLayer> list = getSelectedEditorItem().getEditorItem().getLayers();
         for(int i = 0; i<list.size(); i++){
             EditorItemLayer item = list.get(i);
             if(item.getIdentifier().equals(lineGroup.getName())){
-                list.set(i, new EditorItemLine(lineGroup));
+                list.set(i, new EditorItemSegLine(lineGroup));
                 break;
             }
         }
@@ -531,8 +556,20 @@ public class MainDialogController
         layerTabPageController.refreshList();
     }
 
+  @Override public void onAngleChange(AngleGroup angleGroup) {
+    ArrayList<EditorItemLayer> list = getSelectedEditorItem().getEditorItem().getLayers();
+    for(int i = 0; i<list.size(); i++){
+      EditorItemLayer item = list.get(i);
+      if(item.getIdentifier().equals(angleGroup.getName())){
+        list.set(i, new EditorItemAngle(angleGroup));
+        break;
+      }
+    }
 
-    /**
+    layerTabPageController.refreshList();
+  }
+
+  /**
      * Menu Items
      */
     @FXML

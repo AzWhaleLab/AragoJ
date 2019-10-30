@@ -30,7 +30,7 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import ui.custom.LineGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.model.LabeledComboOption;
 import ui.model.ScaleRatio;
 import utils.Translator;
@@ -55,12 +55,12 @@ public class EquationDialogController extends Dialog<Void> {
     private Timeline validationScheduler;
 
     private OnActionListener listener;
-    private List<LineGroup> lines;
+    private List<SegLineGroup> lines;
     private ScaleRatio currentScale;
 
     private int currentIndex = -1;
 
-    public void init(Window owner, OnActionListener listener, List<LineGroup> lines, ScaleRatio currentScale){
+    public void init(Window owner, OnActionListener listener, List<SegLineGroup> lines, ScaleRatio currentScale){
         this.listener = listener;
         this.lines = lines;
         this.currentScale = currentScale;
@@ -229,7 +229,7 @@ public class EquationDialogController extends Dialog<Void> {
 
                 cell.setComboBoxEditable(true);
 
-                for(LineGroup line : lines){
+                for(SegLineGroup line : lines){
                     cell.getItems().add(new LabeledComboOption(line.getName() + ": " + line.getLength() + " px", String.valueOf(line.getLength())));
                     if(currentScale != null){
                         double length = currentScale.getRoundedScaledValue(line.getLength());

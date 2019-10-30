@@ -1,10 +1,9 @@
 package session.model;
 
 import equation.model.EquationItem;
-import javafx.scene.Node;
-import ui.custom.AreaGroup;
+import ui.custom.area.AreaGroup;
 import ui.custom.ImageEditorStackGroup;
-import ui.custom.LineGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.custom.ZoomableScrollPane;
 import ui.model.LayerListItem;
 import ui.model.ScaleRatio;
@@ -94,8 +93,8 @@ public class EditorItem {
         for(LayerListItem item : layers){
             if(item instanceof EquationItem){
                 editorList.add((EquationItem) item);
-            } else if(item instanceof LineGroup){
-                editorList.add(new EditorItemLine((LineGroup) item));
+            } else if(item instanceof SegLineGroup){
+                editorList.add(new EditorItemSegLine((SegLineGroup) item));
             } else if(item instanceof AreaGroup){
                 editorList.add(new EditorItemArea((AreaGroup) item));
             }

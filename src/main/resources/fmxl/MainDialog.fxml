@@ -122,6 +122,7 @@
                                                             <JFXButton fx:id="editorCursorBtn" mnemonicParsing="false" style="-fx-graphic: url('images/cursor.png');" />
                                                             <JFXButton fx:id="editorLineBtn" mnemonicParsing="false" style="-fx-graphic: url('images/line.png');" />
                                                             <JFXButton fx:id="editorAngBtn" mnemonicParsing="false" style="-fx-graphic: url('images/perpendicular.png');" />
+                                                            <JFXButton fx:id="angleBtn" mnemonicParsing="false" style="-fx-graphic: url('images/angle.png');" />
                                                             <JFXButton fx:id="editorAreaBtn" mnemonicParsing="false" style="-fx-graphic: url('images/area.png');" />
                                                             <HBox fx:id="imageEditorToolsSecondaryPane" style="-fx-background-color: #FFFFFF;" HBox.hgrow="ALWAYS">
                                                                 <children>
@@ -159,6 +160,17 @@
                                                     </HBox>
                                                 </children></AnchorPane>
                                             <AnchorPane fx:id="imageEditorAnchorPane" VBox.vgrow="ALWAYS" />
+                                            <HBox  minHeight="24.0" prefWidth="200.0" alignment="CENTER_LEFT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                                <children>
+                                                    <Label fx:id="statusLabel" >
+                                                        <HBox.margin>
+                                                            <Insets>
+                                                                <left>5</left>
+                                                            </Insets>
+                                                        </HBox.margin>
+                                                    </Label>
+                                                </children>
+                                            </HBox>
                                         </children>
                                     </VBox>
                                 </children>
@@ -179,7 +191,8 @@
                                             </Tab>
                                         </tabs>
                                     </JFXTabPane>
-                                </children></AnchorPane>
+                                </children>
+                            </AnchorPane>
                         </items>
                     </SplitPane>
                 </center>

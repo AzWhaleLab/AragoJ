@@ -19,7 +19,7 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import ui.MainApplication;
-import ui.custom.LineGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.model.LabeledComboOption;
 import ui.model.ScaleRatio;
 import utils.Translator;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 public class ScaleDialogController extends Dialog<Void> {
 
     private Stage stage;
-    private ArrayList<LineGroup> lines;
+    private ArrayList<SegLineGroup> lines;
 
     @FXML private JFXTextField trueLengthTextField;
     @FXML private JFXTextField unitsTextField;
@@ -42,7 +42,7 @@ public class ScaleDialogController extends Dialog<Void> {
     private OnActionListener listener;
     private double ratio = -1;
 
-    public void init(Window owner, OnActionListener listener,  ArrayList<LineGroup> lines){
+    public void init(Window owner, OnActionListener listener,  ArrayList<SegLineGroup> lines){
         this.lines = lines;
         this.listener = listener;
         try {
@@ -133,7 +133,7 @@ public class ScaleDialogController extends Dialog<Void> {
             }
         });
 
-        for(LineGroup line : lines) {
+        for(SegLineGroup line : lines) {
             pixelLengthComboBox.getItems().add(new LabeledComboOption(line.getName() + ": " + line.getLength(), String.valueOf(line.getLength())));
         }
     }

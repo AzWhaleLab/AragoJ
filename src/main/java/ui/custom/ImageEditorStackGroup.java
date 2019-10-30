@@ -1,5 +1,6 @@
 package ui.custom;
 
+import javafx.beans.property.StringProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -10,31 +11,41 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import session.model.EditorItemAngle;
+import session.model.EditorItemSegLine;
 import ui.MainApplication;
+import ui.custom.angle.AngleGroup;
+import ui.custom.angle.AngleInteractor;
+import ui.custom.area.AreaGroup;
+import ui.custom.base.PointGroup;
+import ui.custom.segline.SegLineGroup;
+import ui.custom.segline.SegLineInteractor;
 import ui.model.LayerListItem;
 import ui.model.ScaleRatio;
 import utils.Constants;
 
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
+import utils.PointUtils;
 
-import static ui.custom.ImageEditorStackGroup.Mode.ANG;
-import static ui.custom.ImageEditorStackGroup.Mode.ANG_SEL;
+import static ui.custom.ImageEditorStackGroup.Mode.ANGLE_POINT_SELECT;
+import static ui.custom.ImageEditorStackGroup.Mode.LINE_ANG;
+import static ui.custom.ImageEditorStackGroup.Mode.ANG_POINT_SELECT;
 import static ui.custom.ImageEditorStackGroup.Mode.AREA_VERTICE_SELECT;
-
+import static ui.custom.ImageEditorStackGroup.Mode.LINE_POINT_SELECT;
 
 /**
  * Group responsible for layering measuring tools over the image
  * <p>
  * This group is wrapped by ZoomableScrollPane
  */
-public class ImageEditorStackGroup extends Group implements LineGroup.LineEventHandler, AreaGroup.AreaEventHandler {
+public class ImageEditorStackGroup extends Group
+    implements SegLineGroup.SegLineChangeEventHandler, AreaGroup.AreaEventHandler,
+    AngleGroup.AngleChangeEventHandler {
     public static Color DEFAULT_COLOR = Color.RED;
     private Preferences prefs;
 
-
-    public enum Mode {PAN, ZOOM, SELECT, LINE, ANG_SEL, ANG, AREA_CREATION, AREA_VERTICE_SELECT}
+    public enum Mode {PAN, ZOOM, SELECT, LINE_CREATION, LINE_POINT_SELECT, LINE_ANG_SEL, LINE_ANG, ANG_POINT_SELECT, AREA_CREATION, AREA_VERTICE_SELECT, ANGLE_CREATION, ANGLE_POINT_SELECT}
 
     private ModeListener modeListener;
     private ElementListener elementListener;
@@ -48,17 +59,26 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
 
     private int lineCount;
     private int areaCount;
+    private int angleCount;
 
     private Mode currentMode;
     private ScaleRatio currentScale;
 
     private Bounds bounds;
 
+    // Interactors
+    private SegLineInteractor segLineInteractor = new SegLineInteractor(this);
+    private AngleInteractor angleInteractor = new AngleInteractor(this);
 
-    public ImageEditorStackGroup(ModeListener modeListener, ElementListener elementListener, Color color, double angle) {
+    private StringProperty status;
+
+
+    public ImageEditorStackGroup(ModeListener modeListener, ElementListener elementListener, Color color, double angle, StringProperty statusProperty) {
         super();
         lineCount = 1;
         areaCount = 1;
+        angleCount = 1;
+        this.status = statusProperty;
         prefs = Preferences.userNodeForPackage(MainApplication.class);
         addedLineAngle = angle;
         currentPickedColor = color;
@@ -95,6 +115,25 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
                 getChildren().remove(index+1);
                 currentMode = Mode.AREA_CREATION;
             }
+            if (currentMode == LINE_POINT_SELECT) {
+                int index = elements.size() - 1;
+                SegLineGroup segLineGroup = ((SegLineGroup) elements.get(index));
+                segLineGroup.finish();
+                if(segLineGroup.isEmpty()){
+                    elements.remove(segLineGroup);
+                    getChildren().remove(index + 1);
+                }
+                status.setValue("");
+                currentMode = Mode.LINE_CREATION;
+            }
+            if (currentMode == ANGLE_POINT_SELECT) {
+                int index = elements.size() - 1;
+                AngleGroup angleGroup = ((AngleGroup) elements.get(index));
+                elements.remove(angleGroup);
+                getChildren().remove(index + 1);
+                status.setValue("");
+                currentMode = Mode.ANGLE_CREATION;
+            }
         }
 
     };
@@ -104,6 +143,19 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
 
         if (currentMode == Mode.AREA_VERTICE_SELECT) {
             ((AreaGroup) elements.get(elements.size() - 1)).moveLastVertex(e.getX(), e.getY());
+        } else if (currentMode == LINE_POINT_SELECT) {
+            SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
+            segLineGroup.moveLastVertex(e.getX(), e.getY());
+            status.setValue(segLineGroup.getStatus());
+        } else if (currentMode == ANG_POINT_SELECT) {
+            SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
+            PointGroup pointGroup = segLineGroup.getPoint(0);
+            Point2D point = PointUtils.getFinalCorrectedAnglePoint(bounds, pointGroup.getX(), pointGroup.getY(), e.getX(), e.getY(), helperLineAngle, addedLineAngle);
+            segLineGroup.moveLastVertex(point.getX(), point.getY());
+        }  else if (currentMode == ANGLE_POINT_SELECT) {
+            AngleGroup angleGroup = ((AngleGroup) elements.get(elements.size() - 1));
+            angleGroup.moveLastPoint(e.getX(), e.getY());
+            status.setValue(angleGroup.getStatus());
         }
     };
     /**
@@ -126,13 +178,52 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
                 scrollPane.onScroll(-3, point);
             }
         }
-        if (currentMode == Mode.LINE || currentMode == ANG) {
+
+        if (currentMode == Mode.LINE_POINT_SELECT || currentMode == ANG_POINT_SELECT) {
+            e.consume();
+            SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
+            if(currentMode == ANG_POINT_SELECT){
+                segLineGroup.addPointInPosition();
+                segLineGroup.finish();
+                currentMode = Mode.LINE_ANG_SEL;
+            } else {
+                segLineGroup.addPoint(e.getX(), e.getY());
+            }
+            if(segLineGroup.hasMinimumPoints()){
+                reportLayerAdd(segLineGroup, false);
+            }
+        }
+
+        if (currentMode == Mode.LINE_CREATION || currentMode == LINE_ANG) {
             e.consume();
             // Create a new line
-            LineGroup line = new LineGroup("Line_" + lineCount++, e.getX(), e.getY(), this, currentPickedColor);
-            addElement(line, false);
+            SegLineGroup line = new SegLineGroup("Line_" + lineCount++, e.getX(), e.getY(), segLineInteractor, this, currentPickedColor);
+            addInternalElement(line);
             currentSelectedItemIndex = elements.size() - 1;
+            if(currentMode == LINE_ANG){
+                currentMode = ANG_POINT_SELECT;
+            } else {
+                currentMode = LINE_POINT_SELECT;
+            }
         }
+
+        if (currentMode == Mode.ANGLE_POINT_SELECT) {
+            e.consume();
+            AngleGroup angleGroup = ((AngleGroup) elements.get(elements.size() - 1));
+            boolean finished = angleGroup.addPoint(e.getX(), e.getY());
+            if(finished){
+                reportLayerAdd(angleGroup, false);
+                setStatus("");
+                currentMode = Mode.ANGLE_CREATION;
+            }
+        } else if (currentMode == Mode.ANGLE_CREATION) {
+            e.consume();
+            AngleGroup angle = new AngleGroup("Angle_" + angleCount++, e.getX(), e.getY(), angleInteractor, this);
+            addInternalElement(angle);
+            currentSelectedItemIndex = elements.size() - 1;
+            currentMode = Mode.ANGLE_POINT_SELECT;
+        }
+
 
         if (currentMode == Mode.AREA_VERTICE_SELECT) {
             e.consume();
@@ -149,26 +240,31 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
         }
     };
 
+    public Bounds getBounds() {
+        return bounds;
+    }
+
     /**
      * Handles on mouse dragged event:
      * - Updates either start or end X and Y position of a line.
      */
     private EventHandler<MouseEvent> mouseDraggedHandler = event -> {
+        // TODO
         if (event.isControlDown() || currentMode == Mode.PAN || currentSelectedItemIndex == -1) return;
-        LayerListItem item = elements.get(currentSelectedItemIndex);
-        if (item.getType() == LayerListItem.Type.LINE) {
-            LineGroup line = (LineGroup) item;
-            if (currentMode == Mode.LINE && currentSelectedItemIndex != -1) {
-                line.setEndPoint(getCorrectedPointX(bounds, event.getX()), getCorrectedPointY(bounds, event.getY()));
-            }
-            if (currentMode == Mode.ANG && currentSelectedItemIndex != -1) {
-                event.consume();
-                double length = getDeltaAngledLineLength(line, event.getX(), event.getY(), helperLineAngle + addedLineAngle, true);
-                double x = getAngledPointX(helperLineAngle, line.getStartPointX(), length, true);
-                double y = getAngledPointY(helperLineAngle, line.getStartPointY(), length, true);
-                line.setEndPoint(getCorrectedPointX(bounds, x), getCorrectedPointY(bounds, y));
-            }
-        }
+        //LayerListItem item = elements.get(currentSelectedItemIndex);
+        //if (item.getType() == LayerListItem.Type.LINE) {
+        //    SegLineGroup line = (SegLineGroup) item;
+        //    if (currentMode == Mode.LINE && currentSelectedItemIndex != -1) {
+        //        line.setEndPoint(getCorrectedPointX(bounds, event.getX()), getCorrectedPointY(bounds, event.getY()));
+        //    }
+        //    if (currentMode == Mode.ANG && currentSelectedItemIndex != -1) {
+        //        event.consume();
+        //        double length = getDeltaAngledLineLength(line, event.getX(), event.getY(), helperLineAngle + addedLineAngle, true);
+        //        double x = getAngledPointX(helperLineAngle, line.getStartPointX(), length, true);
+        //        double y = getAngledPointY(helperLineAngle, line.getStartPointY(), length, true);
+        //        line.setEndPoint(getCorrectedPointX(bounds, x), getCorrectedPointY(bounds, y));
+        //    }
+        //}
 
     };
 
@@ -179,7 +275,9 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
     public void setCurrentPickedColor(Color currentPickedColor) {
         this.currentPickedColor = currentPickedColor;
         prefs.put(Constants.STTGS_COLOR_PICKER, currentPickedColor.toString());
+
     }
+
 
     public double getAddedLineAngle() {
         return addedLineAngle;
@@ -190,23 +288,37 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
         prefs.putDouble(Constants.STTGS_ANGLE_PICKER, addedLineAngle);
     }
 
-    public void addElement(LayerListItem item, boolean editorItemLoad) {
-        if (item.getType() == LayerListItem.Type.LINE) {
-            ((LineGroup) item).setOnMouseClicked(event -> {
-                if (currentMode == ANG_SEL) {
-                    LineGroup line = (LineGroup) event.getSource();
-                    helperLineAngle = line.getLineAngle();
+    public void setHelperLineAngle(double helperLineAngle){
+        this.helperLineAngle = helperLineAngle;
+    }
 
-                    if (currentMode == ANG_SEL) currentMode = ANG;
-                    if (modeListener != null) modeListener.onModeChange(currentMode);
-                }
-            });
-        }
+
+    public void addSegLineGroup(EditorItemSegLine segLine){
+        SegLineGroup lineGroup = new SegLineGroup(segLine, segLineInteractor, this);
+        addElement(lineGroup, true);
+    }
+
+    public void addAngle(EditorItemAngle angle){
+        AngleGroup angleGroup = new AngleGroup(angle, angleInteractor, this);
+        addElement(angleGroup, true);
+    }
+
+    public void addElement(LayerListItem item, boolean editorItemLoad) {
+        addInternalElement(item);
+        reportLayerAdd(item, editorItemLoad);
+    }
+
+    private void addInternalElement(LayerListItem item){
         if (item.isVisualElement()) getChildren().add((Node) item);
         elements.add(item);
+    }
+
+    private void reportLayerAdd(LayerListItem item, boolean editorItemLoad){
         if (elementListener != null) {
             if (item.getType() == LayerListItem.Type.LINE) {
-                elementListener.onLineAdd((LineGroup) item, editorItemLoad);
+                elementListener.onLineAdd((SegLineGroup) item, editorItemLoad);
+            } else if(item.getType() == LayerListItem.Type.ANGLE){
+                elementListener.onAngleAdd((AngleGroup) item, editorItemLoad);
             } else if (item.getType() == LayerListItem.Type.AREA && editorItemLoad) {
                 elementListener.onAreaAdd((AreaGroup) item, editorItemLoad);
             }
@@ -254,70 +366,67 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
         elements.clear();
         areaCount = 1;
         lineCount = 1;
+        angleCount = 1;
     }
 
-    public ArrayList<LineGroup> getLines() {
-        ArrayList<LineGroup> lines = new ArrayList<>();
+    public ArrayList<SegLineGroup> getLines() {
+        ArrayList<SegLineGroup> lines = new ArrayList<>();
         for (LayerListItem item : elements) {
             if (item.getType() == LayerListItem.Type.LINE) {
-                lines.add((LineGroup) item);
+                lines.add((SegLineGroup) item);
             }
         }
         return lines;
     }
 
+    @Override public void onSegLineChange(SegLineGroup segLineGroup) {
+        if (elementListener != null) elementListener.onLineChange(segLineGroup);
+    }
+
+    @Override public void onAngleChange(AngleGroup angleGroup) {
+        if (elementListener != null) elementListener.onAngleChange(angleGroup);
+
+    }
+
     /**
      * Individual line point change handlers
      */
-    @Override
-    public void onStartPointChange(LineGroup line, double x, double y) {
-        if (currentMode == ImageEditorStackGroup.Mode.SELECT) {
-            line.setStartPoint(getCorrectedPointX(bounds, x), getCorrectedPointY(bounds, y));
-        }
-    }
 
-    @Override
-    public void onEndPointChange(LineGroup line, double x, double y) {
-        if (currentMode == ImageEditorStackGroup.Mode.SELECT) {
-            line.setEndPoint(getCorrectedPointX(bounds, x), getCorrectedPointY(bounds, y));
-        }
-    }
-
-    @Override
-    public void onAngledStartPointChange(LineGroup line, double x, double y) {
-        if (currentMode == ImageEditorStackGroup.Mode.SELECT) {
-            double lineAngle = line.getLineAngle();
-            double length = getDeltaAngledLineLength(line, x, y, lineAngle, false);
-            double angledPointX = getAngledPointX(lineAngle, line.getEndPointX(), length, false);
-            double angledPointY = getAngledPointY(lineAngle, line.getEndPointY(), length, false);
-
-            line.setStartPoint(getCorrectedAngledPoint(bounds, new Point2D(angledPointX, angledPointY), lineAngle, line.getEndPointX(), line.getEndPointY()));
-        }
-    }
-
-    @Override
-    public void onAngledEndPointChange(LineGroup line, double x, double y) {
-        if (currentMode == ImageEditorStackGroup.Mode.SELECT) {
-            double lineAngle = line.getLineAngle();
-            double length = getDeltaAngledLineLength(line, x, y, lineAngle, true);
-            double angledPointX = getAngledPointX(lineAngle, line.getStartPointX(), length, false);
-            double angledPointY = getAngledPointY(lineAngle, line.getStartPointY(), length, false);
-
-            line.setEndPoint(getCorrectedAngledPoint(bounds, new Point2D(angledPointX, angledPointY), lineAngle, line.getStartPointX(), line.getStartPointY()));
-        }
-    }
-
-    @Override
-    public void onLineChange(LineGroup line, double dx, double dy) {
-        if (currentMode == ImageEditorStackGroup.Mode.SELECT) {
-            line.moveLineGroup(getCorrectedDx(bounds, line, dx), getCorrectedDy(bounds, line, dy));
-        }
-    }
-
-    @Override
-    public void onLineChange(LineGroup lineGroup) {
-        if (elementListener != null) elementListener.onLineChange(lineGroup);
-    }
+    //@Override
+    //public void onAngledStartPointChange(LineGroup line, double x, double y) {
+    //    if (currentMode == ImageEditorStackGroup.Mode.SELECT) {
+    //        double lineAngle = line.getLineAngle();
+    //        double length = getDeltaAngledLineLength(line, x, y, lineAngle, false);
+    //        double angledPointX = getAngledPointX(lineAngle, line.getEndPointX(), length, false);
+    //        double angledPointY = getAngledPointY(lineAngle, line.getEndPointY(), length, false);
+    //
+    //        line.setStartPoint(getCorrectedAngledPoint(bounds, new Point2D(angledPointX, angledPointY), lineAngle, line.getEndPointX(), line.getEndPointY()));
+    //    }
+    //}
+    //
+    //@Override
+    //public void onAngledEndPointChange(LineGroup line, double x, double y) {
+    //    if (currentMode == ImageEditorStackGroup.Mode.SELECT) {
+    //        double lineAngle = line.getLineAngle();
+    //        double length = getDeltaAngledLineLength(line, x, y, lineAngle, true);
+    //        double angledPointX = getAngledPointX(lineAngle, line.getStartPointX(), length, false);
+    //        double angledPointY = getAngledPointY(lineAngle, line.getStartPointY(), length, false);
+    //
+    //        line.setEndPoint(getCorrectedAngledPoint(bounds, new Point2D(angledPointX, angledPointY), lineAngle, line.getStartPointX(), line.getStartPointY()));
+    //    }
+    //}
+    //
+    //@Override
+    //public void onLineChange(LineGroup line, double dx, double dy) {
+    //    if (currentMode == ImageEditorStackGroup.Mode.SELECT) {
+    //        line.moveLineGroup(getCorrectedDx(bounds, line, dx), getCorrectedDy(bounds, line, dy));
+    //    }
+    //}
+    //
+    //@Override
+    //public void onLineChange(LineGroup lineGroup) {
+    //    if (elementListener != null) elementListener.onLineChange(lineGroup);
+    //}
 
     /**
      * Area
@@ -342,9 +451,13 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
 
     public void setCurrentMode(Mode mode) {
         currentSelectedItemIndex = -1;
-        helperLineAngle = -1;
         this.currentMode = mode;
+        status.setValue("");
         if (modeListener != null) modeListener.onModeChange(currentMode);
+    }
+
+    public void setStatus(String s) {
+        status.setValue(s);
     }
 
     public Mode getCurrentMode(){
@@ -353,37 +466,37 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
 
     public void setLayerHelperLinesVisible(boolean visible) {
         for (LayerListItem item : elements) {
-            if (item.getType() == LayerListItem.Type.LINE) ((LineGroup) item).setPrecisionHelpersVisible(visible);
+            if (item.getType() == LayerListItem.Type.LINE) ((SegLineGroup) item).setPrecisionHelpersVisible(visible);
         }
     }
 
     public void setColorHelperLinesVisible(boolean visible) {
         for (LayerListItem item : elements) {
-            if (item.getType() == LayerListItem.Type.LINE) ((LineGroup) item).setColorHelpersVisible(visible);
+            if (item.getType() == LayerListItem.Type.LINE) ((SegLineGroup) item).setColorHelpersVisible(visible);
         }
     }
 
-    private double getDeltaAngledLineLength(LineGroup line, double refX, double refY, double angle, boolean startPoint) {
-        double linePointX = line.getStartPointX();
-        double linePointY = line.getStartPointY();
-        if (!startPoint) {
-            linePointX = line.getEndPointX();
-            linePointY = line.getEndPointY();
-        }
-        double xLength = refX - linePointX;
-        double yLength = refY - linePointY;
-
-        double length = Math.sqrt((xLength * xLength) + (yLength * yLength));
-
-        double degAngle = Math.toDegrees(angle);
-        if (degAngle > 360) degAngle -= 360;
-        if ((degAngle < 45 || (degAngle >= 315 && degAngle < 360)) && xLength < 0) length = -length;
-        else if (degAngle >= 135 && degAngle < 225 && xLength > 0) length = -length;
-        else if (degAngle >= 45 && degAngle < 135 && yLength < 0) length = -length;
-        else if (degAngle >= 225 && degAngle < 315 && yLength > 0) length = -length;
-
-        return length;
-    }
+    //private double getDeltaAngledLineLength(SegLineGroup line, double refX, double refY, double angle, boolean startPoint) {
+    //    double linePointX = line.getStartPointX();
+    //    double linePointY = line.getStartPointY();
+    //    if (!startPoint) {
+    //        linePointX = line.getEndPointX();
+    //        linePointY = line.getEndPointY();
+    //    }
+    //    double xLength = refX - linePointX;
+    //    double yLength = refY - linePointY;
+    //
+    //    double length = Math.sqrt((xLength * xLength) + (yLength * yLength));
+    //
+    //    double degAngle = Math.toDegrees(angle);
+    //    if (degAngle > 360) degAngle -= 360;
+    //    if ((degAngle < 45 || (degAngle >= 315 && degAngle < 360)) && xLength < 0) length = -length;
+    //    else if (degAngle >= 135 && degAngle < 225 && xLength > 0) length = -length;
+    //    else if (degAngle >= 45 && degAngle < 135 && yLength < 0) length = -length;
+    //    else if (degAngle >= 225 && degAngle < 315 && yLength > 0) length = -length;
+    //
+    //    return length;
+    //}
 
     private double getCorrectedPointX(Bounds bounds, double x) {
         double endPointX = x;
@@ -431,25 +544,25 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
         return endPointY;
     }
 
-    private double getCorrectedDx(Bounds bounds, LineGroup line, double dx) {
-        double startPointX = line.getStartPointX();
-        double endPointX = line.getEndPointX();
-        if (startPointX + dx < 0) return -startPointX;
-        if (startPointX + dx > bounds.getWidth()) return bounds.getWidth() - startPointX;
-        if (endPointX + dx < 0) return -endPointX;
-        if (endPointX + dx > bounds.getWidth()) return bounds.getWidth() - endPointX;
-        return dx;
-    }
-
-    private double getCorrectedDy(Bounds bounds, LineGroup line, double dy) {
-        double startPointY = line.getStartPointY();
-        double endPointY = line.getEndPointY();
-        if (startPointY + dy < 0) return -startPointY;
-        if (startPointY + dy > bounds.getHeight()) return bounds.getHeight() - startPointY;
-        if (endPointY + dy < 0) return -endPointY;
-        if (endPointY + dy > bounds.getHeight()) return bounds.getHeight() - endPointY;
-        return dy;
-    }
+    //private double getCorrectedDx(Bounds bounds, LineGroup line, double dx) {
+    //    double startPointX = line.getStartPointX();
+    //    double endPointX = line.getEndPointX();
+    //    if (startPointX + dx < 0) return -startPointX;
+    //    if (startPointX + dx > bounds.getWidth()) return bounds.getWidth() - startPointX;
+    //    if (endPointX + dx < 0) return -endPointX;
+    //    if (endPointX + dx > bounds.getWidth()) return bounds.getWidth() - endPointX;
+    //    return dx;
+    //}
+    //
+    //private double getCorrectedDy(Bounds bounds, LineGroup line, double dy) {
+    //    double startPointY = line.getStartPointY();
+    //    double endPointY = line.getEndPointY();
+    //    if (startPointY + dy < 0) return -startPointY;
+    //    if (startPointY + dy > bounds.getHeight()) return bounds.getHeight() - startPointY;
+    //    if (endPointY + dy < 0) return -endPointY;
+    //    if (endPointY + dy > bounds.getHeight()) return bounds.getHeight() - endPointY;
+    //    return dy;
+    //}
 
     public int getLineCount() {
         return lineCount;
@@ -484,12 +597,17 @@ public class ImageEditorStackGroup extends Group implements LineGroup.LineEventH
     }
 
     public interface ElementListener {
-        void onLineAdd(LineGroup line, boolean sessionLoad);
+        void onLineAdd(SegLineGroup line, boolean sessionLoad);
+
+        void onAngleAdd(AngleGroup angle, boolean sessionLoad);
 
         void onAreaAdd(AreaGroup area, boolean sessionLoad);
 
-        void onLineChange(LineGroup lineGroup);
+        void onLineChange(SegLineGroup lineGroup);
 
         void onAreaChange(AreaGroup areaGroup);
+
+        void onAngleChange(AngleGroup angleGroup);
+
     }
 }

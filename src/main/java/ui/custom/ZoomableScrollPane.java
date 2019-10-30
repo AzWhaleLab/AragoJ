@@ -11,6 +11,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import session.model.*;
 import ui.controller.LayerTabPageController;
+import ui.custom.area.AreaGroup;
 
 /**
  * ScrollPane responsible for wrapping and handling zoom + panning of the ImageEditorStackGroup.
@@ -145,12 +146,14 @@ public class ZoomableScrollPane extends ScrollPane {
         ImageEditorStackGroup stackGroup = (ImageEditorStackGroup) target;
         stackGroup.setLineCount(item.getLineCount());
         for(EditorItemLayer layer : item.getLayers()){
-            if(layer instanceof EditorItemLine){
-                LineGroup lineGroup = new LineGroup((EditorItemLine) layer, (LineGroup.LineEventHandler) handler);
-                stackGroup.addElement(lineGroup, true);
+            if(layer instanceof EditorItemSegLine){
+                stackGroup.addSegLineGroup((EditorItemSegLine) layer);
             } else if(layer instanceof EditorItemArea){
                 AreaGroup areaGroup = new AreaGroup((EditorItemArea) layer, (AreaGroup.AreaEventHandler) handler);
-                stackGroup.addElement(areaGroup, true);            }
+                stackGroup.addElement(areaGroup, true);
+            } else if(layer instanceof EditorItemAngle){
+                stackGroup.addAngle((EditorItemAngle) layer);
+            }
             else if(layer instanceof EquationItem){
                 layerTabPageController.getLayers().add((EquationItem) layer);
             }

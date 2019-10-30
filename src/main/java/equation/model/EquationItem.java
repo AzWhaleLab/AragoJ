@@ -127,6 +127,10 @@ public class EquationItem implements LayerListItem, EditorItemLayer{
         }
     }
 
+    @Override public String getStatus() {
+        return "";
+    }
+
     @Override
     public Type getType() {
         return Type.EQUATION;

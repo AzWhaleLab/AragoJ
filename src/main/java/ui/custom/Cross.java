@@ -48,8 +48,8 @@ public class Cross {
     }
 
     public void setPoint(double x, double y){
-        this.shape.setLayoutX(x - this.shape.getLayoutBounds().getMinX());
-        this.shape.setLayoutY(y - this.shape.getLayoutBounds().getMinY());
+        this.shape.setLayoutX(x - this.shape.getLayoutBounds().getMinX() -1);
+        this.shape.setLayoutY(y - this.shape.getLayoutBounds().getMinY()-1);
         this.pointX = x;
         this.pointY = y;
     }
