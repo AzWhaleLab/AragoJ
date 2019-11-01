@@ -1,13 +1,17 @@
 package ui.custom.angle;
 
 import com.jfoenix.svg.SVGGlyph;
+import com.jfoenix.svg.SVGGlyphLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javafx.scene.Group;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
 import session.model.EditorItemAngle;
 import session.model.EditorItemPosition;
 import ui.custom.ToolEventHandler;
@@ -29,6 +33,7 @@ public class AngleGroup extends Group implements LayerListItem {
   private PointGroup aPoint; // 0
   private PointGroup bPoint; // 1
   private PointGroup cPoint; // 2
+  private Arc arc;
 
   private ArrayList<LineGroup> lines;
   private ArrayList<PointGroup> points;
@@ -75,7 +80,13 @@ public class AngleGroup extends Group implements LayerListItem {
       abLine.setEndPoint(x, y);
       bcLine = new LineGroup(x, y, x, y, 0, Color.WHITE);
       bcLine.setColorVisibility(false);
-      getChildren().addAll(bcLine, bPoint);
+      arc = new Arc(x, y, 0, 0, abLine.getLineAngle(), getAngle());
+      arc.setStroke(Color.WHITE);
+      arc.setStrokeWidth(0.05f);
+      arc.setBlendMode(BlendMode.DIFFERENCE);
+      arc.setFill(Color.TRANSPARENT);
+      arc.setType(ArcType.OPEN);
+      getChildren().addAll(bcLine, bPoint, arc);
       return false;
     } else if(cPoint == null){
       cPoint = new PointGroup(x, y, 1);
@@ -86,6 +97,19 @@ public class AngleGroup extends Group implements LayerListItem {
       calculateAngle();
     }
     return true;
+  }
+
+  private void calculateArc(){
+    if(arc != null && abLine != null && bcLine != null){
+      double argRadius = Math.min(abLine.getLength()*0.3, bcLine.getLength()*0.3);
+      arc.setCenterX(abLine.getEndPointX());
+      arc.setCenterY(abLine.getEndPointY());
+      arc.setStartAngle(Math.toDegrees(abLine.getDisplayAngle()));
+      double angleEnd = Math.toDegrees(abLine.getDisplayAngleWith(bcLine));
+      arc.setLength(angleEnd);
+      arc.setRadiusX(argRadius);
+      arc.setRadiusY(argRadius);
+    }
   }
 
   public void movePoint(int index, double x, double y){
@@ -130,6 +154,7 @@ public class AngleGroup extends Group implements LayerListItem {
     } else {
       currentAngle = abLine.getLineAngle();
     }
+    calculateArc();
     if(eventChangeHandler != null) eventChangeHandler.onAngleChange(this);
   }
 
@@ -137,8 +162,13 @@ public class AngleGroup extends Group implements LayerListItem {
     return currentAngle;
   }
 
+
   @Override public SVGGlyph getSVG() throws IOException {
-    return null;
+    SVGGlyph glyph = SVGGlyphLoader.loadGlyph(getClass().getClassLoader()
+        .getResource("svg/1-angle_vector.svg"));
+    glyph.setFill(Color.gray(0.2));
+    glyph.setSize(32, 25);
+    return glyph;
   }
 
   @Override public String getPrimaryText() {

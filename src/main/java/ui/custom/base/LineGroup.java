@@ -67,6 +67,26 @@ public class LineGroup extends Group {
   }
 
   public double getAngleWith(LineGroup lineGroup){
+    return Math.abs(getDisplayAngleWith(lineGroup));
+  }
+
+  public double getDisplayAngleWith(LineGroup lineGroup){
+    double vectorX = helperLine.getEndX() - helperLine.getStartX();
+    double vectorY = helperLine.getEndY() - helperLine.getStartY();
+    double lineVectorX = lineGroup.getEndPointX() - lineGroup.getStartPointX();
+    double lineVectorY = lineGroup.getEndPointY() - lineGroup.getStartPointY();
+    double dotProduct = (vectorX * lineVectorX) + (vectorY * lineVectorY);
+    double detProduct = (vectorX * lineVectorY) - (vectorY * lineVectorX);
+
+    double angle = Math.PI - Math.atan2(detProduct, dotProduct);
+
+    if(angle > Math.PI){
+      angle = getPositiveAngleWith(lineGroup) - Math.PI;
+    }
+    return angle;
+  }
+
+  private double getPositiveAngleWith(LineGroup lineGroup){
     double vectorX = helperLine.getEndX() - helperLine.getStartX();
     double vectorY = helperLine.getEndY() - helperLine.getStartY();
     double lineVectorX = lineGroup.getEndPointX() - lineGroup.getStartPointX();
@@ -74,6 +94,7 @@ public class LineGroup extends Group {
     double dotProduct = (vectorX * lineVectorX) + (vectorY * lineVectorY);
     double magnitude = Math.sqrt((vectorX * vectorX) + (vectorY * vectorY)) *
         Math.sqrt((lineVectorX * lineVectorX) + (lineVectorY * lineVectorY));
+
     return Math.acos(dotProduct/magnitude);
   }
 
@@ -93,6 +114,18 @@ public class LineGroup extends Group {
         (ax * ax + ay * ay) * (x * x + y * y));
 
     return Math.acos(delta);
+  }
+
+  public double getDisplayAngle() {
+    double startX = colorLine.getStartX();
+    double startY = colorLine.getStartY();
+    double endX = colorLine.getEndX();
+    double endY = colorLine.getEndY();
+
+    double x = endX-startX;
+    double y = endY-startY;
+
+    return Math.PI - Math.atan2(y,x);
   }
 
   public void moveLineGroup(double dx, double dy){
