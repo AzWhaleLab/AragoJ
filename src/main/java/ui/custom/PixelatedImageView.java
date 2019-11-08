@@ -22,6 +22,10 @@ public class PixelatedImageView extends ImageView {
         super(image);
     }
 
+    public PixelatedImageView(){
+        super();
+    }
+
     @Override protected NGNode impl_createPeer() {
         return new NGImageView() {
             private com.sun.prism.Image image;

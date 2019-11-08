@@ -77,6 +77,12 @@
                             </Menu>
                             <Menu mnemonicParsing="false" text="%module">
                                 <items>
+                                    <Menu fx:id="filtersMenu" mnemonicParsing="false" text="%filters" disable="true">
+                                        <MenuItem fx:id="clearFiltersMenuItem"  mnemonicParsing="false" text="%clearFilters" onAction="#onClearFilters" />
+                                        <SeparatorMenuItem mnemonicParsing="false" />
+                                        <MenuItem fx:id="edgeDetectionItem" mnemonicParsing="false" text="%edgeDetectionDots" onAction="#onEdgeDetection" />
+                                        <!--<CheckMenuItem fx:id="autoUndistortCheckMenuItem" text="%autoUndistort"/>-->
+                                    </Menu>
                                     <Menu fx:id="calibrationMenu" mnemonicParsing="false" text="%calibration">
                                         <MenuItem mnemonicParsing="false" text="%calibrateCamera" onAction="#onCalibrateCamera" />
                                         <SeparatorMenuItem mnemonicParsing="false" />

@@ -11,7 +11,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 
-public class CalibrationUtils {
+public class OpenCVUtils {
 
     public static Mat getMatFromImage(Image image) {
         int width = (int) image.getWidth();

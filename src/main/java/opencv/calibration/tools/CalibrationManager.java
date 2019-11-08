@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static opencv.calibration.tools.CalibrationUtils.getImageFromMat;
+import static opencv.calibration.tools.OpenCVUtils.getImageFromMat;
 
 public class CalibrationManager {
     private volatile boolean stoppedCalibration;

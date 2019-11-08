@@ -172,7 +172,6 @@ public class AreaGroup extends Group implements LayerListItem {
             Line previousLine = lines.get(index - 1);
             previousLine.setEndX(x);
             previousLine.setEndY(y);
-
             if (index < lines.size()) {
                 Line currentLine = lines.get(index);
                 previousLine.setStartX(x);
