@@ -77,10 +77,11 @@ public class EdgeDetectionDialog implements EdgeDetectionManager.ResultListener 
   private void initialize(){
     thresholdSlider.setOrientation(Orientation.HORIZONTAL);
     thresholdSlider.setIndicatorPosition(JFXSlider.IndicatorPosition.RIGHT);
+    thresholdSlider.setMax(300);
     thresholdSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-      edgeDetectionManager.applyCannyEdgeDetection(this, imageItem.getPath(), newValue.intValue());
+      edgeDetectionManager.applyCannyEdgeDetection(this, imageItem.getImage(), newValue.intValue());
     });
-    pixelatedImageView = new PixelatedImageView(edgeDetectionManager.applyCannyEdgeDetectionSync(imageItem.getPath(), (int) thresholdSlider.getValue()));
+    pixelatedImageView = new PixelatedImageView(edgeDetectionManager.applyCannyEdgeDetectionSync(imageItem.getImage(), (int) thresholdSlider.getValue()));
     pixelatedImageView.fitWidthProperty().bind(previewPane.widthProperty());
     pixelatedImageView.fitHeightProperty().bind(previewPane.heightProperty());
     pixelatedImageView.setPreserveRatio(true);

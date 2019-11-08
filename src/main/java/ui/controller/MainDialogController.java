@@ -57,6 +57,7 @@ import opencv.calibration.ui.UndistortDialog;
 import opencv.calibration.ui.UndistortProgressDialogController;
 import opencv.filters.edgedetection.EdgeDetectionDialog;
 import opencv.filters.edgedetection.EdgeDetectionFilter;
+import opencv.filters.edgedetection.EdgeDetectionManager;
 import session.SessionManager;
 import session.export.ExportCSV;
 import session.export.ExportPreferences;
@@ -195,33 +196,28 @@ public class MainDialogController
           if (newValue != null) {
             ImageItem imageItem = newValue.getImageItem();
             EditorItem editorItem = newValue.getEditorItem();
-            try {
-              metaTabPageController.addRootTreeItem(imageItem.getMetadata());
-              imageEditorStackGroup.getChildren()
-                  .setAll(new PixelatedImageView(imageItem.getImage()));
-              imageEditorStackGroup.clearList();
-              layerTabPageController.clearList();
-              imageEditorStackGroup.setCurrentScale(editorItem.getScaleRatio());
-              imageEditorScrollPane.loadEditorItem(editorItem, imageEditorStackGroup,
-                  layerTabPageController);
-              if (editorItem.hasScaleRatio()) {
-                convertUnitsMenuItem.setDisable(false);
-              } else {
-                convertUnitsMenuItem.setDisable(true);
-              }
-              layerTabPageController.setListener(MainDialogController.this);
-              layerTabPageController.setCurrentScale(imageEditorStackGroup.getCurrentScale());
-              imageEditorStackGroup.setBounds(
-                  imageEditorStackGroup.parentToLocal(imageEditorStackGroup.getBoundsInParent()));
-              setEditorEnable(true);
+            metaTabPageController.addRootTreeItem(imageItem.getMetadata());
+            imageEditorStackGroup.clearList();
+            imageEditorStackGroup.setImage(new PixelatedImageView(imageItem.getImage()));
+            layerTabPageController.clearList();
+            imageEditorStackGroup.setCurrentScale(editorItem.getScaleRatio());
+            imageEditorScrollPane.loadEditorItem(editorItem, imageEditorStackGroup,
+                layerTabPageController);
+            if (editorItem.hasScaleRatio()) {
+              convertUnitsMenuItem.setDisable(false);
+            } else {
+              convertUnitsMenuItem.setDisable(true);
+            }
+            layerTabPageController.setListener(MainDialogController.this);
+            layerTabPageController.setCurrentScale(imageEditorStackGroup.getCurrentScale());
+            imageEditorStackGroup.setBounds(
+                imageEditorStackGroup.parentToLocal(imageEditorStackGroup.getBoundsInParent()));
+            setEditorEnable(true);
 
-              if (oldValue == null && !editorItem.getLayers()
-                  .isEmpty()) {
-                miscTabPane.getSelectionModel()
-                    .select(0);
-              }
-            } catch (IOException e) {
-              e.printStackTrace();
+            if (oldValue == null && !editorItem.getLayers()
+                .isEmpty()) {
+              miscTabPane.getSelectionModel()
+                  .select(0);
             }
           }
         });
@@ -250,9 +246,14 @@ public class MainDialogController
         ArrayList<ImageItem> items = new ArrayList<>();
         for (File file : files) {
           if (file.exists()) {
-            ImageItem item = ImageManager.retrieveImage(file.getAbsolutePath());
-            item.preloadThumbnail();
-            items.add(item);
+            try {
+              ImageItem item = ImageManager.retrieveImage(file.getAbsolutePath());
+              item.preloadThumbnail();
+              items.add(item);
+            } catch (Exception e){
+              e.printStackTrace();
+            }
+
           }
         }
         return items;
@@ -271,15 +272,16 @@ public class MainDialogController
           System.out.println("Free Memory: " + Runtime.getRuntime()
               .freeMemory());
         } catch (InterruptedException e) {
-          //e.printStackTrace();
+          e.printStackTrace();
           //TODO: Catch exception
 
         } catch (ExecutionException e) {
-          //e.printStackTrace();
+          e.printStackTrace();
           //TODO: Catch exception
         }
         super.succeeded();
       }
+
     };
     new Thread(task).start();
   }
@@ -1109,8 +1111,9 @@ public class MainDialogController
     }
   }
 
-  public void onClearFilters(ActionEvent actionEvent) {
-    //imageListView.getSelectionModel().getSelectedItem().getImageItem().getPath()
+  public void onClearFilters(ActionEvent actionEvent) throws ImageProcessingException, IOException {
+    ImageItem imageItem = imageListView.getSelectionModel().getSelectedItem().getImageItem();
+    changeCurrentImageItem(ImageManager.retrieveImage(imageItem.getPath()));
   }
 
   public void onEdgeDetection(ActionEvent actionEvent) {
@@ -1127,6 +1130,15 @@ public class MainDialogController
   }
 
   @Override public void onApplyEdgeDetection(EdgeDetectionFilter edgeDetectionFilter) {
+    EdgeDetectionManager edgeDetectionManager = new EdgeDetectionManager();
+    ImageItem imageItem = imageListView.getSelectionModel().getSelectedItem().getImageItem();
+    imageItem.setImage(edgeDetectionManager.applyCannyEdgeDetectionSync(imageItem.getImage(), edgeDetectionFilter.getThreshold()));
+    changeCurrentImageItem(imageItem);
+  }
 
+  private void changeCurrentImageItem(ImageItem imageItem){
+    imageListView.getSelectionModel().getSelectedItem().setImageItem(imageItem);
+    imageEditorStackGroup.setImage(new PixelatedImageView(imageItem.getImage()));
+    imageListView.refresh();
   }
 }

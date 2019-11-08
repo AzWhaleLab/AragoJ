@@ -15,14 +15,14 @@ public class EdgeDetectionManager {
   // Debounce
   private PauseTransition pause = new PauseTransition(Duration.millis(400));
 
-  public void applyCannyEdgeDetection(ResultListener resultListener, String imagePath, int threshold){
+  public void applyCannyEdgeDetection(ResultListener resultListener, Image image, int threshold){
     if(task != null){
       task.cancel();
     }
     task = new Task<Void>() {
       @Override protected Void call() throws Exception {
         pause.setOnFinished(event -> {
-          Image resultImage = applyCannyEdgeDetectionSync(imagePath, threshold);
+          Image resultImage = applyCannyEdgeDetectionSync(image, threshold);
           if(!isCancelled()){
             resultListener.onEdgeDetectionFinished(resultImage);
           }
@@ -35,8 +35,8 @@ public class EdgeDetectionManager {
     new Thread(task).start();
   }
 
-  public Image applyCannyEdgeDetectionSync(String imagePath, int threshold){
-    Mat image = Imgcodecs.imread(imagePath);
+  public Image applyCannyEdgeDetectionSync(Image img, int threshold){
+    Mat image = OpenCVUtils.getMatFromImage(img);
     Mat result = new Mat();
     Imgproc.Canny(image, result, threshold, threshold*3);
     return OpenCVUtils.getImageFromMat(result);

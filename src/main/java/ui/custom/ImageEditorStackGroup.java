@@ -6,6 +6,8 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -92,6 +94,14 @@ public class ImageEditorStackGroup extends Group
         this.bounds = bounds;
     }
 
+    public void setImage(ImageView image){
+        if(getChildren().size() == 0){
+            getChildren().setAll(image);
+        } else {
+            getChildren().set(0, image);
+        }
+    }
+
     private void setListeners() {
         setOnMousePressed(mousePressedHandler);
         setOnMouseDragged(mouseDraggedHandler);
@@ -108,32 +118,7 @@ public class ImageEditorStackGroup extends Group
     private EventHandler<KeyEvent> keyPressedHandler = e -> {
 
         if(e.getCode() == KeyCode.ESCAPE){
-            if (currentMode == Mode.AREA_VERTICE_SELECT) {
-                int index = elements.size() - 1;
-                ((AreaGroup) elements.get(index)).cancel();
-                elements.remove(index);
-                getChildren().remove(index+1);
-                currentMode = Mode.AREA_CREATION;
-            }
-            if (currentMode == LINE_POINT_SELECT) {
-                int index = elements.size() - 1;
-                SegLineGroup segLineGroup = ((SegLineGroup) elements.get(index));
-                segLineGroup.finish();
-                if(segLineGroup.isEmpty()){
-                    elements.remove(segLineGroup);
-                    getChildren().remove(index + 1);
-                }
-                status.setValue("");
-                currentMode = Mode.LINE_CREATION;
-            }
-            if (currentMode == ANGLE_POINT_SELECT) {
-                int index = elements.size() - 1;
-                AngleGroup angleGroup = ((AngleGroup) elements.get(index));
-                elements.remove(angleGroup);
-                getChildren().remove(index + 1);
-                status.setValue("");
-                currentMode = Mode.ANGLE_CREATION;
-            }
+            cancelOrFinishModes();
         }
 
     };
@@ -278,7 +263,6 @@ public class ImageEditorStackGroup extends Group
 
     }
 
-
     public double getAddedLineAngle() {
         return addedLineAngle;
     }
@@ -363,10 +347,41 @@ public class ImageEditorStackGroup extends Group
 
 
     public void clearList() {
+        cancelOrFinishModes();
+        getChildren().clear();
         elements.clear();
         areaCount = 1;
         lineCount = 1;
         angleCount = 1;
+    }
+
+    private void cancelOrFinishModes() {
+        if (currentMode == Mode.AREA_VERTICE_SELECT) {
+            int index = elements.size() - 1;
+            ((AreaGroup) elements.get(index)).cancel();
+            elements.remove(index);
+            getChildren().remove(index+1);
+            currentMode = Mode.AREA_CREATION;
+        }
+        if (currentMode == LINE_POINT_SELECT) {
+            int index = elements.size() - 1;
+            SegLineGroup segLineGroup = ((SegLineGroup) elements.get(index));
+            segLineGroup.finish();
+            if(segLineGroup.isEmpty()){
+                elements.remove(segLineGroup);
+                getChildren().remove(index + 1);
+            }
+            status.setValue("");
+            currentMode = Mode.LINE_CREATION;
+        }
+        if (currentMode == ANGLE_POINT_SELECT) {
+            int index = elements.size() - 1;
+            AngleGroup angleGroup = ((AngleGroup) elements.get(index));
+            elements.remove(angleGroup);
+            getChildren().remove(index + 1);
+            status.setValue("");
+            currentMode = Mode.ANGLE_CREATION;
+        }
     }
 
     public ArrayList<SegLineGroup> getLines() {

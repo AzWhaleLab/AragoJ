@@ -54,11 +54,12 @@ public class ImageItem {
     private Image img;
     private String statusColor;
 
-    public ImageItem(Metadata metadata, String name, String path) {
+    public ImageItem(Metadata metadata, String name, Image image, String path) {
         this.metadata = metadata;
         this.name = name;
         this.path = path;
         this.statusColor = "#00000000";
+        this.img = image;
     }
 
     public ImageItem(String name, String path, Image img, Image thumbnail, int thumbnailWidth, String statusColor) {
@@ -75,7 +76,7 @@ public class ImageItem {
             return thumbnail;
         }
 
-        BufferedImage image = ImageIO.read(new File(path));
+        BufferedImage image = SwingFXUtils.fromFXImage(img, null);
         this.width = image.getWidth();
         this.height = image.getHeight();
 
@@ -84,15 +85,19 @@ public class ImageItem {
             method = Scalr.Method.BALANCED;
         }
 
-        img = SwingFXUtils.toFXImage(image, null);
         if(height > this.width){
             return SwingFXUtils.toFXImage(Scalr.resize(image, method, Scalr.Mode.FIT_TO_HEIGHT, width, (BufferedImageOp) null), null);
         }
         return SwingFXUtils.toFXImage(Scalr.resize(image, method, Scalr.Mode.FIT_TO_WIDTH, width, (BufferedImageOp) null), null);
     }
 
-    public Image getImage() throws IOException {
+    public Image getImage() {
         return img;
+    }
+
+    public void setImage(Image image){
+        thumbnail = null;
+        img = image;
     }
 
     public String getName() {
@@ -121,6 +126,7 @@ public class ImageItem {
             thumbnail = getImageIcon(50);
             thumbnailWidth = 50;
         } catch (Exception e) {
+            e.printStackTrace();
             // Since it's a preload, do nothing
         }
     }
