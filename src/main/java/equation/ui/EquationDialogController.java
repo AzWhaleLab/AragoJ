@@ -38,6 +38,7 @@ import utils.Translator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import utils.Utility;
 
 public class EquationDialogController extends Dialog<Void> {
     private Stage stage;
@@ -230,8 +231,8 @@ public class EquationDialogController extends Dialog<Void> {
                 cell.setComboBoxEditable(true);
 
                 for(SegLineGroup line : lines){
-                    cell.getItems().add(new LabeledComboOption(line.getName() + ": " + line.getLength() + " px", String.valueOf(line.getLength())));
-                    if(currentScale != null){
+                    cell.getItems().add(new LabeledComboOption(line.getName() + ": " + Utility.roundTwoDecimals(line.getLength()) + " px", String.valueOf(line.getLength())));
+                    if(currentScale != null && currentScale.hasScale()){
                         double length = currentScale.getRoundedScaledValue(line.getLength());
                         cell.getItems().add(new LabeledComboOption(line.getName() + ": " + length + " "+ currentScale.getUnits(), String.valueOf(length)));
                     }

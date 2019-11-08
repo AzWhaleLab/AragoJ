@@ -2,6 +2,6 @@
 <equations>
     <item>
         <name>Unnammed expression</name>
-        <expression>2+2</expression>
+        <expression>2+2*x</expression>
     </item>
 </equations>
