@@ -15,7 +15,7 @@
    <children>
       <HBox prefWidth="264.0">
          <Pane HBox.hgrow="ALWAYS" />
-         <JFXButton fx:id="cancelButton" alignment="CENTER_RIGHT" textFill="#00000096" HBox.hgrow="ALWAYS">
+         <JFXButton fx:id="cancelButton" onAction="#onCancelClick" alignment="CENTER_RIGHT" textFill="#00000096" HBox.hgrow="ALWAYS">
             <graphic>
                <ImageView fitHeight="12" fitWidth="12" pickOnBounds="true" preserveRatio="true">
                   <image>

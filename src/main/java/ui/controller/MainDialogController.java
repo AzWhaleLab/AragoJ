@@ -55,9 +55,11 @@ import opencv.calibration.model.CalibrationModel;
 import opencv.calibration.ui.CalibrationDialogController;
 import opencv.calibration.ui.UndistortDialog;
 import opencv.calibration.ui.UndistortProgressDialogController;
-import opencv.filters.edgedetection.EdgeDetectionDialog;
-import opencv.filters.edgedetection.EdgeDetectionFilter;
-import opencv.filters.edgedetection.EdgeDetectionManager;
+import opencv.filters.Filter;
+import opencv.filters.FilterArguments;
+import ui.tasks.task.FilterTask;
+import ui.tasks.ProgressDialog;
+import opencv.filters.edgedetection.FilterDialog;
 import session.SessionManager;
 import session.export.ExportCSV;
 import session.export.ExportPreferences;
@@ -77,6 +79,7 @@ import ui.custom.area.AreaGroup;
 import ui.custom.segline.SegLineGroup;
 import ui.model.ScaleRatio;
 import ui.model.UIEditorItem;
+import ui.tasks.task.ImageImporterTask;
 import utils.Constants;
 import utils.Translator;
 import utils.Utility;
@@ -87,7 +90,7 @@ public class MainDialogController
     LayerTabPageController.LineChangeListener, ScaleDialogController.OnActionListener,
     ConvertUnitsDialogController.OnActionListener, UndistortDialog.OnActionListener,
     UndistortProgressDialogController.UndistortCallback, ZoomableScrollPane.ZoomChangeListener,
-    EdgeDetectionDialog.OnActionListener {
+    FilterDialog.OnActionListener {
 
   private Preferences prefs;
 
@@ -241,49 +244,21 @@ public class MainDialogController
   private void addImageFiles(List<File> files) {
     if (files == null || files.size() <= 0) return;
 
-    Task task = new Task<List<ImageItem>>() {
-      @Override protected List<ImageItem> call() throws Exception {
-        ArrayList<ImageItem> items = new ArrayList<>();
-        for (File file : files) {
-          if (file.exists()) {
-            try {
-              ImageItem item = ImageManager.retrieveImage(file.getAbsolutePath());
-              item.preloadThumbnail();
-              items.add(item);
-            } catch (Exception e){
-              e.printStackTrace();
-            }
 
-          }
+    ProgressDialog progressDialog = new ProgressDialog();
+    progressDialog.show(new ImageImporterTask(files, imageItems -> {
+      Platform.runLater(() -> {
+        for (ImageItem item : imageItems) {
+          imageListView.getItems()
+              .add(new UIEditorItem(item));
         }
-        return items;
-      }
-
-      @Override protected void succeeded() {
-        try {
-          List<ImageItem> imageItems = get();
-          for (ImageItem item : imageItems) {
-            imageListView.getItems()
-                .add(new UIEditorItem(item));
-          }
-          exportCSVMenuItem.setDisable(false);
-          System.out.println("ImageListView size:" + imageListView.getItems()
-              .size());
-          System.out.println("Free Memory: " + Runtime.getRuntime()
-              .freeMemory());
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-          //TODO: Catch exception
-
-        } catch (ExecutionException e) {
-          e.printStackTrace();
-          //TODO: Catch exception
-        }
-        super.succeeded();
-      }
-
-    };
-    new Thread(task).start();
+        exportCSVMenuItem.setDisable(false);
+        System.out.println("ImageListView size:" + imageListView.getItems()
+            .size());
+        System.out.println("Free Memory: " + Runtime.getRuntime()
+            .freeMemory());
+      });
+    }), stackPane);
   }
 
   private void addImages(List<EditorItem> items) {
@@ -1119,21 +1094,14 @@ public class MainDialogController
   public void onEdgeDetection(ActionEvent actionEvent) {
     try {
       OpenCVManager.loadOpenCV();
-      EdgeDetectionDialog edgeDetectionDialog = new EdgeDetectionDialog();
-      edgeDetectionDialog.init(editorCursorBtn.getScene()
+      FilterDialog filterDialog = new FilterDialog();
+      filterDialog.init(editorCursorBtn.getScene()
           .getWindow(), this, imageListView.getSelectionModel()
           .getSelectedItem()
-          .getImageItem());
+          .getImageItem(), Translator.getString("edgeDetection"));
     } catch (SecurityException | UnsatisfiedLinkError e) {
       System.err.println("Could not locate dll");
     }
-  }
-
-  @Override public void onApplyEdgeDetection(EdgeDetectionFilter edgeDetectionFilter) {
-    EdgeDetectionManager edgeDetectionManager = new EdgeDetectionManager();
-    ImageItem imageItem = imageListView.getSelectionModel().getSelectedItem().getImageItem();
-    imageItem.setImage(edgeDetectionManager.applyCannyEdgeDetectionSync(imageItem.getImage(), edgeDetectionFilter.getThreshold()));
-    changeCurrentImageItem(imageItem);
   }
 
   private void changeCurrentImageItem(ImageItem imageItem){
@@ -1141,4 +1109,26 @@ public class MainDialogController
     imageEditorStackGroup.setImage(new PixelatedImageView(imageItem.getImage()));
     imageListView.refresh();
   }
+
+  @Override public void onApplyFilter(Filter filter, FilterArguments filterArguments) {
+     ImageItem imageItem = imageListView.getSelectionModel().getSelectedItem().getImageItem();
+     ProgressDialog progressDialog = new ProgressDialog();
+     progressDialog.show(new FilterTask(new FilterTask.ResultListener() {
+       @Override
+       public void onFilterFinished(Filter filter, FilterArguments filterArguments, Image image) {
+         Platform.runLater(() -> {
+           ImageItem imageItem = imageListView.getSelectionModel().getSelectedItem().getImageItem();
+           imageItem.setImage(image);
+           changeCurrentImageItem(imageItem);
+         });
+       }
+
+       @Override
+       public void onFilterFailed(Filter filter, FilterArguments filterArguments, Image image) {
+
+       }
+     }, filter, filterArguments, imageItem.getImage()), stackPane);
+  }
+
+
 }

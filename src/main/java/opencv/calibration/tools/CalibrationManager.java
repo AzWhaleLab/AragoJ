@@ -24,7 +24,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import utils.Translator;
 
-import static opencv.calibration.tools.OpenCVUtils.getImageFromMat;
+import static opencv.utils.OpenCVUtils.getImageFromMat;
 
 public class CalibrationManager {
   private volatile boolean stoppedCalibration;
