@@ -84,13 +84,13 @@ public class ExportCSV {
         } else if (layer instanceof EditorItemArea) {
           EditorItemArea editorItemArea = (EditorItemArea) layer;
           layerNameSB.append(editorItemArea.getName())
-              .append(" (px)");
+              .append(" (px\u00B2)");
           baseName = editorItemArea.getName();
           if (item.hasScaleRatio()) {
             layerUnitNameSB.append(editorItemArea.getName())
                 .append(" (")
                 .append(item.getScaleRatio()
-                    .getUnits())
+                    .getSquaredUnits())
                 .append(")");
           }
         } else if(layer instanceof EditorItemAngle){
@@ -140,7 +140,7 @@ public class ExportCSV {
                   layerUnitNameSB.append(editorItemArea.getName())
                       .append(" (")
                       .append(item2.getScaleRatio()
-                          .getUnits())
+                          .getSquaredUnits())
                       .append(")");
                 }
               }
@@ -210,17 +210,17 @@ public class ExportCSV {
             } else if (layer instanceof EditorItemArea) {
               EditorItemArea editorItemArea = (EditorItemArea) layer;
               AreaGroup areaGroup = new AreaGroup(editorItemArea, null);
-              String areaName = editorItemArea.getName() + " (px)";
+              String areaName = editorItemArea.getName() + " (px\u00B2)";
 
               if (name.equals(areaName)) {
                 valueStringBuilder.append(areaGroup.calculateArea());
               }
               if (item.hasScaleRatio()) {
                 String lineUnitName = areaGroup.getPrimaryText() + " (" + item.getScaleRatio()
-                    .getUnits() + ")";
+                    .getSquaredUnits() + ")";
                 if (name.equals(lineUnitName)) {
                   valueStringBuilder.append(item.getScaleRatio()
-                      .getRoundedScaledValue(areaGroup.calculateArea()));
+                      .getSquaredRoundedScaledValue(areaGroup.calculateArea()));
                 }
               }
             }else if (layer instanceof EditorItemAngle) {

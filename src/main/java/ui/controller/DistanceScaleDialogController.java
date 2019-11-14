@@ -25,6 +25,7 @@ import ui.model.ScaleRatio;
 import utils.Translator;
 
 import java.io.IOException;
+import utils.Utility;
 
 public class DistanceScaleDialogController extends Dialog<Void> {
     private Stage stage;
@@ -73,7 +74,7 @@ public class DistanceScaleDialogController extends Dialog<Void> {
         sensorWidthTextField.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if(!newValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && newValue.length() > 0){
+                if(!newValue.matches(Utility.getNumberAccuracyRegex()) && newValue.length() > 0){
                     sensorWidthTextField.setText(oldValue);
                 }
                 setLengthRatio();
@@ -83,7 +84,7 @@ public class DistanceScaleDialogController extends Dialog<Void> {
         correctionFactorTextField.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if(!newValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && newValue.length() > 0){
+                if(!newValue.matches(Utility.getNumberAccuracyRegex()) && newValue.length() > 0){
                     correctionFactorTextField.setText(oldValue);
                 }
                 setLengthRatio();
@@ -134,7 +135,7 @@ public class DistanceScaleDialogController extends Dialog<Void> {
             public void changed(ObservableValue ov, LabeledComboOption oldV, LabeledComboOption newV) {
                 String val = newV.getValue();
                 String ident = newV.getIdentifier();
-                if(!val.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && val.length() > 0){
+                if(!val.matches(Utility.getNumberAccuracyRegex()) && val.length() > 0){
                     //String e = val.replaceAll("[^\\d]", "");
                     String e = oldV.getValue();
                     comboBox.setValue(new LabeledComboOption(ident,e));
@@ -155,10 +156,10 @@ public class DistanceScaleDialogController extends Dialog<Void> {
             correctionFactorValue = "0";
         }
 
-        if(distanceValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && distanceValue.length() > 0
-                && focalLengthValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && focalLengthValue.length() > 0
-                && sensorWidthValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && sensorWidthValue.length() > 0
-                && correctionFactorValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && correctionFactorValue.length() > 0) {
+        if(distanceValue.matches(Utility.getNumberAccuracyRegex()) && distanceValue.length() > 0
+                && focalLengthValue.matches(Utility.getNumberAccuracyRegex()) && focalLengthValue.length() > 0
+                && sensorWidthValue.matches(Utility.getNumberAccuracyRegex()) && sensorWidthValue.length() > 0
+                && correctionFactorValue.matches(Utility.getNumberAccuracyRegex()) && correctionFactorValue.length() > 0) {
             double distance = Double.parseDouble(distanceValue);
             double focalLength = Double.parseDouble(focalLengthValue);
             double sensorWidth = Double.parseDouble(sensorWidthValue);

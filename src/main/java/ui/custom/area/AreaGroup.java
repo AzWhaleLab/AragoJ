@@ -246,7 +246,7 @@ public class AreaGroup extends Group implements LayerListItem {
 
     @Override
     public String getSecondaryText() {
-        return calculateArea() + " pixels";
+        return calculateArea() + " pixels\u00B2";
     }
 
     @Override public String getStatus() {

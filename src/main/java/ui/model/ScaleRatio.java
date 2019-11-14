@@ -31,6 +31,10 @@ public class ScaleRatio {
         return units;
     }
 
+    public String getSquaredUnits() {
+        return units + "\u00B2";
+    }
+
     public void setUnits(String units) {
         this.units = units;
     }
@@ -39,8 +43,16 @@ public class ScaleRatio {
         return length*ratio;
     }
 
+    public double getSquaredScaledValue(double length){
+        return length*ratio*ratio;
+    }
+
     public double getRoundedScaledValue(double length){
         return Utility.roundTwoDecimals(getScaledValue(length));
+    }
+
+    public double getSquaredRoundedScaledValue(double length){
+        return Utility.roundTwoDecimals(getSquaredScaledValue(length));
     }
 
     public boolean hasScale(){
