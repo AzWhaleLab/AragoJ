@@ -17,6 +17,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
@@ -1018,6 +1019,7 @@ public class MainDialogController
         finalFiles.add(file);
       }
     }
+    Collections.sort(finalFiles);
     addImageFiles(finalFiles);
   }
 

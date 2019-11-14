@@ -19,6 +19,7 @@ import ui.MainApplication;
 import ui.custom.angle.AngleGroup;
 import ui.custom.angle.AngleInteractor;
 import ui.custom.area.AreaGroup;
+import ui.custom.base.LineGroup;
 import ui.custom.base.PointGroup;
 import ui.custom.segline.SegLineGroup;
 import ui.custom.segline.SegLineInteractor;
@@ -130,7 +131,15 @@ public class ImageEditorStackGroup extends Group
             ((AreaGroup) elements.get(elements.size() - 1)).moveLastVertex(e.getX(), e.getY());
         } else if (currentMode == LINE_POINT_SELECT) {
             SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
-            segLineGroup.moveLastVertex(e.getX(), e.getY());
+            if(e.isShiftDown()){
+                LineGroup line = segLineGroup.getSubLine(segLineGroup.getLastPointIndex());
+                double lineAngle = line.getLineAngle();
+                Point2D point = PointUtils.getFinalCorrectedAnglePoint(getBounds(), line.getStartPointX(),
+                    line.getStartPointY(), e.getX(), e.getY(), lineAngle, 0);
+                segLineGroup.moveLastVertex(point.getX(), point.getY());
+            } else {
+                segLineGroup.moveLastVertex(e.getX(), e.getY());
+            }
             status.setValue(segLineGroup.getStatus());
         } else if (currentMode == ANG_POINT_SELECT) {
             SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
@@ -172,7 +181,7 @@ public class ImageEditorStackGroup extends Group
                 segLineGroup.finish();
                 currentMode = Mode.LINE_ANG_SEL;
             } else {
-                segLineGroup.addPoint(e.getX(), e.getY());
+                segLineGroup.addPointInPosition();
             }
             if(segLineGroup.hasMinimumPoints()){
                 reportLayerAdd(segLineGroup, false);
