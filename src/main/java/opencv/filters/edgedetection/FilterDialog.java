@@ -1,7 +1,7 @@
 package opencv.filters.edgedetection;
 
 import com.jfoenix.controls.JFXSpinner;
-import imageprocess.ImageItem;
+import ui.model.ImageItem;
 import java.io.IOException;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -34,7 +34,6 @@ public class FilterDialog implements FilterTask.ResultListener {
   private OnActionListener listener;
   private Stage stage;
 
-  private ImageItem imageItem;
   private PixelatedImageView pixelatedImageView;
   private JFXSpinner loadingSpinner;
 
@@ -42,16 +41,15 @@ public class FilterDialog implements FilterTask.ResultListener {
   private Filter filter;
   private FilterArguments filterArguments;
 
-  public void init(Window owner, OnActionListener listener, ImageItem imageItem, String title){
+  public void init(Window owner, OnActionListener listener, Image image, String title){
     this.listener = listener;
-    this.imageItem = imageItem;
-    filterTask = new FilterTask(this, new SobelEdgeFilter(), null, imageItem.getImage());
+    filterTask = new FilterTask(this, new SobelEdgeFilter(), null, image, "");
     try {
       FXMLLoader loader = new FXMLLoader(getClass().getResource("/fmxl/FilterDialogNoArgs.fxml"), Translator.getBundle());
       loader.setController(this);
       Parent root = loader.load();
-      int width = calculateStageWidth(imageItem);
-      int height = calculateStageHeight(imageItem, width);
+      int width = calculateStageWidth(image);
+      int height = calculateStageHeight(image, width);
       Scene scene = new Scene(root, width, height);
       final ObservableList<String> stylesheets = scene.getStylesheets();
       stylesheets.addAll(getClass().getResource("/css/MainApplication.css").toExternalForm());
@@ -68,13 +66,13 @@ public class FilterDialog implements FilterTask.ResultListener {
     }
   }
 
-  private int calculateStageWidth(ImageItem imageItem){
-    double imageRatio = (double) imageItem.getWidth() / imageItem.getHeight();
+  private int calculateStageWidth(Image imageItem){
+    double imageRatio = imageItem.getWidth() / imageItem.getHeight();
     return (int) Math.max(Math.min(600, HEIGHT_IMAGE*imageRatio), 220);
   }
 
-  private int calculateStageHeight(ImageItem imageItem, int width){
-    double imageRatio = (double) imageItem.getHeight() / imageItem.getWidth();
+  private int calculateStageHeight(Image imageItem, int width){
+    double imageRatio = imageItem.getHeight() / imageItem.getWidth();
     return (int) Math.min(Math.max(imageRatio*width+HEIGHT_NO_IMAGE, HEIGHT_NO_IMAGE), 600);
   }
 
@@ -112,7 +110,7 @@ public class FilterDialog implements FilterTask.ResultListener {
   }
 
   @Override
-  public void onFilterFinished(Filter filter, FilterArguments filterArguments, Image image) {
+  public void onFilterFinished(Filter filter, FilterArguments filterArguments, Image image, String path) {
     this.filter = filter;
     this.filterArguments = filterArguments;
     applyButton.setDisable(false);

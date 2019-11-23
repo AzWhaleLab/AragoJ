@@ -1,5 +1,6 @@
 package ui.tasks.task;
 
+import java.io.File;
 import javafx.animation.PauseTransition;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
@@ -15,15 +16,17 @@ public class FilterTask implements ProgressTask {
   private final Filter filter;
   private final FilterArguments filterArguments;
   private final Image image;
+  private final String path;
 
   private Task<Void> task;
   private PauseTransition pause = new PauseTransition(Duration.millis(400)); // Debounce
 
-  public FilterTask(ResultListener resultListener, Filter filter, FilterArguments filterArguments, Image image){
+  public FilterTask(ResultListener resultListener, Filter filter, FilterArguments filterArguments, Image image, String path){
     this.listener = resultListener;
     this.filter = filter;
     this.filterArguments = filterArguments;
     this.image = image;
+    this.path = path;
   }
 
   @Override public void startTask() {
@@ -35,9 +38,15 @@ public class FilterTask implements ProgressTask {
       task = new Task<Void>() {
         @Override protected Void call() throws Exception {
           try {
-            Image resultImage  = filter.applyFilter(image, filterArguments);
+            String resultPath = "";
+            if(!path.isEmpty()){
+              String name = new File(path).getName();
+              resultPath = "./tmp/" + name + "_tmp.bmp";
+            }
+
+            Image resultImage  = filter.applyFilter(image, filterArguments, resultPath);
             if(!isCancelled()){
-              listener.onFilterFinished(filter, filterArguments, resultImage);
+              listener.onFilterFinished(filter, filterArguments, resultImage, resultPath);
               if(progressTaskListener != null) progressTaskListener.onTaskFinished();
             }
           } catch (FilterArguments.NoArgumentFound e) {
@@ -74,7 +83,7 @@ public class FilterTask implements ProgressTask {
   }
 
   public interface ResultListener{
-    void onFilterFinished(Filter filter, FilterArguments filterArguments, Image image);
+    void onFilterFinished(Filter filter, FilterArguments filterArguments, Image image, String resultPath);
     void onFilterFailed(Filter filter, FilterArguments filterArguments, Image image);
   }
 }

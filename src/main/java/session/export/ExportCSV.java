@@ -1,9 +1,7 @@
 package session.export;
 
-import com.drew.imaging.ImageProcessingException;
 import equation.Equation;
 import equation.model.EquationItem;
-import imageprocess.ImageItem;
 import imageprocess.ImageManager;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,11 +19,14 @@ import session.model.Session;
 import ui.custom.angle.AngleGroup;
 import ui.custom.area.AreaGroup;
 import ui.custom.segline.SegLineGroup;
+import ui.model.ImageItem;
 import ui.model.TagRow;
+import ui.model.UIEditorItem;
 
 public class ExportCSV {
 
-  public static void export(File file, Session session) {
+  public static void export(File file, Session session, List<UIEditorItem> uiEditorItems) {
+    ImageManager imageManager = new ImageManager();
     ArrayList<String> metadataNameList = new ArrayList<>();
     metadataNameList.add("Source");
     ArrayList<String> layerNameList = new ArrayList<>();
@@ -35,8 +36,8 @@ public class ExportCSV {
 
     for (EditorItem item : session.getItems()) {
       // Retrieve metadata
-      try {
-        ImageItem imageItem = ImageManager.retrieveImage(item.getSourceImagePath());
+      ImageItem imageItem = findImageItem(uiEditorItems, item.getSourceImagePath());
+      if (imageItem != null) {
         List<TagRow> metadataList = imageItem.getMetadata();
         metadataMap.put(item.getSourceImagePath(), metadataList);
         for (TagRow tag : metadataList) {
@@ -56,8 +57,6 @@ public class ExportCSV {
             }
           }
         }
-      } catch (IOException | ImageProcessingException e) {
-        //TODO: Handle exception
       }
 
       // Retrieve layers
@@ -93,7 +92,7 @@ public class ExportCSV {
                     .getSquaredUnits())
                 .append(")");
           }
-        } else if(layer instanceof EditorItemAngle){
+        } else if (layer instanceof EditorItemAngle) {
           EditorItemAngle editorItemAngle = (EditorItemAngle) layer;
           layerNameSB.append(editorItemAngle.getName())
               .append(" (\u00B0)");
@@ -156,6 +155,16 @@ public class ExportCSV {
       }
     }
     writeMapsToFile(file, session.getItems(), metadataMap, metadataNameList, layerNameList);
+  }
+
+  private static ImageItem findImageItem(List<UIEditorItem> uiEditorItems, String sourceImagePath) {
+    return uiEditorItems.stream()
+        .filter(uiEditorItem -> uiEditorItem.getImageItem()
+            .getOriginalPath()
+            .equals(sourceImagePath))
+        .map(UIEditorItem::getImageItem)
+        .findFirst()
+        .orElse(null);
   }
 
   private static void writeMapsToFile(File file, ArrayList<EditorItem> items,
@@ -223,7 +232,7 @@ public class ExportCSV {
                       .getSquaredRoundedScaledValue(areaGroup.calculateArea()));
                 }
               }
-            }else if (layer instanceof EditorItemAngle) {
+            } else if (layer instanceof EditorItemAngle) {
               EditorItemAngle editorItemAngle = (EditorItemAngle) layer;
               AngleGroup angleGroup = new AngleGroup(editorItemAngle, null, null);
               String angleName = angleGroup.getName() + " (\u00B0)";

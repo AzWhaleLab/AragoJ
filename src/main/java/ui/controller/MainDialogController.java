@@ -1,5 +1,6 @@
 package ui.controller;
 
+import com.aragoj.plugins.imagereader.ImageReaderPlugin;
 import com.drew.imaging.ImageProcessingException;
 import com.jfoenix.controls.JFXAlert;
 import com.jfoenix.controls.JFXButton;
@@ -8,7 +9,6 @@ import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXTextField;
 import equation.model.EquationItem;
-import imageprocess.ImageItem;
 import imageprocess.ImageManager;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,12 +18,15 @@ import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -34,6 +37,7 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.image.Image;
@@ -58,9 +62,8 @@ import opencv.calibration.ui.UndistortDialog;
 import opencv.calibration.ui.UndistortProgressDialogController;
 import opencv.filters.Filter;
 import opencv.filters.FilterArguments;
-import ui.tasks.task.FilterTask;
-import ui.tasks.ProgressDialog;
 import opencv.filters.edgedetection.FilterDialog;
+import plugins.PluginLoader;
 import session.SessionManager;
 import session.export.ExportCSV;
 import session.export.ExportPreferences;
@@ -78,9 +81,13 @@ import ui.custom.ZoomableScrollPane;
 import ui.custom.angle.AngleGroup;
 import ui.custom.area.AreaGroup;
 import ui.custom.segline.SegLineGroup;
+import ui.model.ImageItem;
 import ui.model.ScaleRatio;
 import ui.model.UIEditorItem;
+import ui.tasks.ProgressDialog;
+import ui.tasks.task.FilterTask;
 import ui.tasks.task.ImageImporterTask;
+import ui.tasks.task.LoadImageTask;
 import utils.Constants;
 import utils.Translator;
 import utils.Utility;
@@ -99,6 +106,9 @@ public class MainDialogController
   // View items
   @FXML private CheckMenuItem precisionLinesCheckItem;
   @FXML private CheckMenuItem identifierLinesCheckItem;
+
+  @FXML public MenuBar menuBar;
+  private Menu pluginImportImagesMenuItem;
 
   @FXML public Menu filtersMenu;
   @FXML private MenuItem convertUnitsMenuItem;
@@ -127,10 +137,12 @@ public class MainDialogController
   private ImageEditorStackGroup imageEditorStackGroup;
   private ZoomableScrollPane imageEditorScrollPane;
 
+  private ImageManager imageManager = new ImageManager();
+
   @FXML private StackPane stackPane;
 
   @FXML public HBox imageEditorToolsSecondaryPane;
-  @FXML public AnchorPane imageEditorAnchorPane;
+  @FXML public StackPane imageEditorStackPane;
   @FXML public Label ieDegreeLabel;
   @FXML public JFXColorPicker ieColorPicker;
   @FXML public JFXTextField ieDegreePicker;
@@ -149,6 +161,7 @@ public class MainDialogController
   }
 
   @FXML private void initialize() {
+    imageManager.clearTmpFolder();
     prefs = Preferences.userNodeForPackage(MainApplication.class);
     ExportPreferences.importExportPreferences();
 
@@ -180,6 +193,51 @@ public class MainDialogController
                 });
           }
         });
+    importPlugins();
+  }
+
+  private void importPlugins() {
+    try {
+      HashMap<Integer, ImageReaderPlugin> imageImportPlugins = imageManager.loadImageImportPlugins();
+      if(!imageImportPlugins.isEmpty()){
+        Menu menuParent = new Menu(Translator.getString("plugins"));
+        Menu menu = new Menu(Translator.getString("pluginImportImages"));
+        for(Map.Entry<Integer, ImageReaderPlugin> set : imageImportPlugins.entrySet()){
+          MenuItem menuItem = new MenuItem(set.getValue().getPluginName());
+          menuItem.setUserData(set.getKey());
+          menuItem.setOnAction(event -> {
+            try {
+              showImportImagesDialog((Integer) menuItem.getUserData());
+            } catch (PluginLoader.PluginNotFoundException e) {
+              showPluginErrorDialog(e.getMessage());
+            }
+          });
+          menu.getItems().add(menuItem);
+        }
+        menuParent.getItems().add(menu);
+        menu.setDisable(sessionManager.getSession() == null);
+        pluginImportImagesMenuItem = menu;
+        menuBar.getMenus().add(menuParent);
+      }
+    } catch (PluginLoader.CouldNotLoadPluginException e) {
+      showPluginErrorDialog(e.getMessage());
+    }
+  }
+
+  private void showPluginErrorDialog(String message) {
+    JFXAlert alert = new JFXAlert((Stage) zoomButton.getScene()
+        .getWindow());
+    alert.initModality(Modality.APPLICATION_MODAL);
+    alert.setOverlayClose(false);
+    JFXDialogLayout layout = new JFXDialogLayout();
+    layout.setHeading(new Label(message));
+    JFXButton okButton = new JFXButton("OK");
+    okButton.getStyleClass()
+        .add("dialog-accept");
+    okButton.setOnAction(event -> alert.hideWithAnimation());
+    layout.setActions(okButton);
+    alert.setContent(layout);
+    alert.show();
   }
 
   /**
@@ -198,31 +256,7 @@ public class MainDialogController
         .selectedItemProperty()
         .addListener((observable, oldValue, newValue) -> {
           if (newValue != null) {
-            ImageItem imageItem = newValue.getImageItem();
-            EditorItem editorItem = newValue.getEditorItem();
-            metaTabPageController.addRootTreeItem(imageItem.getMetadata());
-            imageEditorStackGroup.clearList();
-            imageEditorStackGroup.setImage(new PixelatedImageView(imageItem.getImage()));
-            layerTabPageController.clearList();
-            imageEditorStackGroup.setCurrentScale(editorItem.getScaleRatio());
-            imageEditorScrollPane.loadEditorItem(editorItem, imageEditorStackGroup,
-                layerTabPageController);
-            if (editorItem.hasScaleRatio()) {
-              convertUnitsMenuItem.setDisable(false);
-            } else {
-              convertUnitsMenuItem.setDisable(true);
-            }
-            layerTabPageController.setListener(MainDialogController.this);
-            layerTabPageController.setCurrentScale(imageEditorStackGroup.getCurrentScale());
-            imageEditorStackGroup.setBounds(
-                imageEditorStackGroup.parentToLocal(imageEditorStackGroup.getBoundsInParent()));
-            setEditorEnable(true);
-
-            if (oldValue == null && !editorItem.getLayers()
-                .isEmpty()) {
-              miscTabPane.getSelectionModel()
-                  .select(0);
-            }
+            switchImage(newValue, oldValue);
           }
         });
 
@@ -242,24 +276,59 @@ public class MainDialogController
     });
   }
 
-  private void addImageFiles(List<File> files) {
+  private void switchImage(UIEditorItem newValue, UIEditorItem oldValue) {
+    ImageItem imageItem = newValue.getImageItem();
+    EditorItem editorItem = newValue.getEditorItem();
+    ProgressDialog progressDialog = new ProgressDialog();
+    progressDialog.show(
+        new LoadImageTask(imageItem.getOpenerSourceId(), imageItem.getActivePath(), image -> {
+          Platform.runLater(() -> {
+            metaTabPageController.addRootTreeItem(imageItem.getMetadata());
+            imageEditorStackGroup.clearList();
+            layerTabPageController.clearList();
+            imageEditorStackGroup.setImage(new PixelatedImageView(image));
+
+            imageEditorStackGroup.setCurrentScale(editorItem.getScaleRatio());
+            imageEditorScrollPane.loadEditorItem(editorItem, imageEditorStackGroup,
+                layerTabPageController);
+            if (editorItem.hasScaleRatio()) {
+              convertUnitsMenuItem.setDisable(false);
+            } else {
+              convertUnitsMenuItem.setDisable(true);
+            }
+            layerTabPageController.setListener(MainDialogController.this);
+            layerTabPageController.setCurrentScale(imageEditorStackGroup.getCurrentScale());
+            imageEditorStackGroup.setBounds(
+                imageEditorStackGroup.parentToLocal(imageEditorStackGroup.getBoundsInParent()));
+            setEditorEnable(true);
+
+            if (oldValue == null && !editorItem.getLayers()
+                .isEmpty()) {
+              miscTabPane.getSelectionModel()
+                  .select(0);
+            }
+          });
+        }, imageManager), false, true, imageEditorStackPane);
+  }
+
+  private void addImageFiles(int pluginId, List<File> files) {
     if (files == null || files.size() <= 0) return;
 
-
     ProgressDialog progressDialog = new ProgressDialog();
-    progressDialog.show(new ImageImporterTask(files, imageItems -> {
+    progressDialog.show(new ImageImporterTask(imageManager, files, pluginId, imageItems -> {
       Platform.runLater(() -> {
         for (ImageItem item : imageItems) {
           imageListView.getItems()
               .add(new UIEditorItem(item));
         }
+        sessionManager.syncSession(new ArrayList<>(imageListView.getItems()));
         exportCSVMenuItem.setDisable(false);
         System.out.println("ImageListView size:" + imageListView.getItems()
             .size());
         System.out.println("Free Memory: " + Runtime.getRuntime()
             .freeMemory());
       });
-    }), stackPane);
+    }), true, false, stackPane);
   }
 
   private void addImages(List<EditorItem> items) {
@@ -269,8 +338,7 @@ public class MainDialogController
         for (EditorItem item : items) {
           File file = new File(item.getSourceImagePath());
           if (file.exists()) {
-            ImageItem imageItem = ImageManager.retrieveImage(file.getAbsolutePath());
-            imageItem.preloadThumbnail();
+            ImageItem imageItem = new ImageItem(imageManager.retrieveImage(item.getOpenedWith(), file.getAbsolutePath()));
             uiEditorItems.add(new UIEditorItem(item, imageItem));
           }
         }
@@ -292,7 +360,6 @@ public class MainDialogController
         } catch (InterruptedException e) {
           //e.printStackTrace();
           //TODO: Catch exception
-
         } catch (ExecutionException e) {
           //e.printStackTrace();
           //TODO: Catch exception
@@ -324,7 +391,7 @@ public class MainDialogController
     AnchorPane.setTopAnchor(imageEditorScrollPane, 0.0);
     AnchorPane.setLeftAnchor(imageEditorScrollPane, 0.0);
     AnchorPane.setRightAnchor(imageEditorScrollPane, 0.0);
-    imageEditorAnchorPane.getChildren()
+    imageEditorStackPane.getChildren()
         .setAll(imageEditorScrollPane);
   }
 
@@ -506,6 +573,7 @@ public class MainDialogController
       saveSessionAsMenuItem.setDisable(false);
       saveSessionMenuItem.setDisable(false);
       importImagesMenuItem.setDisable(false);
+     if(pluginImportImagesMenuItem != null) pluginImportImagesMenuItem.setDisable(false);
       if (imageListView.getItems()
           .size() > 0) {
         undistortMenuItem.setDisable(false);
@@ -815,12 +883,14 @@ public class MainDialogController
     cancelButton.setOnAction(event -> alert.hideWithAnimation());
     dontSaveButton.setOnAction(event -> {
       alert.hideWithAnimation();
+      imageManager.clearTmpFolder();
       Platform.exit();
     });
     saveButton.setOnAction(event -> {
       boolean saved = saveCurrentSession();
       alert.hideWithAnimation();
       if (saved) {
+        imageManager.clearTmpFolder();
         Platform.exit();
       }
     });
@@ -945,6 +1015,14 @@ public class MainDialogController
   }
 
   @FXML private void onImportImages() {
+    try {
+      showImportImagesDialog(-1);
+    } catch (PluginLoader.PluginNotFoundException e) {
+      // Not really possible
+    }
+  }
+
+  private void showImportImagesDialog(int pluginId) throws PluginLoader.PluginNotFoundException {
     if (sessionManager.getSession() == null) return;
     FileChooser ch = new FileChooser();
     String path = prefs.get(Constants.STTGS_FILECHOOSER_LASTOPENED, "");
@@ -954,18 +1032,14 @@ public class MainDialogController
         ch.setInitialDirectory(new File(path));
       }
     }
-    ch.getExtensionFilters()
-        .add(new FileChooser.ExtensionFilter(Translator.getString("allimagefilechooser"), "*.jpeg",
-            "*.jpg", "*.bmp", "*.png", "*.gif"));
-    ch.getExtensionFilters()
-        .add(new FileChooser.ExtensionFilter(Translator.getString("jpegimagefilechooser"), "*.jpeg",
-            "*.jpg"));
-    ch.getExtensionFilters()
-        .add(new FileChooser.ExtensionFilter(Translator.getString("bmpimagefilechooser"), "*.bmp"));
-    ch.getExtensionFilters()
-        .add(new FileChooser.ExtensionFilter(Translator.getString("pngimagefilechooser"), "*.png"));
-    ch.getExtensionFilters()
-        .add(new FileChooser.ExtensionFilter(Translator.getString("gifimagefilechooser"), "*.gif"));
+    if(pluginId == -1){
+      ch.getExtensionFilters()
+          .addAll(imageManager.getDefaultExtensionFilters());
+    } else {
+      ch.getExtensionFilters()
+          .addAll(imageManager.getPluginExtensionFilters(pluginId));
+    }
+
     ch.setTitle(Translator.getString("chooseimages"));
 
     List<File> files = ch.showOpenMultipleDialog(imageListView.getScene()
@@ -973,7 +1047,7 @@ public class MainDialogController
     if (files != null && files.size() > 0) {
       prefs.put(Constants.STTGS_FILECHOOSER_LASTOPENED, files.get(0)
           .getParent());
-      addImageFiles(files);
+      addImageFiles(pluginId, files);
     }
   }
 
@@ -996,7 +1070,7 @@ public class MainDialogController
     if (file != null) {
       prefs.put(Constants.STTGS_FILECHOOSER_EXPORTCSV_LASTOPENED, file.getParent());
       sessionManager.syncSession(new ArrayList<>(imageListView.getItems()));
-      ExportCSV.export(file, sessionManager.getSession());
+      ExportCSV.export(file, sessionManager.getSession(), imageListView.getItems());
     }
   }
 
@@ -1020,7 +1094,7 @@ public class MainDialogController
       }
     }
     Collections.sort(finalFiles);
-    addImageFiles(finalFiles);
+    addImageFiles(-1, finalFiles);
   }
 
   public void onImageListDragOver(DragEvent dragEvent) {
@@ -1076,21 +1150,34 @@ public class MainDialogController
 
   @Override public void onImageItemUndistorted(int index, String newPath, boolean select) {
     try {
+      UIEditorItem uiEditorItem = imageListView.getItems().get(index);
       imageListView.getItems()
           .get(index)
-          .setImageItem(ImageManager.retrieveImage(newPath));
+          .setImageItem(new ImageItem(imageManager.retrieveImage(uiEditorItem.getImageItem().getOpenerSourceId(), newPath)));
       if (select) {
         imageListView.getSelectionModel()
             .select(index);
       }
-    } catch (ImageProcessingException | IOException e) {
+    } catch (IOException | ImageManager.ImageProcessingException | ImageReaderPlugin.FormatNotSupported e) {
       // Do nothing
     }
   }
 
   public void onClearFilters(ActionEvent actionEvent) throws ImageProcessingException, IOException {
-    ImageItem imageItem = imageListView.getSelectionModel().getSelectedItem().getImageItem();
-    changeCurrentImageItem(ImageManager.retrieveImage(imageItem.getPath()));
+    try {
+      ImageItem imageItem = imageListView.getSelectionModel()
+          .getSelectedItem()
+          .getImageItem();
+      imageItem.setActivePath(imageItem.getOriginalPath());
+      Image thumbnail = imageManager.loadThumbnail(imageItem.getOpenerSourceId(), imageItem.getActivePath());
+      if (thumbnail != null) {
+        imageItem.setThumbnail(thumbnail);
+      }
+      changeCurrentImageItem(imageItem,
+          imageManager.loadImage(imageItem.getOpenerSourceId(), imageItem.getActivePath()));
+    } catch (ImageManager.ImageProcessingException | ImageReaderPlugin.FormatNotSupported e) {
+      e.printStackTrace();
+    }
   }
 
   public void onEdgeDetection(ActionEvent actionEvent) {
@@ -1098,39 +1185,47 @@ public class MainDialogController
       OpenCVManager.loadOpenCV();
       FilterDialog filterDialog = new FilterDialog();
       filterDialog.init(editorCursorBtn.getScene()
-          .getWindow(), this, imageListView.getSelectionModel()
-          .getSelectedItem()
-          .getImageItem(), Translator.getString("edgeDetection"));
+          .getWindow(), this, imageManager.getCachedImage(), Translator.getString("edgeDetection"));
     } catch (SecurityException | UnsatisfiedLinkError e) {
       System.err.println("Could not locate dll");
     }
   }
 
-  private void changeCurrentImageItem(ImageItem imageItem){
-    imageListView.getSelectionModel().getSelectedItem().setImageItem(imageItem);
-    imageEditorStackGroup.setImage(new PixelatedImageView(imageItem.getImage()));
+  private void changeCurrentImageItem(ImageItem imageItem, Image image) {
+    imageListView.getSelectionModel()
+        .getSelectedItem()
+        .setImageItem(imageItem);
+    imageEditorStackGroup.setImage(new PixelatedImageView(image));
     imageListView.refresh();
   }
 
   @Override public void onApplyFilter(Filter filter, FilterArguments filterArguments) {
-     ImageItem imageItem = imageListView.getSelectionModel().getSelectedItem().getImageItem();
-     ProgressDialog progressDialog = new ProgressDialog();
-     progressDialog.show(new FilterTask(new FilterTask.ResultListener() {
-       @Override
-       public void onFilterFinished(Filter filter, FilterArguments filterArguments, Image image) {
-         Platform.runLater(() -> {
-           ImageItem imageItem = imageListView.getSelectionModel().getSelectedItem().getImageItem();
-           imageItem.setImage(image);
-           changeCurrentImageItem(imageItem);
-         });
-       }
+    ImageItem imageItem = imageListView.getSelectionModel()
+        .getSelectedItem()
+        .getImageItem();
+    ProgressDialog progressDialog = new ProgressDialog();
+    progressDialog.show(new FilterTask(new FilterTask.ResultListener() {
+          @Override
+          public void onFilterFinished(Filter filter, FilterArguments filterArguments, Image image,
+              String path) {
+            Platform.runLater(() -> {
+              ImageItem imageItem = imageListView.getSelectionModel()
+                  .getSelectedItem()
+                  .getImageItem();
+              imageItem.setActivePath(path);
+              Image thumbnail = imageManager.loadThumbnail(imageItem.getOpenerSourceId(), imageItem.getActivePath());
+              if (thumbnail != null) {
+                imageItem.setThumbnail(thumbnail);
+              }
+              changeCurrentImageItem(imageItem, image);
+            });
+          }
 
-       @Override
-       public void onFilterFailed(Filter filter, FilterArguments filterArguments, Image image) {
+          @Override
+          public void onFilterFailed(Filter filter, FilterArguments filterArguments, Image image) {
 
-       }
-     }, filter, filterArguments, imageItem.getImage()), stackPane);
+          }
+        }, filter, filterArguments, imageManager.getCachedImage(), imageItem.getOriginalPath()), true,
+        false, stackPane);
   }
-
-
 }

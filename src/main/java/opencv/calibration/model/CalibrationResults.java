@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.rmi.CORBA.Util;
+import utils.Utility;
 
 public class CalibrationResults {
     private Duration elapsedTime;
@@ -82,7 +84,7 @@ public class CalibrationResults {
         String cameraModel = getCameraModelsString();
         String foundPattern = getFoundPatternString();
         double[] intrinsicVals = calibrationModel.getIntrinsicValues();
-//        String fyfx = "Focal Length (Fx/Fy): " + intrinsicVals[0] + "/" + intrinsicVals[4] + "\n";
+        String fxfy = "Fx:" + Utility.roundTwoDecimals(intrinsicVals[0]) + "\nFy:" +  Utility.roundTwoDecimals(intrinsicVals[4]) + "\n";
         String reprojectionError = "Overall Reprojection Error (RMS): "
                 + String.valueOf(BigDecimal.valueOf(overallReprojectionError).setScale(3, BigDecimal.ROUND_HALF_UP));
         switch(outputDetail){
@@ -94,7 +96,7 @@ public class CalibrationResults {
                 break;
         }
         ;
-        return title+elapsedTime+cameraModel+foundPattern+reprojectionError;
+        return title+elapsedTime+cameraModel+foundPattern+fxfy+reprojectionError;
 
     }
 

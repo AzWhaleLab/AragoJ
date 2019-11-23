@@ -1,6 +1,6 @@
 package ui.tasks.task;
 
-import imageprocess.ImageItem;
+import ui.model.ImageItem;
 import imageprocess.ImageManager;
 import java.io.File;
 import java.util.ArrayList;
@@ -13,13 +13,17 @@ public class ImageImporterTask implements ProgressTask {
 
   private Task task;
 
+  private int pluginId = -1;
   private final List<File> files;
   private final ResultListener resultListener;
   private ProgressTaskListener progressListener;
+  private ImageManager imageManager;
 
-  public ImageImporterTask(List<File> files, ResultListener resultListener){
+  public ImageImporterTask(ImageManager imageManager, List<File> files, int pluginId, ResultListener resultListener){
+    this.imageManager = imageManager;
     this.files = files;
     this.resultListener = resultListener;
+    this.pluginId = pluginId;
   }
 
   @Override public void startTask() {
@@ -33,8 +37,7 @@ public class ImageImporterTask implements ProgressTask {
           File file = files.get(i);
           if (file.exists()) {
             try {
-              ImageItem item = ImageManager.retrieveImage(file.getAbsolutePath());
-              item.preloadThumbnail();
+              ImageItem item = new ImageItem(imageManager.retrieveImage(pluginId, file.getAbsolutePath()));
               items.add(item);
             } catch (Exception e){
               e.printStackTrace();
@@ -51,6 +54,7 @@ public class ImageImporterTask implements ProgressTask {
         if(getException() instanceof OutOfMemoryError){
           error = "Out of memory";
         }
+        getException().printStackTrace();
         if(progressListener != null) progressListener.onTaskFailed(error);
       }
     };

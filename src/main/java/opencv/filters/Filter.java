@@ -4,5 +4,5 @@ import javafx.scene.image.Image;
 
 public interface Filter {
 
-  Image applyFilter(Image image, FilterArguments arguments) throws FilterArguments.NoArgumentFound;
+  Image applyFilter(Image image, FilterArguments arguments, String path) throws FilterArguments.NoArgumentFound;
 }

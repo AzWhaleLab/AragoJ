@@ -5,8 +5,8 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXTextField;
-import imageprocess.ImageItem;
-import imageprocess.ImageManager;
+import opencv.calibration.CalibrationImageManager;
+import opencv.calibration.model.CalibImageItem;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class CalibrationDialogController implements ImageEditorStackGroup.ModeLi
 
   private CalibrationSession session;
 
-  @FXML public JFXListView<ImageItem> imageListView;
+  @FXML public JFXListView<CalibImageItem> imageListView;
   @FXML public AnchorPane imageEditorAnchorPane;
   @FXML public StackPane stackPane;
 
@@ -255,15 +255,14 @@ public class CalibrationDialogController implements ImageEditorStackGroup.ModeLi
 
   private void loadEditorItem(int index) {
     CalibrationImageItem item = session.getItem(index);
-    imageEditorStackGroup.clearList();
     imageEditorScrollPane.loadCalibrationItem(item);
     currentItem = index;
   }
 
   private void addImage(File file) {
-    Task task = new Task<ImageItem>() {
-      @Override protected ImageItem call() throws Exception {
-        ImageItem item = ImageManager.retrieveImage(file.getAbsolutePath());
+    Task task = new Task<CalibImageItem>() {
+      @Override protected CalibImageItem call() throws Exception {
+        CalibImageItem item = CalibrationImageManager.retrieveImage(file.getAbsolutePath());
         item.preloadThumbnail();
         return item;
       }
@@ -526,12 +525,12 @@ public class CalibrationDialogController implements ImageEditorStackGroup.ModeLi
   @Override public void onCalibrationResult(CalibrationResults results) {
     this.calibrationResults = results;
     List<CalibrationImage> imageResults = results.getImagesResults();
-    ObservableList<ImageItem> imageItems = imageListView.getItems();
+    ObservableList<CalibImageItem> imageItems = imageListView.getItems();
     int selectedIndex = imageListView.getSelectionModel()
         .getSelectedIndex();
     for (int i = 0; i < imageResults.size(); i++) {
-      ImageItem listImageItem = imageItems.get(i);
-      ImageItem imageItem = null;
+      CalibImageItem listImageItem = imageItems.get(i);
+      CalibImageItem imageItem = null;
       try {
         Image imageResultItem = imageResults.get(i)
             .getImage();
@@ -539,7 +538,7 @@ public class CalibrationDialogController implements ImageEditorStackGroup.ModeLi
             .isFound();
         String color = "#C41E3A";
         if (found) color = "#00A550";
-        imageItem = new ImageItem(listImageItem.getName(), listImageItem.getPath(), imageResultItem,
+        imageItem = new CalibImageItem(listImageItem.getName(), listImageItem.getPath(), imageResultItem,
             listImageItem.getImageIcon(50), 50, color);
         CalibrationImageItem item = new CalibrationImageItem(imageEditorScrollPane);
         item.setSourceImagePath(imageItem.getPath());

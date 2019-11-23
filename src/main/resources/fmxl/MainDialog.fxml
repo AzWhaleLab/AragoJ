@@ -27,7 +27,7 @@
         <children>
             <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <top>
-                    <MenuBar style="-fx-background-color: #FFFFFF;">
+                    <MenuBar fx:id="menuBar" style="-fx-background-color: #FFFFFF;">
                         <menus>
                             <Menu text="%file">
                                 <items>
@@ -165,7 +165,7 @@
                                                         </children>
                                                     </HBox>
                                                 </children></AnchorPane>
-                                            <AnchorPane fx:id="imageEditorAnchorPane" VBox.vgrow="ALWAYS" />
+                                            <StackPane fx:id="imageEditorStackPane" VBox.vgrow="ALWAYS" />
                                             <HBox  minHeight="24.0" prefWidth="200.0" alignment="CENTER_LEFT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                                                 <children>
                                                     <Label fx:id="statusLabel" >

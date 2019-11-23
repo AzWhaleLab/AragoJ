@@ -1,6 +1,7 @@
 package opencv.calibration.tools;
 
-import imageprocess.ImageItem;
+import opencv.calibration.model.CalibImageItem;
+import ui.model.ImageItem;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class CalibrationManager {
     this.listener = listener;
   }
 
-  public void runCalibration(List<ImageItem> imageItems, CalibrationConfig config) {
+  public void runCalibration(List<CalibImageItem> imageItems, CalibrationConfig config) {
     stoppedCalibration = false;
 
     new Thread(() -> {
@@ -48,7 +49,7 @@ public class CalibrationManager {
 
       Instant start = Instant.now();
       for (int i = 0; i < imageCount && !stoppedCalibration; i++) {
-        ImageItem imageItem = imageItems.get(i);
+        CalibImageItem imageItem = imageItems.get(i);
         // Extract camera
         String cameraModel = imageItem.getCameraModel();
         if (!cameraModel.isEmpty() && !extractedCameras.contains(cameraModel)) {

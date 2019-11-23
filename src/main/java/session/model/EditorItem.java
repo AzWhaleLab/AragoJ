@@ -26,11 +26,13 @@ public class EditorItem {
 
     private ScaleRatio scaleRatio;
     private String sourceImagePath;
+    private Integer openedWith;
 
     public EditorItem(){
         this.layers = new ArrayList<>();
         this.scaleRatio = new ScaleRatio();
         this.zoom = new EditorItemZoom();
+        this.openedWith = -1;
     }
 
     public EditorItem(ZoomableScrollPane scrollPane, List<LayerListItem> layers){
@@ -100,5 +102,14 @@ public class EditorItem {
             }
         }
         return editorList;
+    }
+
+    @XmlElement
+    public Integer getOpenedWith() {
+        return openedWith;
+    }
+
+    public void setOpenedWith(Integer openedWith) {
+        this.openedWith = openedWith;
     }
 }

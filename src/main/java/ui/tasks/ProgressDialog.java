@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import utils.Translator;
@@ -22,7 +23,7 @@ public class ProgressDialog implements ProgressTaskListener {
   private JFXDialog dialog;
   private ProgressTask task;
 
-  public void show(ProgressTask task, StackPane stackPane) {
+  public void show(ProgressTask task, boolean cancellable, boolean transparent, StackPane stackPane) {
     FXMLLoader loader =
         new FXMLLoader(getClass().getResource("/fmxl/ProgressDialog.fxml"), Translator.getBundle());
     loader.setController(this);
@@ -32,7 +33,14 @@ public class ProgressDialog implements ProgressTaskListener {
       e.printStackTrace();
       return;
     }
+    if(!cancellable){
+      cancelButton.setVisible(false);
+    }
     dialog = new JFXDialog(stackPane, container, JFXDialog.DialogTransition.CENTER);
+    if(transparent){
+      container.setBackground(Background.EMPTY);
+      ((StackPane) container.getParent()).setBackground(Background.EMPTY);
+    }
     dialog.setOverlayClose(false);
     dialog.show();
     this.task = task;

@@ -2,7 +2,7 @@ package opencv.calibration.ui;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
-import imageprocess.ImageItem;
+import ui.model.ImageItem;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

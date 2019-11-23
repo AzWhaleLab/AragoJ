@@ -1,7 +1,7 @@
 package opencv.calibration.tools.undistort;
 
-import imageprocess.ImageItem;
-import imageprocess.ImageManager;
+import ui.model.ImageItem;
+import imageprocess.MetadataUtils;
 import opencv.calibration.model.CalibrationModel;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
@@ -43,7 +43,7 @@ public class UndistortManager {
 
     private String undistortImage(CalibrationModel model, ImageItem imageItem){
         // I/O
-        String path = imageItem.getPath();
+        String path = imageItem.getActivePath();
         File srcFile = new File(path);
         String ext = path.substring(path.lastIndexOf("."));
         String savePath = path.substring(0, path.lastIndexOf(".")) + "_u" + ext;
@@ -71,7 +71,7 @@ public class UndistortManager {
                 Calib3d.undistortImage(frame, undistortedMatF, model.getIntrinsic(), model.getDistortionCoeffs(), newCameraMtxF, size);
 
                 Imgcodecs.imwrite(tmpFile.getPath(), undistortedMatF);
-                ImageManager.copyMetadata(srcFile, getTmpDir(srcFile.getName()), new File(savePath));
+                MetadataUtils.copyMetadata(srcFile, getTmpDir(srcFile.getName()), new File(savePath));
                 break;
         }
 

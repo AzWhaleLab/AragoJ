@@ -3,7 +3,7 @@ package ui.controller;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
-import imageprocess.ImageItem;
+import ui.model.ImageItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -91,11 +91,12 @@ public class DistanceScaleDialogController extends Dialog<Void> {
             }
         });
 
-        LabeledComboOption focalLengthOption = imageItem.getFocalLengthSuggestion();
-        if(focalLengthOption != null){
-            focalLengthComboBox.getItems().addAll(imageItem.getFocalLengthSuggestion());
-        }
-        distanceComboBox.getItems().addAll(imageItem.getTargetDistanceSuggestions());
+        // TODO: FAST
+        //LabeledComboOption focalLengthOption = imageItem.getFocalLengthSuggestion();
+        //if(focalLengthOption != null){
+        //    focalLengthComboBox.getItems().addAll(imageItem.getFocalLengthSuggestion());
+        //}
+        //distanceComboBox.getItems().addAll(imageItem.getTargetDistanceSuggestions());
     }
 
     private void setUpLabeledComboBox(JFXComboBox<LabeledComboOption> comboBox){

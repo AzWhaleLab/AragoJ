@@ -9,7 +9,7 @@ import org.opencv.imgproc.Imgproc;
 
 public class CannyEdgeFilter implements Filter {
 
-  @Override public Image applyFilter(Image image, FilterArguments arguments)
+  @Override public Image applyFilter(Image image, FilterArguments arguments, String path)
       throws FilterArguments.NoArgumentFound {
     int threshold = arguments.getInt("threshold");
     try{
