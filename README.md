@@ -13,7 +13,7 @@ Any info about the app, including description and usage can be found on the **[A
 A printable pdf version is also available **[here](https://github.com/franciscoaleixo/AragoJ/blob/master/wiki/AragoJ_0_4.pdf)**
 
 ## Contributions & status
-Any contribution is more than welcome, however note that for code condtributions the application is currently being majorly rewritten to match current programming paradigms, see [#39](https://github.com/franciscoaleixo/AragoJ/issues/39)
+Any contribution is more than welcome, however note that for code contributions the application is currently being majorly rewritten to match current programming paradigms, see [#39](https://github.com/franciscoaleixo/AragoJ/issues/39)
 
 
 ## License
