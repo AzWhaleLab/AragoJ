@@ -62,7 +62,9 @@ import opencv.calibration.ui.UndistortDialog;
 import opencv.calibration.ui.UndistortProgressDialogController;
 import opencv.filters.Filter;
 import opencv.filters.FilterArguments;
-import opencv.filters.edgedetection.FilterDialog;
+import opencv.filters.FilterDialog;
+import opencv.filters.edgedetection.sobel.SobelEdgeFilter;
+import opencv.filters.sharpen.SharpenFilter;
 import plugins.PluginLoader;
 import session.SessionManager;
 import session.export.ExportCSV;
@@ -1253,11 +1255,21 @@ public class MainDialogController
   }
 
   public void onEdgeDetection(ActionEvent actionEvent) {
+    startDialogFilter(new SobelEdgeFilter(), Translator.getString("edgeDetection"));
+  }
+
+  public void onSharpen(ActionEvent actionEvent){
+    startDialogFilter(new SharpenFilter(), Translator.getString("sharpen"));
+  }
+
+  private void startDialogFilter(Filter filter, String title){
     try {
       OpenCVManager.loadOpenCV();
+      Image img = imageManager.getCachedImage();
       FilterDialog filterDialog = new FilterDialog();
+      FilterTask task = new FilterTask(filterDialog, filter, null, img, "");
       filterDialog.init(editorCursorBtn.getScene()
-          .getWindow(), this, imageManager.getCachedImage(), Translator.getString("edgeDetection"));
+          .getWindow(), task, this, img, title);
     } catch (SecurityException | UnsatisfiedLinkError e) {
       System.err.println("Could not locate dll");
     }

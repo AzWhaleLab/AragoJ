@@ -81,6 +81,7 @@
                                         <MenuItem fx:id="clearFiltersMenuItem"  mnemonicParsing="false" text="%clearFilters" onAction="#onClearFilters" />
                                         <SeparatorMenuItem mnemonicParsing="false" />
                                         <MenuItem fx:id="edgeDetectionItem" mnemonicParsing="false" text="%edgeDetectionDots" onAction="#onEdgeDetection" />
+                                        <MenuItem mnemonicParsing="false" text="%sharpenDots" onAction="#onSharpen" />
                                         <!--<CheckMenuItem fx:id="autoUndistortCheckMenuItem" text="%autoUndistort"/>-->
                                     </Menu>
                                     <Menu fx:id="calibrationMenu" mnemonicParsing="false" text="%calibration">

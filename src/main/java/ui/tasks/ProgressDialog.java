@@ -49,6 +49,10 @@ public class ProgressDialog implements ProgressTaskListener {
       container.setBackground(Background.EMPTY);
       ((StackPane) container.getParent()).setBackground(Background.EMPTY);
     }
+    spinner.managedProperty().bind(spinner.visibleProperty());
+    alternativeBtn.managedProperty().bind(alternativeBtn.visibleProperty());
+    progressDescription.managedProperty().bind(progressDescription.visibleProperty());
+    progressPrimary.managedProperty().bind(progressPrimary.visibleProperty());
     dialog.setOverlayClose(false);
     dialog.show();
     setupAlternative();
