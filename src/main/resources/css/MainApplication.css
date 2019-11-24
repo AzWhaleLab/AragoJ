@@ -8,6 +8,16 @@
     -fx-padding:2px;
 }
 
+.hyperlink {
+    -fx-border-color: transparent;
+    -fx-padding: 0 0 10 3;
+    -fx-underline: true;
+}
+
+.hyperlink:visited {
+    -fx-text-fill: -fx-focus-color;
+}
+
 .jfx-list-view{
     -fx-selection-bar: #c7e8f3;
 }

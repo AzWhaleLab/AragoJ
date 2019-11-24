@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.Hyperlink?>
 <VBox fx:id="container" alignment="CENTER" maxWidth="300" minWidth="300" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox prefWidth="264.0">
@@ -24,7 +25,7 @@
             </graphic>
          </JFXButton>
       </HBox>
-       <JFXSpinner radius="15.0">
+       <JFXSpinner fx:id="spinner" radius="15.0">
          <VBox.margin>
             <Insets bottom="8.0" right="18.0" />
          </VBox.margin></JFXSpinner>
@@ -36,10 +37,10 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label fx:id="progressDescription"  textFill="#00000096">
-         <VBox.margin>
-            <Insets right="18.0" />
-         </VBox.margin></Label>
+      <VBox alignment="CENTER">
+         <Label fx:id="progressDescription"  textFill="#00000096"/>
+         <Hyperlink visible="false" fx:id="alternativeBtn"/>
+      </VBox>
    </children>
    <padding>
       <Insets bottom="15.0" left="25.0" right="7.0" top="7.0" />

@@ -55,7 +55,7 @@ public class ImageImporterTask implements ProgressTask {
           error = "Out of memory";
         }
         getException().printStackTrace();
-        if(progressListener != null) progressListener.onTaskFailed(error);
+        if(progressListener != null) progressListener.onTaskFailed(error, true, false);
       }
     };
     new Thread(task).start();

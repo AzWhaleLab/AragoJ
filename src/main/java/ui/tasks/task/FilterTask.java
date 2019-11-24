@@ -21,7 +21,8 @@ public class FilterTask implements ProgressTask {
   private Task<Void> task;
   private PauseTransition pause = new PauseTransition(Duration.millis(400)); // Debounce
 
-  public FilterTask(ResultListener resultListener, Filter filter, FilterArguments filterArguments, Image image, String path){
+  public FilterTask(ResultListener resultListener, Filter filter, FilterArguments filterArguments,
+      Image image, String path) {
     this.listener = resultListener;
     this.filter = filter;
     this.filterArguments = filterArguments;
@@ -30,8 +31,10 @@ public class FilterTask implements ProgressTask {
   }
 
   @Override public void startTask() {
-    if(progressTaskListener != null) progressTaskListener.onProgressChanged("", "Applying filter...");
-    if(task != null){
+    if (progressTaskListener != null) {
+      progressTaskListener.onProgressChanged("", "Applying filter...");
+    }
+    if (task != null) {
       task.cancel();
     }
     pause.setOnFinished(event -> {
@@ -39,19 +42,21 @@ public class FilterTask implements ProgressTask {
         @Override protected Void call() throws Exception {
           try {
             String resultPath = "";
-            if(!path.isEmpty()){
+            if (!path.isEmpty()) {
               String name = new File(path).getName();
               resultPath = "./tmp/" + name + "_tmp.bmp";
             }
 
-            Image resultImage  = filter.applyFilter(image, filterArguments, resultPath);
-            if(!isCancelled()){
+            Image resultImage = filter.applyFilter(image, filterArguments, resultPath);
+            if (!isCancelled()) {
               listener.onFilterFinished(filter, filterArguments, resultImage, resultPath);
-              if(progressTaskListener != null) progressTaskListener.onTaskFinished();
+              if (progressTaskListener != null) progressTaskListener.onTaskFinished();
             }
           } catch (FilterArguments.NoArgumentFound e) {
             listener.onFilterFailed(filter, filterArguments, image);
-            if(progressTaskListener != null) progressTaskListener.onTaskFailed("Filter couldn't be applied.");
+            if (progressTaskListener != null) {
+              progressTaskListener.onTaskFailed("Filter couldn't be applied.", true, false);
+            }
             e.printStackTrace();
           }
           return null;
@@ -59,10 +64,10 @@ public class FilterTask implements ProgressTask {
 
         @Override protected void failed() {
           String error = getException().toString();
-          if(getException() instanceof OutOfMemoryError){
+          if (getException() instanceof OutOfMemoryError) {
             error = "Out of memory";
           }
-          if(progressTaskListener != null) progressTaskListener.onTaskFailed(error);
+          if (progressTaskListener != null) progressTaskListener.onTaskFailed(error, true, false);
         }
       };
       new Thread(task).start();
@@ -71,7 +76,7 @@ public class FilterTask implements ProgressTask {
   }
 
   @Override public void cancelTask() {
-    if(task!= null){
+    if (task != null) {
       task.cancel();
       pause.pause();
     }
@@ -82,8 +87,10 @@ public class FilterTask implements ProgressTask {
     this.progressTaskListener = listener;
   }
 
-  public interface ResultListener{
-    void onFilterFinished(Filter filter, FilterArguments filterArguments, Image image, String resultPath);
+  public interface ResultListener {
+    void onFilterFinished(Filter filter, FilterArguments filterArguments, Image image,
+        String resultPath);
+
     void onFilterFailed(Filter filter, FilterArguments filterArguments, Image image);
   }
 }

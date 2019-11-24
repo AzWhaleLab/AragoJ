@@ -9,6 +9,7 @@ import com.sun.javafx.image.impl.IntArgb;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -75,10 +76,18 @@ public class ImageManager {
   }
 
   public Image loadImage(int preferredSource, String path)
-      throws ImageProcessingException, ImageReaderPlugin.FormatNotSupported {
+      throws ImageProcessingException, ImageReaderPlugin.FormatNotSupported, FileNotFoundException {
+    if(!new File(path).exists()){
+      throw new FileNotFoundException();
+    }
     if (defaultImageParser.supportsFile(path) && preferredSource == -1) {
-      cachedImage = new Image(new File(path).toURI()
-          .toString());
+      try{
+        cachedImage = new Image(new File(path).toURI()
+            .toString());
+      } catch (Exception e){
+        throw new ImageProcessingException(e);
+      }
+
       return cachedImage;
     } else {
       Pair<Integer, ImageReaderPlugin> plugin =

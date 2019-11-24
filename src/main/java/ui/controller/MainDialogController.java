@@ -17,6 +17,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,6 @@ import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -156,6 +156,8 @@ public class MainDialogController
 
   @FXML private Label statusLabel;
 
+  private ProgressDialog imageLoadProgressDialog;
+
   public MainDialogController() {
     this.sessionManager = new SessionManager();
   }
@@ -198,26 +200,31 @@ public class MainDialogController
 
   private void importPlugins() {
     try {
-      HashMap<Integer, ImageReaderPlugin> imageImportPlugins = imageManager.loadImageImportPlugins();
-      if(!imageImportPlugins.isEmpty()){
+      HashMap<Integer, ImageReaderPlugin> imageImportPlugins =
+          imageManager.loadImageImportPlugins();
+      if (!imageImportPlugins.isEmpty()) {
         Menu menuParent = new Menu(Translator.getString("plugins"));
         Menu menu = new Menu(Translator.getString("pluginImportImages"));
-        for(Map.Entry<Integer, ImageReaderPlugin> set : imageImportPlugins.entrySet()){
-          MenuItem menuItem = new MenuItem(set.getValue().getPluginName());
+        for (Map.Entry<Integer, ImageReaderPlugin> set : imageImportPlugins.entrySet()) {
+          MenuItem menuItem = new MenuItem(set.getValue()
+              .getPluginName());
           menuItem.setUserData(set.getKey());
           menuItem.setOnAction(event -> {
             try {
-              showImportImagesDialog((Integer) menuItem.getUserData());
+              showImportImagesDialog((Integer) menuItem.getUserData(), false);
             } catch (PluginLoader.PluginNotFoundException e) {
               showPluginErrorDialog(e.getMessage());
             }
           });
-          menu.getItems().add(menuItem);
+          menu.getItems()
+              .add(menuItem);
         }
-        menuParent.getItems().add(menu);
+        menuParent.getItems()
+            .add(menu);
         menu.setDisable(sessionManager.getSession() == null);
         pluginImportImagesMenuItem = menu;
-        menuBar.getMenus().add(menuParent);
+        menuBar.getMenus()
+            .add(menuParent);
       }
     } catch (PluginLoader.CouldNotLoadPluginException e) {
       showPluginErrorDialog(e.getMessage());
@@ -279,36 +286,60 @@ public class MainDialogController
   private void switchImage(UIEditorItem newValue, UIEditorItem oldValue) {
     ImageItem imageItem = newValue.getImageItem();
     EditorItem editorItem = newValue.getEditorItem();
-    ProgressDialog progressDialog = new ProgressDialog();
-    progressDialog.show(
-        new LoadImageTask(imageItem.getOpenerSourceId(), imageItem.getActivePath(), image -> {
-          Platform.runLater(() -> {
-            metaTabPageController.addRootTreeItem(imageItem.getMetadata());
-            imageEditorStackGroup.clearList();
-            layerTabPageController.clearList();
-            imageEditorStackGroup.setImage(new PixelatedImageView(image));
+    if (imageLoadProgressDialog != null) {
+      imageLoadProgressDialog.close();
+    }
+    imageLoadProgressDialog = new ProgressDialog();
+    imageLoadProgressDialog.setFailAlternative("Find image", () -> {
+      int plugin = imageListView.getSelectionModel()
+          .getSelectedItem()
+          .getImageItem()
+          .getOpenerSourceId();
+      try {
+        showImportImagesDialog(plugin, true);
+      } catch (PluginLoader.PluginNotFoundException e) {
+        showPluginErrorDialog("There was an error loading the plugin that opened this file.");
+      }
+    });
+    imageLoadProgressDialog.show(
+        new LoadImageTask(imageItem.getOpenerSourceId(), imageItem.getActivePath(),
+            new LoadImageTask.ResultListener() {
+              @Override public void onImageLoaded(Image image) {
+                Platform.runLater(() -> {
+                  metaTabPageController.addRootTreeItem(imageItem.getMetadata());
+                  imageEditorStackGroup.clearList();
+                  layerTabPageController.clearList();
+                  imageEditorStackGroup.setImage(new PixelatedImageView(image));
 
-            imageEditorStackGroup.setCurrentScale(editorItem.getScaleRatio());
-            imageEditorScrollPane.loadEditorItem(editorItem, imageEditorStackGroup,
-                layerTabPageController);
-            if (editorItem.hasScaleRatio()) {
-              convertUnitsMenuItem.setDisable(false);
-            } else {
-              convertUnitsMenuItem.setDisable(true);
-            }
-            layerTabPageController.setListener(MainDialogController.this);
-            layerTabPageController.setCurrentScale(imageEditorStackGroup.getCurrentScale());
-            imageEditorStackGroup.setBounds(
-                imageEditorStackGroup.parentToLocal(imageEditorStackGroup.getBoundsInParent()));
-            setEditorEnable(true);
+                  imageEditorStackGroup.setCurrentScale(editorItem.getScaleRatio());
+                  imageEditorScrollPane.loadEditorItem(editorItem, imageEditorStackGroup,
+                      layerTabPageController);
+                  if (editorItem.hasScaleRatio()) {
+                    convertUnitsMenuItem.setDisable(false);
+                  } else {
+                    convertUnitsMenuItem.setDisable(true);
+                  }
+                  layerTabPageController.setListener(MainDialogController.this);
+                  layerTabPageController.setCurrentScale(imageEditorStackGroup.getCurrentScale());
+                  imageEditorStackGroup.setBounds(imageEditorStackGroup.parentToLocal(
+                      imageEditorStackGroup.getBoundsInParent()));
+                  setEditorEnable(true);
 
-            if (oldValue == null && !editorItem.getLayers()
-                .isEmpty()) {
-              miscTabPane.getSelectionModel()
-                  .select(0);
-            }
-          });
-        }, imageManager), false, true, imageEditorStackPane);
+                  if (oldValue == null && !editorItem.getLayers()
+                      .isEmpty()) {
+                    miscTabPane.getSelectionModel()
+                        .select(0);
+                  }
+                });
+              }
+
+              @Override public void onImageLoadFail() {
+                imageEditorStackGroup.clearList();
+                metaTabPageController.clearRootTreeItem();
+                layerTabPageController.clearList();
+                setEditorEnable(false);
+              }
+            }, imageManager), false, true, imageEditorStackPane);
   }
 
   private void addImageFiles(int pluginId, List<File> files) {
@@ -331,6 +362,31 @@ public class MainDialogController
     }), true, false, stackPane);
   }
 
+  private void replaceCurrentImageFile(int pluginId, int index, File file) {
+    if (file == null) return;
+
+    ProgressDialog progressDialog = new ProgressDialog();
+    progressDialog.show(
+        new ImageImporterTask(imageManager, Arrays.asList(file), pluginId, imageItems -> {
+          Platform.runLater(() -> {
+            for (ImageItem item : imageItems) {
+              UIEditorItem uiEditorItem = imageListView.getItems()
+                  .get(index);
+              if (uiEditorItem != null) {
+                ImageItem imageItem = uiEditorItem.getImageItem();
+                imageItem.setPath(item.getOriginalPath());
+                imageItem.setActivePath(item.getActivePath());
+                sessionManager.syncSession(new ArrayList<>(imageListView.getItems()));
+                exportCSVMenuItem.setDisable(false);
+                imageListView.getItems()
+                    .set(index, uiEditorItem);
+                switchImage(uiEditorItem, null);
+              }
+            }
+          });
+        }), true, false, stackPane);
+  }
+
   private void addImages(List<EditorItem> items) {
     Task task = new Task<List<UIEditorItem>>() {
       @Override protected List<UIEditorItem> call() throws Exception {
@@ -338,7 +394,8 @@ public class MainDialogController
         for (EditorItem item : items) {
           File file = new File(item.getSourceImagePath());
           if (file.exists()) {
-            ImageItem imageItem = new ImageItem(imageManager.retrieveImage(item.getOpenedWith(), file.getAbsolutePath()));
+            ImageItem imageItem = new ImageItem(
+                imageManager.retrieveImage(item.getOpenedWith(), file.getAbsolutePath()));
             uiEditorItems.add(new UIEditorItem(item, imageItem));
           }
         }
@@ -573,7 +630,7 @@ public class MainDialogController
       saveSessionAsMenuItem.setDisable(false);
       saveSessionMenuItem.setDisable(false);
       importImagesMenuItem.setDisable(false);
-     if(pluginImportImagesMenuItem != null) pluginImportImagesMenuItem.setDisable(false);
+      if (pluginImportImagesMenuItem != null) pluginImportImagesMenuItem.setDisable(false);
       if (imageListView.getItems()
           .size() > 0) {
         undistortMenuItem.setDisable(false);
@@ -952,6 +1009,7 @@ public class MainDialogController
         .clear();
     metaTabPageController.clearRootTreeItem();
     layerTabPageController.clearList();
+    if (imageLoadProgressDialog != null) imageLoadProgressDialog.close();
 
     // Set the new session
     ArrayList<EditorItem> items = session.getItems();
@@ -1016,13 +1074,14 @@ public class MainDialogController
 
   @FXML private void onImportImages() {
     try {
-      showImportImagesDialog(-1);
+      showImportImagesDialog(-1, false);
     } catch (PluginLoader.PluginNotFoundException e) {
       // Not really possible
     }
   }
 
-  private void showImportImagesDialog(int pluginId) throws PluginLoader.PluginNotFoundException {
+  private void showImportImagesDialog(int pluginId, boolean singleImageReplaceCurrent)
+      throws PluginLoader.PluginNotFoundException {
     if (sessionManager.getSession() == null) return;
     FileChooser ch = new FileChooser();
     String path = prefs.get(Constants.STTGS_FILECHOOSER_LASTOPENED, "");
@@ -1032,7 +1091,7 @@ public class MainDialogController
         ch.setInitialDirectory(new File(path));
       }
     }
-    if(pluginId == -1){
+    if (pluginId == -1) {
       ch.getExtensionFilters()
           .addAll(imageManager.getDefaultExtensionFilters());
     } else {
@@ -1040,14 +1099,24 @@ public class MainDialogController
           .addAll(imageManager.getPluginExtensionFilters(pluginId));
     }
 
-    ch.setTitle(Translator.getString("chooseimages"));
-
-    List<File> files = ch.showOpenMultipleDialog(imageListView.getScene()
-        .getWindow());
-    if (files != null && files.size() > 0) {
-      prefs.put(Constants.STTGS_FILECHOOSER_LASTOPENED, files.get(0)
-          .getParent());
-      addImageFiles(pluginId, files);
+    if (singleImageReplaceCurrent) {
+      ch.setTitle(Translator.getString("chooseimage"));
+      File file = ch.showOpenDialog(imageListView.getScene()
+          .getWindow());
+      if (file != null) {
+        prefs.put(Constants.STTGS_FILECHOOSER_LASTOPENED, file.getParent());
+        replaceCurrentImageFile(pluginId, imageListView.getSelectionModel()
+            .getSelectedIndex(), file);
+      }
+    } else {
+      ch.setTitle(Translator.getString("chooseimages"));
+      List<File> files = ch.showOpenMultipleDialog(imageListView.getScene()
+          .getWindow());
+      if (files != null && files.size() > 0) {
+        prefs.put(Constants.STTGS_FILECHOOSER_LASTOPENED, files.get(0)
+            .getParent());
+        addImageFiles(pluginId, files);
+      }
     }
   }
 
@@ -1150,10 +1219,12 @@ public class MainDialogController
 
   @Override public void onImageItemUndistorted(int index, String newPath, boolean select) {
     try {
-      UIEditorItem uiEditorItem = imageListView.getItems().get(index);
+      UIEditorItem uiEditorItem = imageListView.getItems()
+          .get(index);
       imageListView.getItems()
           .get(index)
-          .setImageItem(new ImageItem(imageManager.retrieveImage(uiEditorItem.getImageItem().getOpenerSourceId(), newPath)));
+          .setImageItem(new ImageItem(imageManager.retrieveImage(uiEditorItem.getImageItem()
+              .getOpenerSourceId(), newPath)));
       if (select) {
         imageListView.getSelectionModel()
             .select(index);
@@ -1169,7 +1240,8 @@ public class MainDialogController
           .getSelectedItem()
           .getImageItem();
       imageItem.setActivePath(imageItem.getOriginalPath());
-      Image thumbnail = imageManager.loadThumbnail(imageItem.getOpenerSourceId(), imageItem.getActivePath());
+      Image thumbnail =
+          imageManager.loadThumbnail(imageItem.getOpenerSourceId(), imageItem.getActivePath());
       if (thumbnail != null) {
         imageItem.setThumbnail(thumbnail);
       }
@@ -1213,7 +1285,8 @@ public class MainDialogController
                   .getSelectedItem()
                   .getImageItem();
               imageItem.setActivePath(path);
-              Image thumbnail = imageManager.loadThumbnail(imageItem.getOpenerSourceId(), imageItem.getActivePath());
+              Image thumbnail =
+                  imageManager.loadThumbnail(imageItem.getOpenerSourceId(), imageItem.getActivePath());
               if (thumbnail != null) {
                 imageItem.setThumbnail(thumbnail);
               }

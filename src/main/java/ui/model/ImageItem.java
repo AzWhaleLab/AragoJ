@@ -127,6 +127,7 @@ public class ImageItem {
     return path;
   }
 
+
   public void setPath(String path) {
     this.path = path;
   }

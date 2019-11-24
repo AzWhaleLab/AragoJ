@@ -1,6 +1,7 @@
 package ui.tasks.task;
 
 import imageprocess.ImageManager;
+import java.io.FileNotFoundException;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import ui.tasks.ProgressTask;
@@ -36,10 +37,15 @@ public class LoadImageTask implements ProgressTask {
 
       @Override protected void failed() {
         String error = getException().toString();
+        boolean shouldShowAlternative = false;
         if (getException() instanceof OutOfMemoryError) {
-          error = "Out of memory";
+          error = "Out of memory.";
+        } else if(getException() instanceof FileNotFoundException){
+          error = "File not found.";
+          shouldShowAlternative = true;
         }
-        if (progressListener != null) progressListener.onTaskFailed(error);
+        if (progressListener != null) progressListener.onTaskFailed(error, false, shouldShowAlternative);
+        if(resultListener != null) resultListener.onImageLoadFail();
       }
     };
     new Thread(task).start();
@@ -57,5 +63,6 @@ public class LoadImageTask implements ProgressTask {
 
   public interface ResultListener {
     void onImageLoaded(Image image);
+    void onImageLoadFail();
   }
 }
