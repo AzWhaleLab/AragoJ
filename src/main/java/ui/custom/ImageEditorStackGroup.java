@@ -6,7 +6,6 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -191,7 +190,7 @@ public class ImageEditorStackGroup extends Group
         if (currentMode == Mode.LINE_CREATION || currentMode == LINE_ANG) {
             e.consume();
             // Create a new line
-            SegLineGroup line = new SegLineGroup("Line_" + lineCount++, e.getX(), e.getY(), segLineInteractor, this, currentPickedColor);
+            SegLineGroup line = new SegLineGroup("Line_" + lineCount++, e.getX(), e.getY(), segLineInteractor, this, currentPickedColor, scaleXProperty());
             addInternalElement(line);
             currentSelectedItemIndex = elements.size() - 1;
             if(currentMode == LINE_ANG){
@@ -287,7 +286,7 @@ public class ImageEditorStackGroup extends Group
 
 
     public void addSegLineGroup(EditorItemSegLine segLine){
-        SegLineGroup lineGroup = new SegLineGroup(segLine, segLineInteractor, this);
+        SegLineGroup lineGroup = new SegLineGroup(segLine, segLineInteractor, this, scaleXProperty());
         addElement(lineGroup, true);
     }
 
@@ -490,7 +489,7 @@ public class ImageEditorStackGroup extends Group
 
     public void setLayerHelperLinesVisible(boolean visible) {
         for (LayerListItem item : elements) {
-            if (item.getType() == LayerListItem.Type.LINE) ((SegLineGroup) item).setPrecisionHelpersVisible(visible);
+            if (item.getType() == LayerListItem.Type.LINE) ((SegLineGroup) item).setSelected(visible);
         }
     }
 

@@ -11,7 +11,7 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
 import session.model.EditorItemArea;
 import session.model.EditorItemPosition;
-import ui.custom.Cross;
+import ui.custom.base.selection.SelectionCross;
 import ui.custom.ToolEventHandler;
 import ui.model.LayerListItem;
 import utils.AreaUtils;
@@ -29,7 +29,7 @@ public class AreaGroup extends Group implements LayerListItem {
     private String name;
     private Color color;
     private ArrayList<Line> lines;
-    private ArrayList<Cross> vertices;
+    private ArrayList<SelectionCross> vertices;
 
     private Circle startPointCircle; // To end the area
     private boolean isFinished;
@@ -91,24 +91,24 @@ public class AreaGroup extends Group implements LayerListItem {
 
         startPointCircle.setOnMouseEntered(e -> {
             if (isCompletable()) {
-                Cross cross = vertices.get(0);
-                cross.setColor(color);
+                SelectionCross selectionCross = vertices.get(0);
+                selectionCross.setColor(color);
                 // Set final cursor
             }
         });
         startPointCircle.setOnMouseExited(e -> {
             // Unset final cursor
             if (isCompletable()) {
-                Cross cross = vertices.get(0);
-                cross.resetColor();
+                SelectionCross selectionCross = vertices.get(0);
+                selectionCross.resetColor();
             }
         });
         startPointCircle.setOnMousePressed(e -> {
             if (isCompletable()) {
                 e.consume();
                 addVertex(startPointX, startPointY, true);
-                Cross cross = vertices.get(0);
-                cross.resetColor();
+                SelectionCross selectionCross = vertices.get(0);
+                selectionCross.resetColor();
                 completeArea(true);
             }
         });
@@ -122,7 +122,7 @@ public class AreaGroup extends Group implements LayerListItem {
     private void completeArea(boolean emitCallback) {
         double[] points = new double[vertices.size() * 2];
         int i = 0;
-        for (Cross vert : vertices) {
+        for (SelectionCross vert : vertices) {
             points[i++] = vert.getPointX();
             points[i++] = vert.getPointY();
         }
@@ -140,8 +140,8 @@ public class AreaGroup extends Group implements LayerListItem {
 
     public double calculateArea() {
         java.awt.Polygon polygon = new java.awt.Polygon();
-        for (Cross cross : vertices) {
-            polygon.addPoint((int) cross.getPointX(), (int) cross.getPointY());
+        for (SelectionCross selectionCross : vertices) {
+            polygon.addPoint((int) selectionCross.getPointX(), (int) selectionCross.getPointY());
         }
         Area area = new Area(polygon);
         return Utility.roundTwoDecimals(AreaUtils.approxArea(area, 0, 0));
@@ -178,17 +178,17 @@ public class AreaGroup extends Group implements LayerListItem {
                 previousLine.setStartY(y);
             }
             if (index < vertices.size()) {
-                Cross currentVertex = vertices.get(index);
+                SelectionCross currentVertex = vertices.get(index);
                 currentVertex.setPointX(x);
                 currentVertex.setPointY(y);
             }
         }
     }
 
-    private Cross createCross(double startPointX, double startPointY) {
-        Cross cross = new Cross(startPointX, startPointY);
-        getChildren().add(cross.getShape());
-        return cross;
+    private SelectionCross createCross(double startPointX, double startPointY) {
+        SelectionCross selectionCross = new SelectionCross(startPointX, startPointY);
+        getChildren().add(selectionCross);
+        return selectionCross;
     }
 
     private Line createLine(double startPointX, double startPointY, double endPointX, double endPointY) {
@@ -220,8 +220,8 @@ public class AreaGroup extends Group implements LayerListItem {
     public List<EditorItemPosition> getExportableVertices(){
         ArrayList<EditorItemPosition> verts = new ArrayList<>(vertices.size());
         for(int i = 0; i<vertices.size(); i++){
-            Cross cross = vertices.get(i);
-            verts.add(new EditorItemPosition(cross.getPointX(), cross.getPointY()));
+            SelectionCross selectionCross = vertices.get(i);
+            verts.add(new EditorItemPosition(selectionCross.getPointX(), selectionCross.getPointY()));
         }
         return verts;
     }
@@ -277,7 +277,6 @@ public class AreaGroup extends Group implements LayerListItem {
         void onAreaChanged(AreaGroup areaGroup);
 
         void onAreaComplete(AreaGroup area);
-
     }
 
 }

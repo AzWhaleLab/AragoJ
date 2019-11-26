@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import javafx.beans.property.SimpleDoubleProperty;
 import session.model.EditorItem;
 import session.model.EditorItemAngle;
 import session.model.EditorItemArea;
@@ -65,7 +66,7 @@ public class ExportCSV {
         StringBuilder layerUnitNameSB = new StringBuilder();
         String baseName = "";
         if (layer instanceof EditorItemSegLine) {
-          SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer, null, null);
+          SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer, null, null, new SimpleDoubleProperty(1));
           layerNameSB.append(lineGroup.getName())
               .append(" (px)");
           baseName = lineGroup.getName();
@@ -119,7 +120,7 @@ public class ExportCSV {
           for (EditorItemLayer layer2 : item2.getLayers()) {
             layerUnitNameSB = new StringBuilder();
             if (layer2 instanceof EditorItemSegLine) {
-              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer2, null, null);
+              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer2, null, null, new SimpleDoubleProperty(1));
               if (lineGroup.getName()
                   .equals(baseName)) {
                 if (item2.hasScaleRatio()) {
@@ -203,7 +204,7 @@ public class ExportCSV {
           ArrayList<EditorItemLayer> layers = item.getLayers();
           for (EditorItemLayer layer : layers) {
             if (layer instanceof EditorItemSegLine) {
-              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer, null, null);
+              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer, null, null, new SimpleDoubleProperty(1));
               String lineName = lineGroup.getName() + " (px)";
               if (name.equals(lineName)) {
                 valueStringBuilder.append(lineGroup.getLength());
