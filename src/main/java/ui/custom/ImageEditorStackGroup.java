@@ -13,11 +13,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import session.model.EditorItemAngle;
+import session.model.EditorItemArea;
 import session.model.EditorItemSegLine;
 import ui.MainApplication;
 import ui.custom.angle.AngleGroup;
 import ui.custom.angle.AngleInteractor;
 import ui.custom.area.AreaGroup;
+import ui.custom.area.AreaInteractor;
 import ui.custom.base.LineGroup;
 import ui.custom.base.PointGroup;
 import ui.custom.segline.SegLineGroup;
@@ -42,10 +44,11 @@ import static ui.custom.ImageEditorStackGroup.Mode.LINE_POINT_SELECT;
  * This group is wrapped by ZoomableScrollPane
  */
 public class ImageEditorStackGroup extends Group
-    implements SegLineGroup.SegLineChangeEventHandler, AreaGroup.AreaEventHandler,
+    implements SegLineGroup.SegLineChangeEventHandler, AreaGroup.AreaChangeEventHandler,
     AngleGroup.AngleChangeEventHandler {
     public static Color DEFAULT_COLOR = Color.RED;
     private Preferences prefs;
+
 
     public enum Mode {PAN, ZOOM, SELECT, LINE_CREATION, LINE_POINT_SELECT, LINE_ANG_SEL, LINE_ANG, ANG_POINT_SELECT, AREA_CREATION, AREA_VERTICE_SELECT, ANGLE_CREATION, ANGLE_POINT_SELECT}
 
@@ -70,6 +73,7 @@ public class ImageEditorStackGroup extends Group
 
     // Interactors
     private SegLineInteractor segLineInteractor = new SegLineInteractor(this);
+    private AreaInteractor areaInteractor = new AreaInteractor(this);
     private AngleInteractor angleInteractor = new AngleInteractor(this);
 
     private StringProperty status;
@@ -151,11 +155,7 @@ public class ImageEditorStackGroup extends Group
             status.setValue(angleGroup.getStatus());
         }
     };
-    /**
-     * Handles two options (on mouse press):
-     * - Creation of a new measuring tool (free, perpendicular or paralell line)
-     * - Selecting a line (for different uses).
-     */
+
     private EventHandler<MouseEvent> mousePressedHandler = e -> {
         requestFocus();
         if (e.isControlDown() || currentMode == Mode.PAN) return;
@@ -211,7 +211,7 @@ public class ImageEditorStackGroup extends Group
             }
         } else if (currentMode == Mode.ANGLE_CREATION) {
             e.consume();
-            AngleGroup angle = new AngleGroup("Angle_" + angleCount++, e.getX(), e.getY(), angleInteractor, this);
+            AngleGroup angle = new AngleGroup("Angle_" + angleCount++, e.getX(), e.getY(), angleInteractor, this, scaleXProperty());
             addInternalElement(angle);
             currentSelectedItemIndex = elements.size() - 1;
             currentMode = Mode.ANGLE_POINT_SELECT;
@@ -221,14 +221,12 @@ public class ImageEditorStackGroup extends Group
         if (currentMode == Mode.AREA_VERTICE_SELECT) {
             e.consume();
             ((AreaGroup) elements.get(elements.size() - 1)).addVertex(e.getX(), e.getY(), false);
-        }
-
-        if (currentMode == Mode.AREA_CREATION) {
+        } else if (currentMode == Mode.AREA_CREATION) {
             e.consume();
             currentMode = AREA_VERTICE_SELECT;
             // Create a new line
-            AreaGroup areaGroup = new AreaGroup("Area_" + areaCount++, e.getX(), e.getY(), this, currentPickedColor);
-            addElement(areaGroup, false);
+            AreaGroup areaGroup = new AreaGroup("Area_" + areaCount++, e.getX(), e.getY(), areaInteractor, this, currentPickedColor, scaleXProperty());
+            addInternalElement(areaGroup);
             currentSelectedItemIndex = elements.size() - 1;
         }
     };
@@ -284,6 +282,10 @@ public class ImageEditorStackGroup extends Group
         this.helperLineAngle = helperLineAngle;
     }
 
+    public void addAreaGroup(EditorItemArea layer) {
+        AreaGroup areaGroup = new AreaGroup(layer, areaInteractor, this, scaleXProperty());
+        addElement(areaGroup, true);
+    }
 
     public void addSegLineGroup(EditorItemSegLine segLine){
         SegLineGroup lineGroup = new SegLineGroup(segLine, segLineInteractor, this, scaleXProperty());
@@ -291,7 +293,7 @@ public class ImageEditorStackGroup extends Group
     }
 
     public void addAngle(EditorItemAngle angle){
-        AngleGroup angleGroup = new AngleGroup(angle, angleInteractor, this);
+        AngleGroup angleGroup = new AngleGroup(angle, angleInteractor, this, scaleXProperty());
         addElement(angleGroup, true);
     }
 
@@ -487,11 +489,6 @@ public class ImageEditorStackGroup extends Group
         return currentMode;
     }
 
-    public void setLayerHelperLinesVisible(boolean visible) {
-        for (LayerListItem item : elements) {
-            if (item.getType() == LayerListItem.Type.LINE) ((SegLineGroup) item).setSelected(visible);
-        }
-    }
 
     public void setColorHelperLinesVisible(boolean visible) {
         for (LayerListItem item : elements) {

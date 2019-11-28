@@ -49,7 +49,7 @@ public class LineGroup extends Group {
   }
 
   public void setScale(double value) {
-    selectionLine.setScale(1 / value);
+    selectionLine.setScale(value);
   }
 
   public double getEndPointX() {

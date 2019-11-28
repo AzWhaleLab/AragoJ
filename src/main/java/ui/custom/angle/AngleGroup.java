@@ -3,26 +3,24 @@ package ui.custom.angle;
 import com.jfoenix.svg.SVGGlyph;
 import com.jfoenix.svg.SVGGlyphLoader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javafx.scene.Group;
-import javafx.scene.effect.BlendMode;
+import javafx.beans.property.DoubleProperty;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Arc;
-import javafx.scene.shape.ArcType;
 import session.model.EditorItemAngle;
 import session.model.EditorItemPosition;
 import ui.custom.ToolEventHandler;
 import ui.custom.base.LineGroup;
 import ui.custom.base.PointGroup;
+import ui.custom.base.selection.ArcSelectionLine;
+import ui.custom.base.selection.SelectableGroup;
 import ui.model.LayerListItem;
 import utils.Utility;
 
 import static ui.model.LayerListItem.Type.ANGLE;
 
-public class AngleGroup extends Group implements LayerListItem {
+public class AngleGroup extends SelectableGroup implements LayerListItem {
   private final AngleEventHandler eventHandler;
   private final AngleChangeEventHandler eventChangeHandler;
 
@@ -30,67 +28,74 @@ public class AngleGroup extends Group implements LayerListItem {
 
   private LineGroup abLine;
   private LineGroup bcLine;
-  private PointGroup aPoint; // 0
-  private PointGroup bPoint; // 1
-  private PointGroup cPoint; // 2
-  private Arc arc;
-
-  private ArrayList<LineGroup> lines;
-  private ArrayList<PointGroup> points;
+  private PointGroup aPoint;
+  private PointGroup bPoint;
+  private PointGroup cPoint;
+  private ArcSelectionLine angleLine;
 
   private double currentAngle;
 
-  public AngleGroup(EditorItemAngle item, AngleEventHandler eventHandler, AngleChangeEventHandler eventChangeHandler){
+  public AngleGroup(EditorItemAngle item, AngleEventHandler eventHandler,
+      AngleChangeEventHandler eventChangeHandler, DoubleProperty scaleProperty) {
+    super(scaleProperty);
     this.eventHandler = eventHandler;
     this.eventChangeHandler = eventChangeHandler;
-    this.points = new ArrayList<>();
-    this.lines = new ArrayList<>();
     this.name = item.getName();
-    if(item.getPoints().size() >= 3){
+    if (item.getPoints()
+        .size() >= 3) {
       List<EditorItemPosition> points = item.getPoints();
-      addPoint(points.get(0).getX(), points.get(0).getY());
-      addPoint(points.get(1).getX(), points.get(1).getY());
-      addPoint(points.get(2).getX(), points.get(2).getY());
+      addPoint(points.get(0)
+          .getX(), points.get(0)
+          .getY());
+      addPoint(points.get(1)
+          .getX(), points.get(1)
+          .getY());
+      addPoint(points.get(2)
+          .getX(), points.get(2)
+          .getY());
     }
   }
 
   public AngleGroup(String name, double startPointX, double startPointY,
-      AngleEventHandler eventHandler, AngleChangeEventHandler eventChangeHandler) {
+      AngleEventHandler eventHandler, AngleChangeEventHandler eventChangeHandler,
+      DoubleProperty scaleProperty) {
+    super(scaleProperty);
     this.eventHandler = eventHandler;
     this.eventChangeHandler = eventChangeHandler;
-    this.points = new ArrayList<>();
-    this.lines = new ArrayList<>();
     this.name = name;
     addPoint(startPointX, startPointY);
   }
 
   public boolean addPoint(double x, double y) {
-    if(aPoint == null){
+    if (aPoint == null) {
       aPoint = new PointGroup(x, y, 1);
       aPoint.setCircleVisibility(false);
+      aPoint.setScale(getScale());
       setListener(aPoint, 0);
       abLine = new LineGroup(x, y, x, y, 0, Color.WHITE);
+      abLine.setScale(getScale());
       abLine.setColorVisibility(false);
       getChildren().addAll(abLine, aPoint);
       return false;
-    } else if(bPoint == null){
+    } else if (bPoint == null) {
       bPoint = new PointGroup(x, y, 1);
       bPoint.setCircleVisibility(false);
+      bPoint.setScale(getScale());
       setListener(bPoint, 1);
       abLine.setEndPoint(x, y);
+      abLine.setScale(getScale());
       bcLine = new LineGroup(x, y, x, y, 0, Color.WHITE);
       bcLine.setColorVisibility(false);
-      arc = new Arc(x, y, 0, 0, abLine.getLineAngle(), getAngle());
-      arc.setStroke(Color.WHITE);
-      arc.setStrokeWidth(0.05f);
-      arc.setBlendMode(BlendMode.DIFFERENCE);
-      arc.setFill(Color.TRANSPARENT);
-      arc.setType(ArcType.OPEN);
-      getChildren().addAll(bcLine, bPoint, arc);
+      bcLine.setScale(getScale());
+
+      angleLine = new ArcSelectionLine(x, y, 0, 0, abLine.getLineAngle(), getAngle());
+      angleLine.setScale(getScale());
+      getChildren().addAll(bcLine, bPoint, angleLine);
       return false;
-    } else if(cPoint == null){
+    } else if (cPoint == null) {
       cPoint = new PointGroup(x, y, 1);
       cPoint.setCircleVisibility(false);
+      cPoint.setScale(getScale());
       setListener(cPoint, 2);
       bcLine.setEndPoint(x, y);
       getChildren().addAll(cPoint);
@@ -99,40 +104,36 @@ public class AngleGroup extends Group implements LayerListItem {
     return true;
   }
 
-  private void calculateArc(){
-    if(arc != null && abLine != null && bcLine != null){
-      double argRadius = Math.min(abLine.getLength()*0.3, bcLine.getLength()*0.3);
-      arc.setCenterX(abLine.getEndPointX());
-      arc.setCenterY(abLine.getEndPointY());
-      arc.setStartAngle(Math.toDegrees(abLine.getDisplayAngle()));
+  private void calculateArc() {
+    if (angleLine != null && abLine != null && bcLine != null) {
+      double argRadius = Math.min(abLine.getLength() * 0.3, bcLine.getLength() * 0.3);
       double angleEnd = Math.toDegrees(abLine.getDisplayAngleWith(bcLine));
-      arc.setLength(angleEnd);
-      arc.setRadiusX(argRadius);
-      arc.setRadiusY(argRadius);
+      angleLine.setArc(abLine.getEndPointX(), abLine.getEndPointY(), argRadius, argRadius,
+          Math.toDegrees(abLine.getDisplayAngle()), angleEnd);
     }
   }
 
-  public void movePoint(int index, double x, double y){
-    if(index == 0){
+  public void movePoint(int index, double x, double y) {
+    if (index == 0) {
       aPoint.setPoint(x, y);
-      abLine.setStartPoint(x,y);
-    } else if(index == 1){
-      abLine.setEndPoint(x,y);
-      if(bPoint != null){
+      abLine.setStartPoint(x, y);
+    } else if (index == 1) {
+      abLine.setEndPoint(x, y);
+      if (bPoint != null) {
         bPoint.setPoint(x, y);
-        bcLine.setStartPoint(x,y);
+        bcLine.setStartPoint(x, y);
       }
-    } else if(index == 2){
-      if(cPoint != null){
+    } else if (index == 2) {
+      if (cPoint != null) {
         cPoint.setPoint(x, y);
       }
-      bcLine.setEndPoint(x,y);
+      bcLine.setEndPoint(x, y);
     }
     calculateAngle();
   }
 
-  public void moveLastPoint(double x, double y){
-    if(bPoint == null){
+  public void moveLastPoint(double x, double y) {
+    if (bPoint == null) {
       movePoint(1, x, y);
     } else {
       movePoint(2, x, y);
@@ -149,19 +150,18 @@ public class AngleGroup extends Group implements LayerListItem {
   }
 
   private void calculateAngle() {
-    if(bcLine != null){
+    if (bcLine != null) {
       currentAngle = abLine.getAngleWith(bcLine);
     } else {
       currentAngle = abLine.getLineAngle();
     }
     calculateArc();
-    if(eventChangeHandler != null) eventChangeHandler.onAngleChange(this);
+    if (eventChangeHandler != null) eventChangeHandler.onAngleChange(this);
   }
 
-  public double getAngle(){
+  public double getAngle() {
     return currentAngle;
   }
-
 
   @Override public SVGGlyph getSVG() throws IOException {
     SVGGlyph glyph = SVGGlyphLoader.loadGlyph(getClass().getClassLoader()
@@ -177,7 +177,7 @@ public class AngleGroup extends Group implements LayerListItem {
 
   @Override public void setPrimaryText(String primaryText) {
     name = primaryText;
-    if(eventChangeHandler != null) eventChangeHandler.onAngleChange(this);
+    if (eventChangeHandler != null) eventChangeHandler.onAngleChange(this);
   }
 
   @Override public String getSecondaryText() {
@@ -185,8 +185,9 @@ public class AngleGroup extends Group implements LayerListItem {
   }
 
   @Override public String getStatus() {
-    if(cPoint == null)
-      return "angle="+ Utility.roundTwoDecimals(Math.toDegrees(getAngle())) + "\u00B0";
+    if (cPoint == null) {
+      return "angle=" + Utility.roundTwoDecimals(Math.toDegrees(getAngle())) + "\u00B0";
+    }
     return "";
   }
 
@@ -202,11 +203,35 @@ public class AngleGroup extends Group implements LayerListItem {
     EditorItemPosition aPointItem = new EditorItemPosition(aPoint.getX(), aPoint.getY());
     EditorItemPosition bPointItem = new EditorItemPosition(bPoint.getX(), bPoint.getY());
     EditorItemPosition cPointItem = new EditorItemPosition(cPoint.getX(), cPoint.getY());
-   return Arrays.asList(aPointItem, bPointItem, cPointItem);
+    return Arrays.asList(aPointItem, bPointItem, cPointItem);
   }
 
   public String getName() {
     return name;
+  }
+
+  @Override public void onChangeScale(double value) {
+    if (abLine != null) abLine.setScale(value);
+    if (bcLine != null) bcLine.setScale(value);
+    if (aPoint != null) aPoint.setScale(value);
+    if (bPoint != null) bPoint.setScale(value);
+    if (cPoint != null) cPoint.setScale(value);
+    if (angleLine != null) angleLine.setScale(value);
+  }
+
+  @Override public void setSelected(boolean selected) {
+    if (abLine != null) abLine.setSelected(selected);
+    if (bcLine != null) bcLine.setSelected(selected);
+    if (aPoint != null) aPoint.setSelected(selected);
+    if (bPoint != null) bPoint.setSelected(selected);
+    if (cPoint != null) cPoint.setSelected(selected);
+    if (angleLine != null) {
+      if (selected) {
+        angleLine.show();
+      } else {
+        angleLine.hide();
+      }
+    }
   }
 
   public interface AngleChangeEventHandler extends ToolEventHandler {
@@ -215,6 +240,7 @@ public class AngleGroup extends Group implements LayerListItem {
 
   public interface AngleEventHandler extends ToolEventHandler {
     void onPointDrag(MouseEvent event, AngleGroup angleGroup, int pointIndex);
+
     void onPointReleased(MouseEvent event, AngleGroup angleGroup, int pointIndex);
   }
 }

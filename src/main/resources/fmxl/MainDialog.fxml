@@ -70,7 +70,6 @@
                             <Menu mnemonicParsing="false" text="%view">
                                 <items>
                                     <Menu mnemonicParsing="false" text="%layer">
-                                        <CheckMenuItem fx:id="precisionLinesCheckItem" mnemonicParsing="false" onAction="#onPrecisionLinesToggle" text="%precisionLines" selected="true" />
                                         <CheckMenuItem fx:id="identifierLinesCheckItem" mnemonicParsing="false" onAction="#onIdentifierLinesToggle" text="%identifierLines" selected="true" />
                                     </Menu>
                                 </items>

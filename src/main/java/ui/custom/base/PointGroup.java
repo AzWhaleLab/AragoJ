@@ -70,4 +70,8 @@ public class PointGroup extends Group {
   public void setScale(double value) {
     selectionCross.setScale(value);
   }
+
+  public boolean containsPoint(double x, double y) {
+    return selectionCross.containsPoint(x, y);
+  }
 }

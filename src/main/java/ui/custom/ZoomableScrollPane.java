@@ -141,8 +141,7 @@ public class ZoomableScrollPane extends ScrollPane {
     this.layout();
   }
 
-  public void loadEditorItem(EditorItem item, ToolEventHandler handler,
-      LayerTabPageController layerTabPageController) {
+  public void loadEditorItem(EditorItem item, LayerTabPageController layerTabPageController) {
     // Set zoom
     EditorItemZoom zoom = item.getZoom();
     if (zoom != null && zoom.getScale() >= 0) {
@@ -163,9 +162,7 @@ public class ZoomableScrollPane extends ScrollPane {
       if (layer instanceof EditorItemSegLine) {
         stackGroup.addSegLineGroup((EditorItemSegLine) layer);
       } else if (layer instanceof EditorItemArea) {
-        AreaGroup areaGroup =
-            new AreaGroup((EditorItemArea) layer, (AreaGroup.AreaEventHandler) handler);
-        stackGroup.addElement(areaGroup, true);
+        stackGroup.addAreaGroup((EditorItemArea) layer);
       } else if (layer instanceof EditorItemAngle) {
         stackGroup.addAngle((EditorItemAngle) layer);
       } else if (layer instanceof EquationItem) {

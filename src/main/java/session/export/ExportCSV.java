@@ -66,7 +66,8 @@ public class ExportCSV {
         StringBuilder layerUnitNameSB = new StringBuilder();
         String baseName = "";
         if (layer instanceof EditorItemSegLine) {
-          SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer, null, null, new SimpleDoubleProperty(1));
+          SegLineGroup lineGroup =
+              new SegLineGroup((EditorItemSegLine) layer, null, null, new SimpleDoubleProperty(1));
           layerNameSB.append(lineGroup.getName())
               .append(" (px)");
           baseName = lineGroup.getName();
@@ -120,7 +121,8 @@ public class ExportCSV {
           for (EditorItemLayer layer2 : item2.getLayers()) {
             layerUnitNameSB = new StringBuilder();
             if (layer2 instanceof EditorItemSegLine) {
-              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer2, null, null, new SimpleDoubleProperty(1));
+              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer2, null, null,
+                  new SimpleDoubleProperty(1));
               if (lineGroup.getName()
                   .equals(baseName)) {
                 if (item2.hasScaleRatio()) {
@@ -204,7 +206,8 @@ public class ExportCSV {
           ArrayList<EditorItemLayer> layers = item.getLayers();
           for (EditorItemLayer layer : layers) {
             if (layer instanceof EditorItemSegLine) {
-              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer, null, null, new SimpleDoubleProperty(1));
+              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer, null, null,
+                  new SimpleDoubleProperty(1));
               String lineName = lineGroup.getName() + " (px)";
               if (name.equals(lineName)) {
                 valueStringBuilder.append(lineGroup.getLength());
@@ -219,23 +222,26 @@ public class ExportCSV {
               }
             } else if (layer instanceof EditorItemArea) {
               EditorItemArea editorItemArea = (EditorItemArea) layer;
-              AreaGroup areaGroup = new AreaGroup(editorItemArea, null);
+              AreaGroup areaGroup =
+                  new AreaGroup(editorItemArea, null, null, new SimpleDoubleProperty(1));
               String areaName = editorItemArea.getName() + " (px\u00B2)";
+              areaGroup.calculateArea();
 
               if (name.equals(areaName)) {
-                valueStringBuilder.append(areaGroup.calculateArea());
+                valueStringBuilder.append(areaGroup.getRoundedArea());
               }
               if (item.hasScaleRatio()) {
                 String lineUnitName = areaGroup.getPrimaryText() + " (" + item.getScaleRatio()
                     .getSquaredUnits() + ")";
                 if (name.equals(lineUnitName)) {
                   valueStringBuilder.append(item.getScaleRatio()
-                      .getSquaredRoundedScaledValue(areaGroup.calculateArea()));
+                      .getSquaredRoundedScaledValue(areaGroup.getRoundedArea()));
                 }
               }
             } else if (layer instanceof EditorItemAngle) {
               EditorItemAngle editorItemAngle = (EditorItemAngle) layer;
-              AngleGroup angleGroup = new AngleGroup(editorItemAngle, null, null);
+              AngleGroup angleGroup =
+                  new AngleGroup(editorItemAngle, null, null, new SimpleDoubleProperty(1));
               String angleName = angleGroup.getName() + " (\u00B0)";
 
               if (name.equals(angleName)) {

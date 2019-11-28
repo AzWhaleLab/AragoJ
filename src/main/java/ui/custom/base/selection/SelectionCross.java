@@ -46,10 +46,30 @@ public class SelectionCross extends Group implements SelectionGroup {
     setTranslateX(translateY);
   }
 
-  public void setScale(double value) {
+  @Override public void setScale(double value) {
     double scale = 1 / value;
-    setScaleX(Math.min(scale * 30, 80));
-    setScaleY(Math.min(scale * 30, 80));
+    setScaleX(Math.min(scale * 30, 60));
+    setScaleY(Math.min(scale * 30, 60));
+  }
+
+  @Override public void show() {
+    setOpacity(1);
+    setMouseTransparent(false);
+  }
+
+  @Override public void hide() {
+    setOpacity(0);
+    setMouseTransparent(true);
+  }
+
+  /**
+   * This is used instead of the Node's contain because it doesn't seem to take scaling into
+   * consideration.
+   */
+  public boolean containsPoint(double x, double y) {
+    return Math.pow(x - selectionCircle.getCenterX(), 2) + Math.pow(
+        y - selectionCircle.getCenterY(), 2) < Math.pow(selectionCircle.getRadius() * getScaleX(),
+        2);
   }
 
   public void setColor(Color color) {
@@ -68,12 +88,12 @@ public class SelectionCross extends Group implements SelectionGroup {
   }
 
   public void setPointX(double x) {
-    setLayoutX(x - getLayoutBounds().getMinX());
+    setLayoutX(x - getLayoutBounds().getMinX() - (getLayoutBounds().getWidth() / 2));
     this.pointX = x;
   }
 
   public void setPointY(double y) {
-    setLayoutY(y - getLayoutBounds().getMinY());
+    setLayoutY(y - getLayoutBounds().getMinY() - (getLayoutBounds().getHeight() / 2));
     this.pointY = y;
   }
 
@@ -83,15 +103,5 @@ public class SelectionCross extends Group implements SelectionGroup {
 
   public double getPointY() {
     return pointY;
-  }
-
-  @Override public void show() {
-    setOpacity(1);
-    setMouseTransparent(false);
-  }
-
-  @Override public void hide() {
-    setOpacity(0);
-    setMouseTransparent(true);
   }
 }

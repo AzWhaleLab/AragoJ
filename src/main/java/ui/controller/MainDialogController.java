@@ -106,7 +106,6 @@ public class MainDialogController
 
   //// Menu Items
   // View items
-  @FXML private CheckMenuItem precisionLinesCheckItem;
   @FXML private CheckMenuItem identifierLinesCheckItem;
 
   @FXML public MenuBar menuBar;
@@ -314,7 +313,7 @@ public class MainDialogController
                   imageEditorStackGroup.setImage(new PixelatedImageView(image));
 
                   imageEditorStackGroup.setCurrentScale(editorItem.getScaleRatio());
-                  imageEditorScrollPane.loadEditorItem(editorItem, imageEditorStackGroup,
+                  imageEditorScrollPane.loadEditorItem(editorItem,
                       layerTabPageController);
                   if (editorItem.hasScaleRatio()) {
                     convertUnitsMenuItem.setDisable(false);
@@ -665,7 +664,6 @@ public class MainDialogController
     layerTabPageController.addLayer(line);
 
     imageEditorStackGroup.setColorHelperLinesVisible(identifierLinesCheckItem.isSelected());
-    imageEditorStackGroup.setLayerHelperLinesVisible(precisionLinesCheckItem.isSelected());
   }
 
   @Override public void onAngleAdd(AngleGroup angle, boolean editorItemLoad) {
@@ -744,15 +742,6 @@ public class MainDialogController
       imageEditorStackGroup.setColorHelperLinesVisible(true);
     } else {
       imageEditorStackGroup.setColorHelperLinesVisible(false);
-    }
-  }
-
-  @FXML public void onPrecisionLinesToggle(ActionEvent actionEvent) {
-    CheckMenuItem item = (CheckMenuItem) actionEvent.getSource();
-    if (item.isSelected()) {
-      imageEditorStackGroup.setLayerHelperLinesVisible(true);
-    } else {
-      imageEditorStackGroup.setLayerHelperLinesVisible(false);
     }
   }
 

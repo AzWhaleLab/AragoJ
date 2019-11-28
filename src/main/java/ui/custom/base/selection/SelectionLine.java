@@ -24,11 +24,6 @@ public class SelectionLine extends Group implements SelectionGroup {
     setMouseTransparent(true);
   }
 
-  public void setScale(double scale) {
-    innerLine.setStrokeWidth(scale);
-    outerLine.setStrokeWidth(scale * 2);
-  }
-
   public void setStartX(double startX) {
     innerLine.setStartX(startX);
     outerLine.setStartX(startX);
@@ -63,6 +58,12 @@ public class SelectionLine extends Group implements SelectionGroup {
 
   public double getEndY() {
     return innerLine.getEndY();
+  }
+
+  @Override public void setScale(double scale) {
+    double s = 1 / scale;
+    innerLine.setStrokeWidth(s);
+    outerLine.setStrokeWidth(s * 2);
   }
 
   @Override public void show() {
