@@ -2,6 +2,7 @@ package ui.custom.base;
 
 import javafx.geometry.Bounds;
 import ui.custom.ImageEditorStackGroup;
+import ui.model.LayerListItem;
 
 public class Interactor {
 
@@ -28,5 +29,9 @@ public class Interactor {
 
   protected void setStatus(String s){
     imageEditorStackGroup.setStatus(s);
+  }
+
+  protected void setSelected(LayerListItem layerListItem){
+    imageEditorStackGroup.setSelectedLayer(layerListItem);
   }
 }

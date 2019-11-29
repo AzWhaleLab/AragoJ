@@ -55,8 +55,7 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
       addVertex(pos.getX(), pos.getY(), false);
       if (i + 1 == verts.size()) {
         EditorItemPosition initialVert = verts.get(0);
-        addVertex(initialVert.getX(), initialVert.getY(), true);
-        completeArea(false);
+        addVertex(initialVert.getX(), initialVert.getY(), false);
       }
     }
   }
@@ -91,7 +90,12 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
   private void completeArea(boolean emitCallback) {
     isFinished = true;
     calculateArea();
-    if (emitCallback) areaChangeEventHandler.onAreaComplete(this);
+    if (emitCallback) {
+      setSelected(true);
+      areaChangeEventHandler.onAreaComplete(this);
+    } else {
+      setSelected(false);
+    }
   }
 
   public void calculateArea() {
@@ -113,6 +117,9 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
 
     boolean hasPolygon = polygon != null;
     polygon = new Polygon(points);
+    polygon.setOnMousePressed(event -> {
+      if (areaEventHandler != null) areaEventHandler.onAreaPressed(event, this);
+    });
     polygon.setFill(color);
     polygon.setOpacity(opacity);
     if (!hasPolygon) {
@@ -128,7 +135,7 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
     return Utility.roundTwoDecimals(cachedArea);
   }
 
-  public void addVertex(double x, double y, boolean skipVertexShape) {
+  public void addVertex(double x, double y, boolean emitCompleteCallback) {
     if (isFinished) return;
     double actualX = x;
     double actualY = y;
@@ -144,7 +151,7 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
         LineGroup lastLine = lines.get(lines.size() - 1);
         lastLine.setEndPoint(actualX, actualY);
       }
-      completeArea(true);
+      completeArea(emitCompleteCallback);
     } else {
       // Add the point
       PointGroup pointGroup = new PointGroup(actualX, actualY, 1);
@@ -274,7 +281,7 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
     }
   }
 
-  @Override public void setSelected(boolean selected) {
+  @Override public void onSelected(boolean selected) {
     for (LineGroup line : lines) {
       line.setSelected(selected);
     }
@@ -285,6 +292,8 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
 
   public interface AreaEventHandler extends ToolEventHandler {
     void onPointDrag(MouseEvent event, AreaGroup areaGroup, int pointIndex);
+
+    void onAreaPressed(MouseEvent event, AreaGroup areaGroup);
   }
 
   public interface AreaChangeEventHandler extends ToolEventHandler {

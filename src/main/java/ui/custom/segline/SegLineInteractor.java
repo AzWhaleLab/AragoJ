@@ -25,7 +25,7 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
   public void onPointDrag(MouseEvent event, SegLineGroup segLineGroup, int pointIndex) {
     if (event.isControlDown()) return;
 
-    if (getCurrentMode() == ImageEditorStackGroup.Mode.SELECT) {
+    if (segLineGroup.isSelected() && getCurrentMode() == ImageEditorStackGroup.Mode.SELECT) {
       if (event.isShiftDown() && (pointIndex == 0
           || pointIndex == segLineGroup.getLastPointIndex())) {
         if (pointIndex == 0) {
@@ -56,6 +56,13 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
       LineGroup line = segLineGroup.getSubLine(lineIndex);
       setHelperLineAngle(line.getLineAngle());
       setCurrentMode(ImageEditorStackGroup.Mode.LINE_ANG);
+    }
+  }
+
+  @Override public void onSegLineGroupPressed(MouseEvent event, SegLineGroup segLineGroup) {
+    if(getCurrentMode() == ImageEditorStackGroup.Mode.SELECT) {
+      event.consume();
+      setSelected(segLineGroup);
     }
   }
 

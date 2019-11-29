@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.DoubleProperty;
+import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import session.model.EditorItemPosition;
@@ -50,6 +51,10 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
     for (EditorItemPosition pos : verts) {
       addPoint(pos.getX(), pos.getY());
     }
+    finish();
+    setOnMousePressed(event -> {
+      if(eventHandler != null) eventHandler.onSegLineGroupPressed(event, this);
+    });
   }
 
   public SegLineGroup(String name, double startPointX, double startPointY,
@@ -64,6 +69,9 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
     this.color = color;
 
     addPoint(startPointX, startPointY);
+    setOnMousePressed(event -> {
+      if(eventHandler != null) eventHandler.onSegLineGroupPressed(event, this);
+    });
   }
 
   public void moveLastVertex(double x, double y) {
@@ -267,7 +275,7 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
     }
   }
 
-  @Override public void setSelected(boolean selected) {
+  @Override public void onSelected(boolean selected) {
     lines.forEach((lineGroup -> lineGroup.setSelected(selected)));
     points.forEach((pointGroup -> pointGroup.setSelected(selected)));
   }
@@ -282,8 +290,10 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
     if (lines.size() == 0) {
       getChildren().clear();
       points.clear();
+    } else {
+      calculateLength();
+      setSelected(true);
     }
-    calculateLength();
     if (changeEventHandler != null) changeEventHandler.onSegLineChange(this);
   }
 
@@ -313,6 +323,8 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
     void onPointDrag(MouseEvent event, SegLineGroup segLineGroup, int pointIndex);
 
     void onLineClicked(MouseEvent event, SegLineGroup segLineGroup, int lineIndex);
+
+    void onSegLineGroupPressed(MouseEvent event, SegLineGroup segLineGroup);
 
     void onPointReleased(MouseEvent event, SegLineGroup segLineGroup, int pointIndex);
   }

@@ -100,6 +100,7 @@ public class AngleGroup extends SelectableGroup implements LayerListItem {
       bcLine.setEndPoint(x, y);
       getChildren().addAll(cPoint);
       calculateAngle();
+      setSelected(true);
     }
     return true;
   }
@@ -146,6 +147,9 @@ public class AngleGroup extends SelectableGroup implements LayerListItem {
     });
     pointGroup.setOnMouseReleased(event -> {
       eventHandler.onPointReleased(event, this, i);
+    });
+    pointGroup.setOnMousePressed(event -> {
+      eventHandler.onMousePressed(event, this, i);
     });
   }
 
@@ -219,7 +223,7 @@ public class AngleGroup extends SelectableGroup implements LayerListItem {
     if (angleLine != null) angleLine.setScale(value);
   }
 
-  @Override public void setSelected(boolean selected) {
+  @Override public void onSelected(boolean selected) {
     if (abLine != null) abLine.setSelected(selected);
     if (bcLine != null) bcLine.setSelected(selected);
     if (aPoint != null) aPoint.setSelected(selected);
@@ -240,6 +244,8 @@ public class AngleGroup extends SelectableGroup implements LayerListItem {
 
   public interface AngleEventHandler extends ToolEventHandler {
     void onPointDrag(MouseEvent event, AngleGroup angleGroup, int pointIndex);
+
+    void onMousePressed(MouseEvent event, AngleGroup angleGroup, int pointIndex);
 
     void onPointReleased(MouseEvent event, AngleGroup angleGroup, int pointIndex);
   }

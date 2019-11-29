@@ -84,6 +84,7 @@ import ui.custom.angle.AngleGroup;
 import ui.custom.area.AreaGroup;
 import ui.custom.segline.SegLineGroup;
 import ui.model.ImageItem;
+import ui.model.LayerListItem;
 import ui.model.ScaleRatio;
 import ui.model.UIEditorItem;
 import ui.tasks.ProgressDialog;
@@ -97,7 +98,7 @@ import utils.jfx.JFXTabPane;
 
 public class MainDialogController
     implements ImageEditorStackGroup.ModeListener, ImageEditorStackGroup.ElementListener,
-    LayerTabPageController.LineChangeListener, ScaleDialogController.OnActionListener,
+    LayerTabPageController.LayerChangeListener, ScaleDialogController.OnActionListener,
     ConvertUnitsDialogController.OnActionListener, UndistortDialog.OnActionListener,
     UndistortProgressDialogController.UndistortCallback, ZoomableScrollPane.ZoomChangeListener,
     FilterDialog.OnActionListener {
@@ -313,8 +314,7 @@ public class MainDialogController
                   imageEditorStackGroup.setImage(new PixelatedImageView(image));
 
                   imageEditorStackGroup.setCurrentScale(editorItem.getScaleRatio());
-                  imageEditorScrollPane.loadEditorItem(editorItem,
-                      layerTabPageController);
+                  imageEditorScrollPane.loadEditorItem(editorItem, layerTabPageController);
                   if (editorItem.hasScaleRatio()) {
                     convertUnitsMenuItem.setDisable(false);
                   } else {
@@ -615,6 +615,9 @@ public class MainDialogController
           .select(1);
       miscTabPane.setDisable(true);
       setLineEditorVisual(null);
+      if (imageEditorStackGroup != null) {
+        imageEditorStackGroup.setCurrentMode(null);
+      }
     } else {
       editorCursorBtn.setDisable(false);
       editorLineBtn.setDisable(false);
@@ -653,6 +656,14 @@ public class MainDialogController
     setLineEditorVisual(mode);
   }
 
+  @Override public void onLayerSelected(LayerListItem item) {
+    layerTabPageController.setSelected(item);
+  }
+
+  @Override public void deselect() {
+    layerTabPageController.deselect();
+  }
+
   @Override public void onLineAdd(SegLineGroup line, boolean editorItemLoad) {
     if (!editorItemLoad) {
       getSelectedEditorItem().getEditorItem()
@@ -662,6 +673,9 @@ public class MainDialogController
           .select(0);
     }
     layerTabPageController.addLayer(line);
+    if (!editorItemLoad) {
+      layerTabPageController.selectLastLayer();
+    }
 
     imageEditorStackGroup.setColorHelperLinesVisible(identifierLinesCheckItem.isSelected());
   }
@@ -675,6 +689,9 @@ public class MainDialogController
           .select(0);
     }
     layerTabPageController.addLayer(angle);
+    if (!editorItemLoad) {
+      layerTabPageController.selectLastLayer();
+    }
   }
 
   @Override public void onAreaAdd(AreaGroup area, boolean sessionLoad) {
@@ -686,6 +703,9 @@ public class MainDialogController
           .select(0);
     }
     layerTabPageController.addLayer(area);
+    if (!sessionLoad) {
+      layerTabPageController.selectLastLayer();
+    }
   }
 
   @Override public void onLineChange(SegLineGroup lineGroup) {
@@ -864,6 +884,10 @@ public class MainDialogController
     getSelectedEditorItem().getEditorItem()
         .getLayers()
         .add(equationItem);
+  }
+
+  @Override public void onLayersSelected(List<LayerListItem> items) {
+    imageEditorStackGroup.setSelectedLayers(items);
   }
 
   @Override public void onZoomChange(double hValue, double vValue) {
@@ -1247,11 +1271,11 @@ public class MainDialogController
     startDialogFilter(new SobelEdgeFilter(), Translator.getString("edgeDetection"));
   }
 
-  public void onSharpen(ActionEvent actionEvent){
+  public void onSharpen(ActionEvent actionEvent) {
     startDialogFilter(new SharpenFilter(), Translator.getString("sharpen"));
   }
 
-  private void startDialogFilter(Filter filter, String title){
+  private void startDialogFilter(Filter filter, String title) {
     try {
       OpenCVManager.loadOpenCV();
       Image img = imageManager.getCachedImage();
