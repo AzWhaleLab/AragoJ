@@ -1,5 +1,6 @@
 package ui.custom.angle;
 
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import ui.custom.ImageEditorStackGroup;
 import ui.custom.base.Interactor;
@@ -11,7 +12,9 @@ public class AngleInteractor extends Interactor implements AngleGroup.AngleEvent
   }
 
   @Override public void onPointDrag(MouseEvent event, AngleGroup angleGroup, int pointIndex) {
-    if(angleGroup.isSelected() && getCurrentMode() == ImageEditorStackGroup.Mode.SELECT){
+    if (angleGroup.isSelected()
+        && getCurrentMode() == ImageEditorStackGroup.Mode.SELECT
+        && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
       angleGroup.movePoint(pointIndex, event.getX(), event.getY());
       setStatus(angleGroup.getStatus());
@@ -19,7 +22,8 @@ public class AngleInteractor extends Interactor implements AngleGroup.AngleEvent
   }
 
   @Override public void onMousePressed(MouseEvent event, AngleGroup angleGroup, int pointIndex) {
-    if(getCurrentMode() == ImageEditorStackGroup.Mode.SELECT){
+    if (getCurrentMode() == ImageEditorStackGroup.Mode.SELECT
+        && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
       setSelected(angleGroup);
     }

@@ -12,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -38,6 +39,7 @@ import static ui.custom.ImageEditorStackGroup.Mode.ANG_POINT_SELECT;
 import static ui.custom.ImageEditorStackGroup.Mode.AREA_VERTICE_SELECT;
 import static ui.custom.ImageEditorStackGroup.Mode.LINE_ANG;
 import static ui.custom.ImageEditorStackGroup.Mode.LINE_POINT_SELECT;
+import static ui.custom.ImageEditorStackGroup.Mode.SELECT;
 
 /**
  * Group responsible for layering measuring tools over the image
@@ -124,9 +126,6 @@ public class ImageEditorStackGroup extends Group
     if (e.getCode() == KeyCode.ESCAPE) {
       cancelOrFinishModes();
     }
-    if (e.getCode() == KeyCode.DELETE) {
-      //deleteSelectedItem();
-    }
   };
 
   private EventHandler<MouseEvent> mouseMovedHandler = e -> {
@@ -162,87 +161,97 @@ public class ImageEditorStackGroup extends Group
 
   private EventHandler<MouseEvent> mousePressedHandler = e -> {
     requestFocus();
-    if (e.isControlDown() || currentMode == Mode.PAN) return;
-
-    if (currentMode == ImageEditorStackGroup.Mode.ZOOM) {
-      e.consume();
-      VBox vBox = (VBox) ((ImageEditorStackGroup) e.getSource()).getParent()
-          .getParent();
-      ZoomableScrollPane scrollPane = (ZoomableScrollPane) vBox.getParent()
-          .getParent()
-          .getParent();
-      Point2D point = vBox.sceneToLocal(new Point2D(e.getSceneX(), e.getSceneY()));
-      if (e.isPrimaryButtonDown()) {
-        scrollPane.onScroll(3, point);
-      } else if (e.isSecondaryButtonDown()) {
-        scrollPane.onScroll(-3, point);
-      }
+    if (e.isControlDown() || currentMode == Mode.PAN) {
+      return;
     }
 
-    if (currentMode == Mode.LINE_POINT_SELECT || currentMode == ANG_POINT_SELECT) {
-      e.consume();
-      SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
-      if (currentMode == ANG_POINT_SELECT) {
-        segLineGroup.addPointInPosition();
-        segLineGroup.finish();
-        currentMode = Mode.LINE_ANG_SEL;
+    if (e.getButton() == MouseButton.SECONDARY) {
+      if (currentMode == SELECT) {
+
       } else {
-        segLineGroup.addPointInPosition();
+        cancelOrFinishModes();
       }
-      if (segLineGroup.hasMinimumPoints()) {
-        reportLayerAdd(segLineGroup, false);
+    } else if (e.getButton() == MouseButton.PRIMARY) {
+      if (currentMode == ImageEditorStackGroup.Mode.ZOOM) {
+        e.consume();
+        VBox vBox = (VBox) ((ImageEditorStackGroup) e.getSource()).getParent()
+            .getParent();
+        ZoomableScrollPane scrollPane = (ZoomableScrollPane) vBox.getParent()
+            .getParent()
+            .getParent();
+        Point2D point = vBox.sceneToLocal(new Point2D(e.getSceneX(), e.getSceneY()));
+        if (e.isPrimaryButtonDown()) {
+          scrollPane.onScroll(3, point);
+        } else if (e.isSecondaryButtonDown()) {
+          scrollPane.onScroll(-3, point);
+        }
       }
-    }
 
-    if (currentMode == Mode.LINE_CREATION || currentMode == LINE_ANG) {
-      e.consume();
-      deselect();
-      // Create a new line
-      SegLineGroup line =
-          new SegLineGroup("Line_" + lineCount++, e.getX(), e.getY(), segLineInteractor, this,
-              currentPickedColor, scaleXProperty());
-      addInternalElement(line);
-      currentSelectedItemIndex = elements.size() - 1;
-      if (currentMode == LINE_ANG) {
-        currentMode = ANG_POINT_SELECT;
-      } else {
-        currentMode = LINE_POINT_SELECT;
+      if (currentMode == Mode.LINE_POINT_SELECT || currentMode == ANG_POINT_SELECT) {
+        e.consume();
+        SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
+        if (currentMode == ANG_POINT_SELECT) {
+          segLineGroup.addPointInPosition();
+          segLineGroup.finish();
+          currentMode = Mode.LINE_ANG_SEL;
+        } else {
+          segLineGroup.addPointInPosition();
+        }
+        if (segLineGroup.hasMinimumPoints()) {
+          reportLayerAdd(segLineGroup, false);
+        }
       }
-    }
 
-    if (currentMode == Mode.ANGLE_POINT_SELECT) {
-      e.consume();
-      AngleGroup angleGroup = ((AngleGroup) elements.get(elements.size() - 1));
-      boolean finished = angleGroup.addPoint(e.getX(), e.getY());
-      if (finished) {
-        reportLayerAdd(angleGroup, false);
-        setStatus("");
-        currentMode = Mode.ANGLE_CREATION;
+      if (currentMode == Mode.LINE_CREATION || currentMode == LINE_ANG) {
+        e.consume();
+        deselect();
+        // Create a new line
+        SegLineGroup line =
+            new SegLineGroup("Line_" + lineCount++, e.getX(), e.getY(), segLineInteractor, this,
+                currentPickedColor, scaleXProperty());
+        addInternalElement(line);
+        currentSelectedItemIndex = elements.size() - 1;
+        if (currentMode == LINE_ANG) {
+          currentMode = ANG_POINT_SELECT;
+        } else {
+          currentMode = LINE_POINT_SELECT;
+        }
       }
-    } else if (currentMode == Mode.ANGLE_CREATION) {
-      e.consume();
-      deselect();
-      AngleGroup angle =
-          new AngleGroup("Angle_" + angleCount++, e.getX(), e.getY(), angleInteractor, this,
-              scaleXProperty());
-      addInternalElement(angle);
-      currentSelectedItemIndex = elements.size() - 1;
-      currentMode = Mode.ANGLE_POINT_SELECT;
-    }
 
-    if (currentMode == Mode.AREA_VERTICE_SELECT) {
-      e.consume();
-      ((AreaGroup) elements.get(elements.size() - 1)).addVertex(e.getX(), e.getY(), true);
-    } else if (currentMode == Mode.AREA_CREATION) {
-      e.consume();
-      deselect();
-      currentMode = AREA_VERTICE_SELECT;
-      // Create a new line
-      AreaGroup areaGroup =
-          new AreaGroup("Area_" + areaCount++, e.getX(), e.getY(), areaInteractor, this,
-              currentPickedColor, scaleXProperty());
-      addInternalElement(areaGroup);
-      currentSelectedItemIndex = elements.size() - 1;
+      if (currentMode == Mode.ANGLE_POINT_SELECT) {
+        e.consume();
+        AngleGroup angleGroup = ((AngleGroup) elements.get(elements.size() - 1));
+        boolean finished = angleGroup.addPoint(e.getX(), e.getY());
+        if (finished) {
+          reportLayerAdd(angleGroup, false);
+          setStatus("");
+          currentMode = Mode.ANGLE_CREATION;
+        }
+      } else if (currentMode == Mode.ANGLE_CREATION) {
+        e.consume();
+        deselect();
+        AngleGroup angle =
+            new AngleGroup("Angle_" + angleCount++, e.getX(), e.getY(), angleInteractor, this,
+                scaleXProperty());
+        addInternalElement(angle);
+        currentSelectedItemIndex = elements.size() - 1;
+        currentMode = Mode.ANGLE_POINT_SELECT;
+      }
+
+      if (currentMode == Mode.AREA_VERTICE_SELECT) {
+        e.consume();
+        ((AreaGroup) elements.get(elements.size() - 1)).addVertex(e.getX(), e.getY(), true);
+      } else if (currentMode == Mode.AREA_CREATION) {
+        e.consume();
+        deselect();
+        currentMode = AREA_VERTICE_SELECT;
+        // Create a new line
+        AreaGroup areaGroup =
+            new AreaGroup("Area_" + areaCount++, e.getX(), e.getY(), areaInteractor, this,
+                currentPickedColor, scaleXProperty());
+        addInternalElement(areaGroup);
+        currentSelectedItemIndex = elements.size() - 1;
+      }
     }
   };
 
@@ -352,7 +361,7 @@ public class ImageEditorStackGroup extends Group
   /**
    * Removes a layer (line) from the ImageEditorStackGroup
    */
-  public void removeLineGroup(String name) {
+  public void removeLayerGroup(String name) {
     for (int i = 0; i < elements.size(); i++) {
       LayerListItem item = elements.get(i);
       if (item.getPrimaryText()
@@ -467,6 +476,7 @@ public class ImageEditorStackGroup extends Group
     }
     if (elementListener != null) elementListener.deselect();
   }
+
 
   /**
    * Area

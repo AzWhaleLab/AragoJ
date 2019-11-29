@@ -1,6 +1,7 @@
 package ui.custom.segline;
 
 import javafx.geometry.Point2D;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import ui.custom.ImageEditorStackGroup;
 import ui.custom.base.Interactor;
@@ -23,7 +24,7 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
   }
 
   public void onPointDrag(MouseEvent event, SegLineGroup segLineGroup, int pointIndex) {
-    if (event.isControlDown()) return;
+    if (event.isControlDown() || event.getButton() == MouseButton.SECONDARY) return;
 
     if (segLineGroup.isSelected() && getCurrentMode() == ImageEditorStackGroup.Mode.SELECT) {
       if (event.isShiftDown() && (pointIndex == 0
@@ -35,7 +36,7 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
               line.getEndPointY(), event.getX(), event.getY(), lineAngle, 0);
           segLineGroup.setPointPosition(point.getX(), point.getY(), pointIndex);
         } else {
-          LineGroup line = segLineGroup.getSubLine(pointIndex-1);
+          LineGroup line = segLineGroup.getSubLine(pointIndex - 1);
           double lineAngle = line.getLineAngle();
           Point2D point = PointUtils.getFinalCorrectedAnglePoint(getBounds(), line.getStartPointX(),
               line.getStartPointY(), event.getX(), event.getY(), lineAngle, 0);
@@ -51,7 +52,7 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
   }
 
   @Override public void onLineClicked(MouseEvent event, SegLineGroup segLineGroup, int lineIndex) {
-    if (getCurrentMode() == LINE_ANG_SEL) {
+    if (getCurrentMode() == LINE_ANG_SEL && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
       LineGroup line = segLineGroup.getSubLine(lineIndex);
       setHelperLineAngle(line.getLineAngle());
@@ -60,7 +61,8 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
   }
 
   @Override public void onSegLineGroupPressed(MouseEvent event, SegLineGroup segLineGroup) {
-    if(getCurrentMode() == ImageEditorStackGroup.Mode.SELECT) {
+    if (getCurrentMode() == ImageEditorStackGroup.Mode.SELECT
+        && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
       setSelected(segLineGroup);
     }

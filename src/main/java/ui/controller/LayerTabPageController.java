@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.ContextMenu;
@@ -34,7 +35,6 @@ public class LayerTabPageController
         }
       }
     });
-    setContextMenu();
     setupCellFactory();
     layerListView.setOnMousePressed(event -> {
       if (currentSelected != null && listener != null) {
@@ -46,6 +46,11 @@ public class LayerTabPageController
         .selectedItemProperty()
         .addListener((observable, oldValue, newValue) -> {
           currentSelected = newValue;
+          if(currentSelected != null){
+            setContextMenu();
+          } else {
+            layerListView.setContextMenu(null);
+          }
         });
   }
 
@@ -71,13 +76,20 @@ public class LayerTabPageController
 
   private void setContextMenu() {
     ContextMenu listItemContextMenu = new ContextMenu();
+    MenuItem unselect = new MenuItem(Translator.getString("unselect"));
     MenuItem removeContextItem = new MenuItem(Translator.getString("delete"));
 
+    unselect.setOnAction(event -> {
+      deselect();
+      if (listener != null) {
+        listener.onLayersSelected(Collections.emptyList());
+      }
+    });
     removeContextItem.setOnAction(event -> {
       removeSelectedLayer();
     });
     listItemContextMenu.getItems()
-        .setAll(removeContextItem);
+        .setAll(unselect, removeContextItem);
     layerListView.setContextMenu(listItemContextMenu);
   }
 

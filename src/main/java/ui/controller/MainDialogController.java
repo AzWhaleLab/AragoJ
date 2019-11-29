@@ -863,7 +863,7 @@ public class MainDialogController
         break;
       }
     }
-    imageEditorStackGroup.removeLineGroup(name);
+    imageEditorStackGroup.removeLayerGroup(name);
   }
 
   @Override public void onRenameLayer(String oldName, String newName) {
