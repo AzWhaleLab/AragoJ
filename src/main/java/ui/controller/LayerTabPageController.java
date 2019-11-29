@@ -136,8 +136,8 @@ public class LayerTabPageController
     }
     LayerListItem item = layerListView.getItems()
         .get(index);
-    item.setPrimaryText(name);
     listener.onRenameLayer(item.getPrimaryText(), name);
+    item.setPrimaryText(name);
   }
 
   public void setSelected(LayerListItem item) {
