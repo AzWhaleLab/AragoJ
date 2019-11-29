@@ -290,6 +290,10 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
     }
   }
 
+  public void setColorHelpersVisible(boolean visible) {
+    polygon.setOpacity(visible ? 1 : 0);
+  }
+
   public interface AreaEventHandler extends ToolEventHandler {
     void onPointDrag(MouseEvent event, AreaGroup areaGroup, int pointIndex);
 

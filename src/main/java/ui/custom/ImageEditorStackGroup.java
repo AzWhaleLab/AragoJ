@@ -514,6 +514,9 @@ public class ImageEditorStackGroup extends Group
       if (item.getType() == LayerListItem.Type.LINE) {
         ((SegLineGroup) item).setColorHelpersVisible(visible);
       }
+        if (item.getType() == LayerListItem.Type.AREA) {
+            ((AreaGroup) item).setColorHelpersVisible(visible);
+        }
     }
   }
 

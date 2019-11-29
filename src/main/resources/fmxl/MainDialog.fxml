@@ -70,7 +70,7 @@
                             <Menu mnemonicParsing="false" text="%view">
                                 <items>
                                     <Menu mnemonicParsing="false" text="%layer">
-                                        <CheckMenuItem fx:id="identifierLinesCheckItem" mnemonicParsing="false" onAction="#onIdentifierLinesToggle" text="%identifierLines" selected="true" />
+                                        <CheckMenuItem fx:id="identifierLinesCheckItem" mnemonicParsing="false" onAction="#onIdentifierLinesToggle" text="%identifierShapes" selected="true" />
                                     </Menu>
                                 </items>
                             </Menu>
