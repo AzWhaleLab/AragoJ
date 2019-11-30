@@ -22,6 +22,8 @@
 <?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.ToggleGroup?>
 <StackPane fx:id="stackPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.controller.MainDialogController">
     <AnchorPane prefHeight="400.0" prefWidth="600.0"  >
         <children>
@@ -72,6 +74,14 @@
                                     <Menu mnemonicParsing="false" text="%layer">
                                         <CheckMenuItem fx:id="identifierLinesCheckItem" mnemonicParsing="false" onAction="#onIdentifierLinesToggle" text="%identifierShapes" selected="true" />
                                     </Menu>
+                                  <fx:define>
+                                    <ToggleGroup fx:id="pixelGridToggleGroup"/>
+                                  </fx:define>
+                                  <Menu mnemonicParsing="false" text="%pixelGrid">
+                                    <RadioMenuItem fx:id="pixelGridNoGridCheckItem" toggleGroup="$pixelGridToggleGroup" mnemonicParsing="false" onAction="#onPixelGridNoGrid" text="%noPixelGrid" selected="true" />
+                                    <RadioMenuItem fx:id="pixelGrid1PixelCheckItem" toggleGroup="$pixelGridToggleGroup" mnemonicParsing="false" onAction="#onPixelGrid1Pixel" text="%1pixelGrid" selected="true" />
+                                    <RadioMenuItem fx:id="pixelGridHalfPixelCheckItem" toggleGroup="$pixelGridToggleGroup" mnemonicParsing="false" onAction="#onPixelGridHalfPixel" text="%05pixelGrid" selected="true" />
+                                  </Menu>
                                 </items>
                             </Menu>
                             <Menu mnemonicParsing="false" text="%module">

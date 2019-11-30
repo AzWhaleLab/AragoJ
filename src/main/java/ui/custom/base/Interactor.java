@@ -34,4 +34,8 @@ public class Interactor {
   protected void setSelected(LayerListItem layerListItem){
     imageEditorStackGroup.setSelectedLayer(layerListItem);
   }
+
+  protected double correct(double coordinate){
+    return imageEditorStackGroup.getPixelGridManager().correct(coordinate);
+  }
 }

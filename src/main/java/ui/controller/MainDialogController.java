@@ -39,7 +39,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -77,11 +79,14 @@ import session.model.EditorItemSegLine;
 import session.model.Session;
 import ui.MainApplication;
 import ui.cellfactory.ImageListViewCell;
+import ui.custom.preferences.ColorLinesManager;
 import ui.custom.ImageEditorStackGroup;
+import ui.custom.preferences.PixelGridManager;
 import ui.custom.PixelatedImageView;
 import ui.custom.ZoomableScrollPane;
 import ui.custom.angle.AngleGroup;
 import ui.custom.area.AreaGroup;
+import ui.custom.preferences.ViewPreferencesManager;
 import ui.custom.segline.SegLineGroup;
 import ui.model.ImageItem;
 import ui.model.LayerListItem;
@@ -103,11 +108,16 @@ public class MainDialogController
     UndistortProgressDialogController.UndistortCallback, ZoomableScrollPane.ZoomChangeListener,
     FilterDialog.OnActionListener {
 
+
   private Preferences prefs;
 
   //// Menu Items
   // View items
   @FXML private CheckMenuItem identifierLinesCheckItem;
+  @FXML private ToggleGroup pixelGridToggleGroup;
+  @FXML public RadioMenuItem pixelGridNoGridCheckItem;
+  @FXML public RadioMenuItem pixelGrid1PixelCheckItem;
+  @FXML public RadioMenuItem pixelGridHalfPixelCheckItem;
 
   @FXML public MenuBar menuBar;
   private Menu pluginImportImagesMenuItem;
@@ -140,6 +150,7 @@ public class MainDialogController
   private ZoomableScrollPane imageEditorScrollPane;
 
   private ImageManager imageManager = new ImageManager();
+  private ViewPreferencesManager viewPreferencesManager = new ViewPreferencesManager();
 
   @FXML private StackPane stackPane;
 
@@ -440,10 +451,12 @@ public class MainDialogController
     ieColorPicker.setValue(currentPickedColor);
     ieDegreePicker.setText(NumberFormat.getInstance()
         .format(angle));
+    loadIdentifierShapesPrefs();
+    loadPixelGridToggle();
 
     // Initalize editor panes + groups.
     imageEditorStackGroup = new ImageEditorStackGroup(this, this, currentPickedColor, angle,
-        statusLabel.textProperty());
+        statusLabel.textProperty(), viewPreferencesManager);
     imageEditorScrollPane = new ZoomableScrollPane(imageEditorStackGroup, this);
     AnchorPane.setBottomAnchor(imageEditorScrollPane, 0.0);
     AnchorPane.setTopAnchor(imageEditorScrollPane, 0.0);
@@ -451,6 +464,22 @@ public class MainDialogController
     AnchorPane.setRightAnchor(imageEditorScrollPane, 0.0);
     imageEditorStackPane.getChildren()
         .setAll(imageEditorScrollPane);
+  }
+
+  private void loadIdentifierShapesPrefs() {
+    boolean show = viewPreferencesManager.getColorLinesManager().isColorShapesVisible();
+    identifierLinesCheckItem.setSelected(show);
+  }
+
+  private void loadPixelGridToggle() {
+    double step = viewPreferencesManager.getPixelGridManager().getStep();
+    if(step == 1){
+      pixelGridToggleGroup.selectToggle(pixelGrid1PixelCheckItem);
+    } else if(step == 0.5){
+      pixelGridToggleGroup.selectToggle(pixelGridHalfPixelCheckItem);
+    } else {
+      pixelGridToggleGroup.selectToggle(pixelGridNoGridCheckItem);
+    }
   }
 
   private void setEditorButtonListeners() {
@@ -676,8 +705,6 @@ public class MainDialogController
     if (!editorItemLoad) {
       layerTabPageController.selectLastLayer();
     }
-
-    imageEditorStackGroup.setColorHelperLinesVisible(identifierLinesCheckItem.isSelected());
   }
 
   @Override public void onAngleAdd(AngleGroup angle, boolean editorItemLoad) {
@@ -756,14 +783,6 @@ public class MainDialogController
   /**
    * Menu Items
    */
-  @FXML public void onIdentifierLinesToggle(ActionEvent actionEvent) {
-    CheckMenuItem item = (CheckMenuItem) actionEvent.getSource();
-    if (item.isSelected()) {
-      imageEditorStackGroup.setColorHelperLinesVisible(true);
-    } else {
-      imageEditorStackGroup.setColorHelperLinesVisible(false);
-    }
-  }
 
   @FXML public void convertViaScale(ActionEvent actionEvent) {
     ScaleDialogController scaleDialog = new ScaleDialogController();
@@ -1325,5 +1344,27 @@ public class MainDialogController
           }
         }, filter, filterArguments, imageManager.getCachedImage(), imageItem.getOriginalPath()), true,
         false, stackPane);
+  }
+
+  /**
+   * View menu items
+   */
+
+  @FXML public void onIdentifierLinesToggle(ActionEvent actionEvent) {
+    CheckMenuItem item = (CheckMenuItem) actionEvent.getSource();
+    viewPreferencesManager.saveColorShapesPreferences(item.isSelected());
+    imageEditorStackGroup.setColorHelperLinesVisible(item.isSelected());
+  }
+
+  @FXML public void onPixelGridNoGrid(ActionEvent actionEvent) {
+    viewPreferencesManager.savePixelGridPreferences(-1);
+  }
+
+  @FXML public void onPixelGrid1Pixel(ActionEvent actionEvent) {
+    viewPreferencesManager.savePixelGridPreferences(1);
+  }
+
+  @FXML public void onPixelGridHalfPixel(ActionEvent actionEvent) {
+    viewPreferencesManager.savePixelGridPreferences(0.5);
   }
 }

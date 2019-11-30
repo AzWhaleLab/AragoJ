@@ -34,12 +34,12 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
   private boolean isFinished;
 
   private Polygon polygon;
-  private float opacity;
+  private double opacity;
 
   private double cachedArea;
 
   public AreaGroup(EditorItemArea area, AreaEventHandler areaEventHandler,
-      AreaChangeEventHandler handler, DoubleProperty scale) {
+      AreaChangeEventHandler handler, boolean isVisible, DoubleProperty scale) {
     super(scale);
     this.vertices = new ArrayList<>();
     this.lines = new ArrayList<>();
@@ -47,7 +47,7 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
     this.name = area.getName();
     this.color = Color.valueOf(area.getColor());
     this.areaEventHandler = areaEventHandler;
-    setGroupOpacity(0.5f);
+    setGroupOpacity(isVisible ? 0.5 : 0);
 
     List<EditorItemPosition> verts = area.getVertices();
     for (int i = 0; i < verts.size(); i++) {
@@ -61,7 +61,7 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
   }
 
   public AreaGroup(String name, double startPointX, double startPointY,
-      AreaEventHandler areaEventHandler, AreaChangeEventHandler handler, Color color,
+      AreaEventHandler areaEventHandler, AreaChangeEventHandler handler, Color color, boolean isVisible,
       DoubleProperty scale) {
     super(scale);
     this.lines = new ArrayList<>();
@@ -72,11 +72,11 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
     this.color = color;
     this.isFinished = false;
 
-    setGroupOpacity(0.5f);
+    setGroupOpacity(isVisible ? 0.5 : 0);
     addVertex(startPointX, startPointY, false);
   }
 
-  private void setGroupOpacity(float opacity) {
+  private void setGroupOpacity(double opacity) {
     this.opacity = opacity;
     if (polygon != null) {
       polygon.setOpacity(opacity);
@@ -291,7 +291,12 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
   }
 
   public void setColorHelpersVisible(boolean visible) {
-    polygon.setOpacity(visible ? 1 : 0);
+    if(visible){
+      opacity = 0.5;
+    } else {
+      opacity = 0;
+    }
+    polygon.setOpacity(opacity);
   }
 
   public interface AreaEventHandler extends ToolEventHandler {

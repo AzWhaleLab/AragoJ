@@ -139,7 +139,7 @@ public class CalibrationDialogController implements ImageEditorStackGroup.ModeLi
 
   private void initializePanes() {
     // Initalize editor panes + groups.
-    imageEditorStackGroup = new ImageEditorStackGroup(this, null, null, 0, null);
+    imageEditorStackGroup = new ImageEditorStackGroup(this, null, null, 0, null, null);
     imageEditorScrollPane = new ZoomableScrollPane(imageEditorStackGroup, null);
     AnchorPane.setBottomAnchor(imageEditorScrollPane, 0.0);
     AnchorPane.setTopAnchor(imageEditorScrollPane, 0.0);

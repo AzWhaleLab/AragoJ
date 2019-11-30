@@ -26,6 +26,9 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
   public void onPointDrag(MouseEvent event, SegLineGroup segLineGroup, int pointIndex) {
     if (event.isControlDown() || event.getButton() == MouseButton.SECONDARY) return;
 
+    double x = correct(event.getX());
+    double y = correct(event.getY());
+
     if (segLineGroup.isSelected() && getCurrentMode() == ImageEditorStackGroup.Mode.SELECT) {
       if (event.isShiftDown() && (pointIndex == 0
           || pointIndex == segLineGroup.getLastPointIndex())) {
@@ -33,18 +36,18 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
           LineGroup line = segLineGroup.getSubLine(pointIndex);
           double lineAngle = line.getLineAngle();
           Point2D point = PointUtils.getFinalCorrectedAnglePoint(getBounds(), line.getEndPointX(),
-              line.getEndPointY(), event.getX(), event.getY(), lineAngle, 0);
+              line.getEndPointY(), x, y, lineAngle, 0);
           segLineGroup.setPointPosition(point.getX(), point.getY(), pointIndex);
         } else {
           LineGroup line = segLineGroup.getSubLine(pointIndex - 1);
           double lineAngle = line.getLineAngle();
           Point2D point = PointUtils.getFinalCorrectedAnglePoint(getBounds(), line.getStartPointX(),
-              line.getStartPointY(), event.getX(), event.getY(), lineAngle, 0);
+              line.getStartPointY(), x, y, lineAngle, 0);
           segLineGroup.setPointPosition(point.getX(), point.getY(), pointIndex);
         }
       } else {
-        double correctedX = PointUtils.getCorrectedPointX(getBounds(), event.getX());
-        double correctedY = PointUtils.getCorrectedPointY(getBounds(), event.getY());
+        double correctedX = PointUtils.getCorrectedPointX(getBounds(), x);
+        double correctedY = PointUtils.getCorrectedPointY(getBounds(), y);
         segLineGroup.setPointPosition(correctedX, correctedY, pointIndex);
       }
       setStatus(segLineGroup.getStatus(pointIndex));

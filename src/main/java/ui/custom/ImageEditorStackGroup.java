@@ -27,6 +27,8 @@ import ui.custom.area.AreaInteractor;
 import ui.custom.base.LineGroup;
 import ui.custom.base.PointGroup;
 import ui.custom.base.selection.SelectableGroup;
+import ui.custom.preferences.PixelGridManager;
+import ui.custom.preferences.ViewPreferencesManager;
 import ui.custom.segline.SegLineGroup;
 import ui.custom.segline.SegLineInteractor;
 import ui.model.LayerListItem;
@@ -68,6 +70,8 @@ public class ImageEditorStackGroup extends Group
   private int areaCount;
   private int angleCount;
 
+  private ViewPreferencesManager viewPreferencesManager;
+
   private Mode currentMode;
   private ScaleRatio currentScale;
 
@@ -81,7 +85,8 @@ public class ImageEditorStackGroup extends Group
   private StringProperty status;
 
   public ImageEditorStackGroup(ModeListener modeListener, ElementListener elementListener,
-      Color color, double angle, StringProperty statusProperty) {
+      Color color, double angle, StringProperty statusProperty,
+      ViewPreferencesManager viewPreferencesManager) {
     super();
     lineCount = 1;
     areaCount = 1;
@@ -90,6 +95,7 @@ public class ImageEditorStackGroup extends Group
     prefs = Preferences.userNodeForPackage(MainApplication.class);
     addedLineAngle = angle;
     currentPickedColor = color;
+    this.viewPreferencesManager = viewPreferencesManager;
     this.modeListener = modeListener;
     this.elementListener = elementListener;
     elements = new ArrayList<>();
@@ -110,7 +116,6 @@ public class ImageEditorStackGroup extends Group
 
   private void setListeners() {
     setOnMousePressed(mousePressedHandler);
-    setOnMouseDragged(mouseDraggedHandler);
     setOnMouseMoved(mouseMovedHandler);
 
     setOnKeyPressed(keyPressedHandler);
@@ -131,30 +136,34 @@ public class ImageEditorStackGroup extends Group
   private EventHandler<MouseEvent> mouseMovedHandler = e -> {
     if (e.isControlDown() || currentMode == Mode.PAN) return;
 
+    double x = viewPreferencesManager.getPixelGridManager()
+        .correct(e.getX());
+    double y = viewPreferencesManager.getPixelGridManager()
+        .correct(e.getY());
     if (currentMode == Mode.AREA_VERTICE_SELECT) {
-      ((AreaGroup) elements.get(elements.size() - 1)).moveLastVertex(e.getX(), e.getY());
+      ((AreaGroup) elements.get(elements.size() - 1)).moveLastVertex(x, y);
     } else if (currentMode == LINE_POINT_SELECT) {
       SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
       if (e.isShiftDown()) {
         LineGroup line = segLineGroup.getSubLine(segLineGroup.getLastPointIndex());
         double lineAngle = line.getLineAngle();
         Point2D point = PointUtils.getFinalCorrectedAnglePoint(getBounds(), line.getStartPointX(),
-            line.getStartPointY(), e.getX(), e.getY(), lineAngle, 0);
+            line.getStartPointY(), x, y, lineAngle, 0);
         segLineGroup.moveLastVertex(point.getX(), point.getY());
       } else {
-        segLineGroup.moveLastVertex(e.getX(), e.getY());
+        segLineGroup.moveLastVertex(x, y);
       }
       status.setValue(segLineGroup.getStatus());
     } else if (currentMode == ANG_POINT_SELECT) {
       SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
       PointGroup pointGroup = segLineGroup.getPoint(0);
       Point2D point =
-          PointUtils.getFinalCorrectedAnglePoint(bounds, pointGroup.getX(), pointGroup.getY(),
-              e.getX(), e.getY(), helperLineAngle, addedLineAngle);
+          PointUtils.getFinalCorrectedAnglePoint(bounds, pointGroup.getX(), pointGroup.getY(), x, y,
+              helperLineAngle, addedLineAngle);
       segLineGroup.moveLastVertex(point.getX(), point.getY());
     } else if (currentMode == ANGLE_POINT_SELECT) {
       AngleGroup angleGroup = ((AngleGroup) elements.get(elements.size() - 1));
-      angleGroup.moveLastPoint(e.getX(), e.getY());
+      angleGroup.moveLastPoint(x, y);
       status.setValue(angleGroup.getStatus());
     }
   };
@@ -164,6 +173,11 @@ public class ImageEditorStackGroup extends Group
     if (e.isControlDown() || currentMode == Mode.PAN) {
       return;
     }
+
+    double x = viewPreferencesManager.getPixelGridManager()
+        .correct(e.getX());
+    double y = viewPreferencesManager.getPixelGridManager()
+        .correct(e.getY());
 
     if (e.getButton() == MouseButton.SECONDARY) {
       if (currentMode == SELECT) {
@@ -206,9 +220,9 @@ public class ImageEditorStackGroup extends Group
         e.consume();
         deselect();
         // Create a new line
-        SegLineGroup line =
-            new SegLineGroup("Line_" + lineCount++, e.getX(), e.getY(), segLineInteractor, this,
-                currentPickedColor, scaleXProperty());
+        SegLineGroup line = new SegLineGroup("Line_" + lineCount++, x, y, segLineInteractor, this,
+            currentPickedColor, viewPreferencesManager.getColorLinesManager()
+            .isColorShapesVisible(), scaleXProperty());
         addInternalElement(line);
         currentSelectedItemIndex = elements.size() - 1;
         if (currentMode == LINE_ANG) {
@@ -221,7 +235,7 @@ public class ImageEditorStackGroup extends Group
       if (currentMode == Mode.ANGLE_POINT_SELECT) {
         e.consume();
         AngleGroup angleGroup = ((AngleGroup) elements.get(elements.size() - 1));
-        boolean finished = angleGroup.addPoint(e.getX(), e.getY());
+        boolean finished = angleGroup.addPoint(x, y);
         if (finished) {
           reportLayerAdd(angleGroup, false);
           setStatus("");
@@ -231,8 +245,7 @@ public class ImageEditorStackGroup extends Group
         e.consume();
         deselect();
         AngleGroup angle =
-            new AngleGroup("Angle_" + angleCount++, e.getX(), e.getY(), angleInteractor, this,
-                scaleXProperty());
+            new AngleGroup("Angle_" + angleCount++, x, y, angleInteractor, this, scaleXProperty());
         addInternalElement(angle);
         currentSelectedItemIndex = elements.size() - 1;
         currentMode = Mode.ANGLE_POINT_SELECT;
@@ -240,15 +253,16 @@ public class ImageEditorStackGroup extends Group
 
       if (currentMode == Mode.AREA_VERTICE_SELECT) {
         e.consume();
-        ((AreaGroup) elements.get(elements.size() - 1)).addVertex(e.getX(), e.getY(), true);
+        ((AreaGroup) elements.get(elements.size() - 1)).addVertex(x, y, true);
       } else if (currentMode == Mode.AREA_CREATION) {
         e.consume();
         deselect();
         currentMode = AREA_VERTICE_SELECT;
         // Create a new line
         AreaGroup areaGroup =
-            new AreaGroup("Area_" + areaCount++, e.getX(), e.getY(), areaInteractor, this,
-                currentPickedColor, scaleXProperty());
+            new AreaGroup("Area_" + areaCount++, x, y, areaInteractor, this, currentPickedColor,
+                viewPreferencesManager.getColorLinesManager()
+                    .isColorShapesVisible(), scaleXProperty());
         addInternalElement(areaGroup);
         currentSelectedItemIndex = elements.size() - 1;
       }
@@ -258,29 +272,6 @@ public class ImageEditorStackGroup extends Group
   public Bounds getBounds() {
     return bounds;
   }
-
-  /**
-   * Handles on mouse dragged event: - Updates either start or end X and Y position of a line.
-   */
-  private EventHandler<MouseEvent> mouseDraggedHandler = event -> {
-    // TODO
-    if (event.isControlDown() || currentMode == Mode.PAN || currentSelectedItemIndex == -1) return;
-    //LayerListItem item = elements.get(currentSelectedItemIndex);
-    //if (item.getType() == LayerListItem.Type.LINE) {
-    //    SegLineGroup line = (SegLineGroup) item;
-    //    if (currentMode == Mode.LINE && currentSelectedItemIndex != -1) {
-    //        line.setEndPoint(getCorrectedPointX(bounds, event.getX()), getCorrectedPointY(bounds, event.getY()));
-    //    }
-    //    if (currentMode == Mode.ANG && currentSelectedItemIndex != -1) {
-    //        event.consume();
-    //        double length = getDeltaAngledLineLength(line, event.getX(), event.getY(), helperLineAngle + addedLineAngle, true);
-    //        double x = getAngledPointX(helperLineAngle, line.getStartPointX(), length, true);
-    //        double y = getAngledPointY(helperLineAngle, line.getStartPointY(), length, true);
-    //        line.setEndPoint(getCorrectedPointX(bounds, x), getCorrectedPointY(bounds, y));
-    //    }
-    //}
-
-  };
 
   public Color getCurrentPickedColor() {
     return currentPickedColor;
@@ -305,13 +296,17 @@ public class ImageEditorStackGroup extends Group
   }
 
   public void addAreaGroup(EditorItemArea layer) {
-    AreaGroup areaGroup = new AreaGroup(layer, areaInteractor, this, scaleXProperty());
+    AreaGroup areaGroup = new AreaGroup(layer, areaInteractor, this,
+        viewPreferencesManager.getColorLinesManager()
+            .isColorShapesVisible(), scaleXProperty());
     addElement(areaGroup, true);
     deselect();
   }
 
   public void addSegLineGroup(EditorItemSegLine segLine) {
-    SegLineGroup lineGroup = new SegLineGroup(segLine, segLineInteractor, this, scaleXProperty());
+    SegLineGroup lineGroup = new SegLineGroup(segLine, segLineInteractor, this,
+        viewPreferencesManager.getColorLinesManager()
+            .isColorShapesVisible(), scaleXProperty());
     addElement(lineGroup, true);
     deselect();
   }
@@ -477,7 +472,6 @@ public class ImageEditorStackGroup extends Group
     if (elementListener != null) elementListener.deselect();
   }
 
-
   /**
    * Area
    **/
@@ -514,10 +508,14 @@ public class ImageEditorStackGroup extends Group
       if (item.getType() == LayerListItem.Type.LINE) {
         ((SegLineGroup) item).setColorHelpersVisible(visible);
       }
-        if (item.getType() == LayerListItem.Type.AREA) {
-            ((AreaGroup) item).setColorHelpersVisible(visible);
-        }
+      if (item.getType() == LayerListItem.Type.AREA) {
+        ((AreaGroup) item).setColorHelpersVisible(visible);
+      }
     }
+  }
+
+  public PixelGridManager getPixelGridManager() {
+    return viewPreferencesManager.getPixelGridManager();
   }
 
   public void setLineCount(int count) {

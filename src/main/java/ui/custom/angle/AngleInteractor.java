@@ -12,11 +12,13 @@ public class AngleInteractor extends Interactor implements AngleGroup.AngleEvent
   }
 
   @Override public void onPointDrag(MouseEvent event, AngleGroup angleGroup, int pointIndex) {
+    double x = correct(event.getX());
+    double y = correct(event.getY());
     if (angleGroup.isSelected()
         && getCurrentMode() == ImageEditorStackGroup.Mode.SELECT
         && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
-      angleGroup.movePoint(pointIndex, event.getX(), event.getY());
+      angleGroup.movePoint(pointIndex, x, y);
       setStatus(angleGroup.getStatus());
     }
   }

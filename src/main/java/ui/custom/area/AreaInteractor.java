@@ -12,11 +12,13 @@ public class AreaInteractor extends Interactor implements AreaGroup.AreaEventHan
   }
 
   @Override public void onPointDrag(MouseEvent event, AreaGroup areaGroup, int pointIndex) {
+    double x = correct(event.getX());
+    double y = correct(event.getY());
     if (areaGroup.isSelected()
         && getCurrentMode() == ImageEditorStackGroup.Mode.SELECT
         && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
-      areaGroup.setVertexPosition(event.getX(), event.getY(), pointIndex);
+      areaGroup.setVertexPosition(x, y, pointIndex);
     }
   }
 

@@ -38,7 +38,7 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
   private double currentLength = 0;
 
   public SegLineGroup(EditorItemSegLine segLine, SegLineEventHandler eventHandler,
-      SegLineChangeEventHandler eventChangeHandler, DoubleProperty scalePropery) {
+      SegLineChangeEventHandler eventChangeHandler, boolean isVisible, DoubleProperty scalePropery) {
     super(scalePropery);
     this.points = new ArrayList<>();
     this.lines = new ArrayList<>();
@@ -46,6 +46,7 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
     this.eventHandler = eventHandler;
     this.name = segLine.getName();
     this.color = Color.valueOf(segLine.getColor());
+    this.opacity = isVisible ? 0.5 : 0;
 
     List<EditorItemPosition> verts = segLine.getPoints();
     for (EditorItemPosition pos : verts) {
@@ -58,7 +59,7 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
   }
 
   public SegLineGroup(String name, double startPointX, double startPointY,
-      SegLineEventHandler eventHandler, SegLineChangeEventHandler eventChangeHandler, Color color,
+      SegLineEventHandler eventHandler, SegLineChangeEventHandler eventChangeHandler, Color color, boolean isVisible,
       DoubleProperty scalePropery) {
     super(scalePropery);
     this.changeEventHandler = eventChangeHandler;
@@ -67,6 +68,7 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
     this.points = new ArrayList<>();
     this.name = name;
     this.color = color;
+    this.opacity = isVisible ? 0.5 : 0;
 
     addPoint(startPointX, startPointY);
     setOnMousePressed(event -> {
@@ -125,7 +127,13 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
   private void addPoint(double x, double y) {
     PointGroup pointGroup = new PointGroup(x, y, WIDTH / 2);
     pointGroup.setScale(getScale());
-    pointGroup.setGroupOpacity(opacity);
+    if(points.size() == 0){
+      pointGroup.setGroupOpacity(0);
+    } else {
+      PointGroup lastPoint = points.get(points.size() - 1);
+      lastPoint.setGroupOpacity(opacity);
+      pointGroup.setGroupOpacity(opacity);
+    }
     pointGroup.setOnMouseDragged(event -> {
       eventHandler.onPointDrag(event, this, points.indexOf(pointGroup));
     });
@@ -135,11 +143,12 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
     points.add(pointGroup);
     if (lines.size() > 0) {
       LineGroup lastLine = lines.get(lines.size() - 1);
+      lastLine.setGroupOpacity(opacity);
       lastLine.setEndPoint(x, y);
     }
     LineGroup lineGroup = new LineGroup(x, y, x, y, WIDTH, color);
     lineGroup.setScale(getScale());
-    lineGroup.setGroupOpacity(opacity);
+    lineGroup.setGroupOpacity(0);
     lineGroup.setOnMousePressed(event -> {
       eventHandler.onLineClicked(event, this, lines.indexOf(lineGroup));
       currentX = event.getX();
@@ -281,8 +290,13 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
   }
 
   public void setColorHelpersVisible(boolean visible) {
-    lines.forEach((lineGroup -> lineGroup.setColorVisibility(visible)));
-    points.forEach((pointGroup -> pointGroup.setCircleVisibility(visible)));
+    if(visible){
+      opacity = 0.5;
+    } else {
+      opacity = 0;
+    }
+    lines.forEach((lineGroup -> lineGroup.setGroupOpacity(opacity)));
+    points.forEach((pointGroup -> pointGroup.setGroupOpacity(opacity)));
   }
 
   public void finish() {

@@ -27,7 +27,6 @@ import ui.model.UIEditorItem;
 public class ExportCSV {
 
   public static void export(File file, Session session, List<UIEditorItem> uiEditorItems) {
-    ImageManager imageManager = new ImageManager();
     ArrayList<String> metadataNameList = new ArrayList<>();
     metadataNameList.add("Source");
     ArrayList<String> layerNameList = new ArrayList<>();
@@ -67,7 +66,7 @@ public class ExportCSV {
         String baseName = "";
         if (layer instanceof EditorItemSegLine) {
           SegLineGroup lineGroup =
-              new SegLineGroup((EditorItemSegLine) layer, null, null, new SimpleDoubleProperty(1));
+              new SegLineGroup((EditorItemSegLine) layer, null, null, false, new SimpleDoubleProperty(1));
           layerNameSB.append(lineGroup.getName())
               .append(" (px)");
           baseName = lineGroup.getName();
@@ -121,7 +120,7 @@ public class ExportCSV {
           for (EditorItemLayer layer2 : item2.getLayers()) {
             layerUnitNameSB = new StringBuilder();
             if (layer2 instanceof EditorItemSegLine) {
-              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer2, null, null,
+              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer2, null, null, false,
                   new SimpleDoubleProperty(1));
               if (lineGroup.getName()
                   .equals(baseName)) {
@@ -206,7 +205,7 @@ public class ExportCSV {
           ArrayList<EditorItemLayer> layers = item.getLayers();
           for (EditorItemLayer layer : layers) {
             if (layer instanceof EditorItemSegLine) {
-              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer, null, null,
+              SegLineGroup lineGroup = new SegLineGroup((EditorItemSegLine) layer, null, null, false,
                   new SimpleDoubleProperty(1));
               String lineName = lineGroup.getName() + " (px)";
               if (name.equals(lineName)) {
@@ -223,7 +222,7 @@ public class ExportCSV {
             } else if (layer instanceof EditorItemArea) {
               EditorItemArea editorItemArea = (EditorItemArea) layer;
               AreaGroup areaGroup =
-                  new AreaGroup(editorItemArea, null, null, new SimpleDoubleProperty(1));
+                  new AreaGroup(editorItemArea, null, null, false, new SimpleDoubleProperty(1));
               String areaName = editorItemArea.getName() + " (px\u00B2)";
               areaGroup.calculateArea();
 
