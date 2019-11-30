@@ -134,8 +134,6 @@ public class ImageEditorStackGroup extends Group
   };
 
   private EventHandler<MouseEvent> mouseMovedHandler = e -> {
-    if (e.isControlDown() || currentMode == Mode.PAN) return;
-
     double x = viewPreferencesManager.getPixelGridManager()
         .correct(e.getX());
     double y = viewPreferencesManager.getPixelGridManager()

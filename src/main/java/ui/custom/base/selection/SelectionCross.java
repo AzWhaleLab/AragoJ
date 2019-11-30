@@ -3,23 +3,22 @@ package ui.custom.base.selection;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
-import javafx.scene.shape.StrokeType;
+import javafx.scene.shape.Line;
 
 public class SelectionCross extends Group implements SelectionGroup {
 
-  private static final Color DEFAULT_COLOR = Color.WHITE;
-  private static final double THICKNESS = 0.05;
   private static final double LENGTH = 2;
   private double pointX;
   private double pointY;
 
-  private Rectangle rectH;
-  private Rectangle rectV;
+  private Line rectHInner;
+  private Line rectHOuter;
+  private Line rectVInner;
+  private Line rectVOuter;
+
+  private double currentScale;
 
   private Circle selectionCircle;
-  private Shape crossShape;
 
   public SelectionCross(double x, double y) {
     this(x, y, 0, 0);
@@ -28,28 +27,57 @@ public class SelectionCross extends Group implements SelectionGroup {
   public SelectionCross(double x, double y, double translateX, double translateY) {
     this.pointX = x;
     this.pointY = y;
-    this.rectH =
-        new Rectangle(pointX - (LENGTH / 2), pointY - (THICKNESS / 2.0), LENGTH, THICKNESS);
-    this.rectV =
-        new Rectangle(pointX - (THICKNESS / 2.0), pointY - (LENGTH / 2), THICKNESS, LENGTH);
-    this.crossShape = Shape.union(rectH, rectV);
-    crossShape.setFill(DEFAULT_COLOR);
-    crossShape.setStroke(Color.BLACK);
-    crossShape.setStrokeType(StrokeType.OUTSIDE);
-    crossShape.setStrokeWidth(0.01);
+    this.rectHInner = new Line(pointX - (LENGTH / 2), pointY, pointX + (LENGTH / 2), pointY);
+    rectHInner.setStroke(Color.WHITE);
+    this.rectHOuter = new Line(pointX - (LENGTH / 2), pointY, pointX + (LENGTH / 2), pointY);
+    rectHOuter.setStroke(Color.rgb(0, 0, 0, 0.5));
+    this.rectVInner = new Line(pointX, pointY - (LENGTH / 2.0), pointX, pointY + (LENGTH / 2.0));
+    rectVInner.setStroke(Color.WHITE);
+    this.rectVOuter = new Line(pointX, pointY - (LENGTH / 2.0), pointX, pointY + (LENGTH / 2.0));
+    rectVOuter.setStroke(Color.rgb(0, 0, 0, 0.5));
 
     this.selectionCircle = new Circle(pointX, pointY, LENGTH / 2);
     this.selectionCircle.setOpacity(0);
 
-    getChildren().addAll(crossShape, selectionCircle);
+    getChildren().addAll(rectHOuter, rectVOuter, rectHInner, rectVInner, selectionCircle);
     setTranslateX(translateX);
-    setTranslateX(translateY);
+    setTranslateY(translateY);
   }
 
   @Override public void setScale(double value) {
-    double scale = 1 / value;
-    setScaleX(Math.min(scale * 30, 60));
-    setScaleY(Math.min(scale * 30, 60));
+    this.currentScale = 1 / value;
+    updatePoint();
+  }
+
+  private void updatePoint() {
+    rectHInner.setStrokeWidth(currentScale);
+    rectVInner.setStrokeWidth(currentScale);
+    rectHOuter.setStrokeWidth(currentScale * 2);
+    rectVOuter.setStrokeWidth(currentScale * 2);
+
+    double scaledLength = Math.min((LENGTH / 2) * currentScale * 20, 10);
+    selectionCircle.setRadius(scaledLength);
+    selectionCircle.setCenterX(pointX);
+    selectionCircle.setCenterY(pointY);
+    rectHInner.setStartX(pointX - scaledLength);
+    rectHInner.setStartY(pointY);
+    rectHInner.setEndX(pointX + scaledLength);
+    rectHInner.setEndY(pointY);
+
+    rectHOuter.setStartX(pointX - scaledLength);
+    rectHOuter.setStartY(pointY);
+    rectHOuter.setEndX(pointX + scaledLength);
+    rectHOuter.setEndY(pointY);
+
+    rectVInner.setStartX(pointX);
+    rectVInner.setStartY(pointY - scaledLength);
+    rectVInner.setEndX(pointX);
+    rectVInner.setEndY(pointY + scaledLength);
+
+    rectVOuter.setStartX(pointX);
+    rectVOuter.setStartY(pointY - scaledLength);
+    rectVOuter.setEndX(pointX);
+    rectVOuter.setEndY(pointY + scaledLength);
   }
 
   @Override public void show() {
@@ -72,29 +100,10 @@ public class SelectionCross extends Group implements SelectionGroup {
         2);
   }
 
-  public void setColor(Color color) {
-    crossShape.setFill(color);
-  }
-
-  public void resetColor() {
-    setColor(DEFAULT_COLOR);
-  }
-
   public void setPoint(double x, double y) {
-    setLayoutX(x - getLayoutBounds().getMinX() - (getLayoutBounds().getWidth() / 2));
-    setLayoutY(y - getLayoutBounds().getMinY() - (getLayoutBounds().getHeight() / 2));
     this.pointX = x;
     this.pointY = y;
-  }
-
-  public void setPointX(double x) {
-    setLayoutX(x - getLayoutBounds().getMinX() - (getLayoutBounds().getWidth() / 2));
-    this.pointX = x;
-  }
-
-  public void setPointY(double y) {
-    setLayoutY(y - getLayoutBounds().getMinY() - (getLayoutBounds().getHeight() / 2));
-    this.pointY = y;
+    updatePoint();
   }
 
   public double getPointX() {

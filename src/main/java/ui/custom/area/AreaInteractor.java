@@ -12,6 +12,7 @@ public class AreaInteractor extends Interactor implements AreaGroup.AreaEventHan
   }
 
   @Override public void onPointDrag(MouseEvent event, AreaGroup areaGroup, int pointIndex) {
+    if(event.isControlDown()) return;
     double x = correct(event.getX());
     double y = correct(event.getY());
     if (areaGroup.isSelected()
@@ -23,6 +24,7 @@ public class AreaInteractor extends Interactor implements AreaGroup.AreaEventHan
   }
 
   @Override public void onAreaPressed(MouseEvent event, AreaGroup areaGroup) {
+    if(event.isControlDown()) return;
     if (getCurrentMode() == ImageEditorStackGroup.Mode.SELECT
         && event.getButton() == MouseButton.PRIMARY) {
       event.consume();

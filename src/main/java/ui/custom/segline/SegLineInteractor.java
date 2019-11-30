@@ -55,6 +55,7 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
   }
 
   @Override public void onLineClicked(MouseEvent event, SegLineGroup segLineGroup, int lineIndex) {
+    if(event.isControlDown()) return;
     if (getCurrentMode() == LINE_ANG_SEL && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
       LineGroup line = segLineGroup.getSubLine(lineIndex);
@@ -64,6 +65,7 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
   }
 
   @Override public void onSegLineGroupPressed(MouseEvent event, SegLineGroup segLineGroup) {
+    if(event.isControlDown()) return;
     if (getCurrentMode() == ImageEditorStackGroup.Mode.SELECT
         && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
@@ -73,6 +75,7 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
 
   @Override
   public void onPointReleased(MouseEvent event, SegLineGroup segLineGroup, int pointIndex) {
+    if(event.isControlDown()) return;
     setStatus("");
   }
 }

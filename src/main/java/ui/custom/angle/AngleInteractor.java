@@ -12,6 +12,7 @@ public class AngleInteractor extends Interactor implements AngleGroup.AngleEvent
   }
 
   @Override public void onPointDrag(MouseEvent event, AngleGroup angleGroup, int pointIndex) {
+    if(event.isControlDown()) return;
     double x = correct(event.getX());
     double y = correct(event.getY());
     if (angleGroup.isSelected()
@@ -24,6 +25,7 @@ public class AngleInteractor extends Interactor implements AngleGroup.AngleEvent
   }
 
   @Override public void onMousePressed(MouseEvent event, AngleGroup angleGroup, int pointIndex) {
+    if(event.isControlDown()) return;
     if (getCurrentMode() == ImageEditorStackGroup.Mode.SELECT
         && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
@@ -32,6 +34,7 @@ public class AngleInteractor extends Interactor implements AngleGroup.AngleEvent
   }
 
   @Override public void onPointReleased(MouseEvent event, AngleGroup angleGroup, int pointIndex) {
+    if(event.isControlDown()) return;
     setStatus("");
   }
 }
