@@ -41,6 +41,7 @@ public class FilterTask implements ProgressTask {
       task = new Task<Void>() {
         @Override protected Void call() throws Exception {
           try {
+            makeTmpDir();
             String resultPath = "";
             if (!path.isEmpty()) {
               String name = new File(path).getName();
@@ -73,6 +74,11 @@ public class FilterTask implements ProgressTask {
       new Thread(task).start();
     });
     pause.playFromStart();
+  }
+
+  private void makeTmpDir(){
+    File file = new File("tmp");
+    if(!file.exists() || !file.isDirectory()) file.mkdirs();
   }
 
   @Override public void cancelTask() {
