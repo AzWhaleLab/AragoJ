@@ -38,6 +38,10 @@ public class ImageManager {
 
   public ImageManager() {
     pluginLoader = new ImageReaderPluginLoader();
+    File tmpFolder = new File("tmp");
+    if(!tmpFolder.exists() || !tmpFolder.isDirectory()){
+      tmpFolder.mkdir();
+    }
   }
 
   public HashMap<Integer, ImageReaderPlugin> loadImageImportPlugins()
