@@ -79,9 +79,7 @@ import session.model.EditorItemSegLine;
 import session.model.Session;
 import ui.MainApplication;
 import ui.cellfactory.ImageListViewCell;
-import ui.custom.preferences.ColorLinesManager;
 import ui.custom.ImageEditorStackGroup;
-import ui.custom.preferences.PixelGridManager;
 import ui.custom.PixelatedImageView;
 import ui.custom.ZoomableScrollPane;
 import ui.custom.angle.AngleGroup;
@@ -107,7 +105,6 @@ public class MainDialogController
     ConvertUnitsDialogController.OnActionListener, UndistortDialog.OnActionListener,
     UndistortProgressDialogController.UndistortCallback, ZoomableScrollPane.ZoomChangeListener,
     FilterDialog.OnActionListener {
-
 
   private Preferences prefs;
 
@@ -455,8 +452,9 @@ public class MainDialogController
     loadPixelGridToggle();
 
     // Initalize editor panes + groups.
-    imageEditorStackGroup = new ImageEditorStackGroup(this, this, currentPickedColor, angle,
-        statusLabel.textProperty(), viewPreferencesManager);
+    imageEditorStackGroup =
+        new ImageEditorStackGroup(this, this, currentPickedColor, angle, statusLabel.textProperty(),
+            viewPreferencesManager);
     imageEditorScrollPane = new ZoomableScrollPane(imageEditorStackGroup, this);
     AnchorPane.setBottomAnchor(imageEditorScrollPane, 0.0);
     AnchorPane.setTopAnchor(imageEditorScrollPane, 0.0);
@@ -467,15 +465,17 @@ public class MainDialogController
   }
 
   private void loadIdentifierShapesPrefs() {
-    boolean show = viewPreferencesManager.getColorLinesManager().isColorShapesVisible();
+    boolean show = viewPreferencesManager.getColorLinesManager()
+        .isColorShapesVisible();
     identifierLinesCheckItem.setSelected(show);
   }
 
   private void loadPixelGridToggle() {
-    double step = viewPreferencesManager.getPixelGridManager().getStep();
-    if(step == 1){
+    double step = viewPreferencesManager.getPixelGridManager()
+        .getStep();
+    if (step == 1) {
       pixelGridToggleGroup.selectToggle(pixelGrid1PixelCheckItem);
-    } else if(step == 0.5){
+    } else if (step == 0.5) {
       pixelGridToggleGroup.selectToggle(pixelGridHalfPixelCheckItem);
     } else {
       pixelGridToggleGroup.selectToggle(pixelGridNoGridCheckItem);
@@ -1255,10 +1255,17 @@ public class MainDialogController
     try {
       UIEditorItem uiEditorItem = imageListView.getItems()
           .get(index);
+      ImageItem imageItem = new ImageItem(imageManager.retrieveImage(uiEditorItem.getImageItem()
+          .getOpenerSourceId(), newPath));
       imageListView.getItems()
           .get(index)
-          .setImageItem(new ImageItem(imageManager.retrieveImage(uiEditorItem.getImageItem()
-              .getOpenerSourceId(), newPath)));
+          .setImageItem(imageItem);
+      imageListView.refresh();
+      if (index == imageListView.getSelectionModel()
+          .getSelectedIndex()) {
+        imageEditorStackGroup.setImage(new PixelatedImageView(
+            imageManager.loadImage(imageItem.getOpenerSourceId(), imageItem.getActivePath())));
+      }
       if (select) {
         imageListView.getSelectionModel()
             .select(index);

@@ -2,6 +2,7 @@ package opencv.calibration.ui;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
+import javafx.event.ActionEvent;
 import ui.model.ImageItem;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -51,6 +52,13 @@ public class UndistortProgressDialogController implements UndistortManager.Undis
 
     @Override
     public void onFinish() {
+        Platform.runLater(() -> {
+            if(dialog != null) dialog.close();
+        });
+    }
+
+    @FXML
+    public void onCancelClick(ActionEvent actionEvent) {
         Platform.runLater(() -> {
             if(dialog != null) dialog.close();
         });
