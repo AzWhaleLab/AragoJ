@@ -175,8 +175,8 @@ public class MetaTreeTableController {
         String longitude = tagRow.getChildren()
             .get(1)
             .getValue();
-        latitude = encodeValue(latitude.replaceAll("\\s", ""));
-        longitude = encodeValue(longitude.replaceAll("\\s", ""));
+        latitude = encodeValue(latitude.replaceAll("\\s", "")).replaceAll(",", ".");
+        longitude = encodeValue(longitude.replaceAll("\\s", "")).replaceAll(",", ".");
         try {
           Desktop.getDesktop()
               .browse(new URI("https://www.google.com/maps/place/" + latitude + "+" + longitude));
