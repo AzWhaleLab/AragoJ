@@ -22,10 +22,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -94,6 +92,7 @@ import ui.tasks.ProgressDialog;
 import ui.tasks.task.FilterTask;
 import ui.tasks.task.ImageImporterTask;
 import ui.tasks.task.LoadImageTask;
+import ui.tasks.task.SessionOpenTask;
 import utils.Constants;
 import utils.Translator;
 import utils.Utility;
@@ -396,44 +395,18 @@ public class MainDialogController
         }), true, false, stackPane);
   }
 
-  private void addImages(List<EditorItem> items) {
-    Task task = new Task<List<UIEditorItem>>() {
-      @Override protected List<UIEditorItem> call() throws Exception {
-        ArrayList<UIEditorItem> uiEditorItems = new ArrayList<>();
-        for (EditorItem item : items) {
-          File file = new File(item.getSourceImagePath());
-          if (file.exists()) {
-            ImageItem imageItem = new ImageItem(
-                imageManager.retrieveImage(item.getOpenedWith(), file.getAbsolutePath()));
-            uiEditorItems.add(new UIEditorItem(item, imageItem));
-          }
-        }
-        return uiEditorItems;
-      }
 
-      @Override protected void succeeded() {
-        try {
-          List<UIEditorItem> editorItems = get();
-          for (UIEditorItem item : editorItems) {
-            imageListView.getItems()
-                .add(item);
-          }
-          exportCSVMenuItem.setDisable(false);
-          System.out.println("ImageListView size:" + imageListView.getItems()
-              .size());
-          System.out.println("Free Memory: " + Runtime.getRuntime()
-              .freeMemory());
-        } catch (InterruptedException e) {
-          //e.printStackTrace();
-          //TODO: Catch exception
-        } catch (ExecutionException e) {
-          //e.printStackTrace();
-          //TODO: Catch exception
-        }
-        super.succeeded();
+  private void openSession(List<EditorItem> items) {
+    if (items == null || items.size() <= 0) return;
+    ProgressDialog progressDialog = new ProgressDialog();
+    progressDialog.show(new SessionOpenTask(imageManager, items, editorItems -> {
+      for (UIEditorItem item : editorItems) {
+        imageListView.getItems()
+            .add(item);
       }
-    };
-    new Thread(task).start();
+      exportCSVMenuItem.setDisable(false);
+    }), true, false, stackPane);
+
   }
 
   /**
@@ -1047,7 +1020,7 @@ public class MainDialogController
 
     // Set the new session
     ArrayList<EditorItem> items = session.getItems();
-    addImages(items);
+    openSession(items);
     setEditorEnable(false);
     if (session.getPath() != null && !session.getPath()
         .isEmpty()) {
@@ -1246,9 +1219,7 @@ public class MainDialogController
           .getSelectedItem()
           .getImageItem());
     }
-    controller.undistortImages(calibrationModel, imageItems, imageListView.getSelectionModel()
-        .getSelectedIndices()
-        .get(0), stackPane);
+    controller.undistortImages(calibrationModel, imageItems, imageListView.getSelectionModel().getSelectedIndex(), stackPane);
   }
 
   @Override public void onImageItemUndistorted(int index, String newPath, boolean select) {

@@ -16,6 +16,7 @@ import ui.custom.base.PointGroup;
 import ui.custom.base.selection.ArcSelectionLine;
 import ui.custom.base.selection.SelectableGroup;
 import ui.model.LayerListItem;
+import ui.model.ScaleRatio;
 import utils.Utility;
 
 import static ui.model.LayerListItem.Type.ANGLE;
@@ -188,7 +189,7 @@ public class AngleGroup extends SelectableGroup implements LayerListItem {
     return Utility.roundTwoDecimals(Math.toDegrees(getAngle())) + "\u00B0";
   }
 
-  @Override public String getStatus() {
+  @Override public String getStatus(ScaleRatio scaleRatio) {
     if (cPoint == null) {
       return "angle=" + Utility.roundTwoDecimals(Math.toDegrees(getAngle())) + "\u00B0";
     }

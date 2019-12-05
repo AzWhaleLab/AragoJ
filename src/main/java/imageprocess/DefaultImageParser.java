@@ -175,9 +175,9 @@ public class DefaultImageParser {
     if (gpsDirectory != null) {
       GeoLocation location = gpsDirectory.getGeoLocation();
       if (location != null) {
-        MetadataItem latRow = new MetadataItem("Latitude", String.valueOf(location.getLatitude()));
+        MetadataItem latRow = new MetadataItem("Latitude", GeoLocation.decimalToDegreesMinutesSecondsString(location.getLatitude()));
         MetadataItem longRow =
-            new MetadataItem("Longitude", String.valueOf(location.getLongitude()));
+            new MetadataItem("Longitude", GeoLocation.decimalToDegreesMinutesSecondsString(location.getLongitude()));
         gps.addItem(latRow);
         gps.addItem(longRow);
         if (gpsDirectory.containsTag(GpsDirectory.TAG_ALTITUDE_REF)) {
@@ -218,7 +218,7 @@ public class DefaultImageParser {
     }
     if (xmp.getData()
         .size() != 0) {
-      xmp.addItem(xmp);
+      metadataItems.add(xmp);
     }
 
     // Derived values

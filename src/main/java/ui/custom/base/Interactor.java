@@ -3,6 +3,7 @@ package ui.custom.base;
 import javafx.geometry.Bounds;
 import ui.custom.ImageEditorStackGroup;
 import ui.model.LayerListItem;
+import ui.model.ScaleRatio;
 
 public class Interactor {
 
@@ -34,6 +35,11 @@ public class Interactor {
   protected void setSelected(LayerListItem layerListItem){
     imageEditorStackGroup.setSelectedLayer(layerListItem);
   }
+
+  protected ScaleRatio getCurrentScale(){
+    return imageEditorStackGroup.getCurrentScale();
+  }
+
 
   protected double correct(double coordinate){
     return imageEditorStackGroup.getPixelGridManager().correct(coordinate);

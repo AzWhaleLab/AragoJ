@@ -9,7 +9,7 @@ public interface LayerListItem {
     String getPrimaryText();
     void setPrimaryText(String primaryText);
     String getSecondaryText();
-    String getStatus();
+    String getStatus(ScaleRatio scaleRatio);
     Type getType();
     boolean isVisualElement();
 

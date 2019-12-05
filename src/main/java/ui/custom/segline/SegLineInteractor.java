@@ -50,7 +50,7 @@ public class SegLineInteractor extends Interactor implements SegLineGroup.SegLin
         double correctedY = PointUtils.getCorrectedPointY(getBounds(), y);
         segLineGroup.setPointPosition(correctedX, correctedY, pointIndex);
       }
-      setStatus(segLineGroup.getStatus(pointIndex));
+      setStatus(segLineGroup.getStatus(pointIndex, getCurrentScale()));
     }
   }
 

@@ -25,6 +25,7 @@ public class UndistortProgressDialogController implements UndistortManager.Undis
     private UndistortCallback progressListener;
     private UndistortManager undistortManager;
     private int selectedIndex;
+    private boolean applyToAll = false;
 
     public UndistortProgressDialogController(UndistortCallback progressListener){
         this.progressListener = progressListener;
@@ -46,7 +47,11 @@ public class UndistortProgressDialogController implements UndistortManager.Undis
     @Override
     public void onImageUndistorted(int currentImage, String savePath) {
         Platform.runLater(() -> {
-            progressListener.onImageItemUndistorted(currentImage, savePath, selectedIndex == currentImage);
+            if(!applyToAll){
+                progressListener.onImageItemUndistorted(selectedIndex, savePath, selectedIndex == currentImage);
+            } else {
+                progressListener.onImageItemUndistorted(currentImage, savePath, selectedIndex == currentImage);
+            }
         });
     }
 
@@ -65,12 +70,14 @@ public class UndistortProgressDialogController implements UndistortManager.Undis
     }
 
     public void undistortImages(CalibrationModel model, List<ImageItem> imageItemList, int selectedIndex, StackPane stackPane) {
+        applyToAll = imageItemList.size() > 1;
         dialog = new JFXDialog(stackPane, container, JFXDialog.DialogTransition.CENTER);
         dialog.setOverlayClose(false);
         dialog.show();
         this.selectedIndex = selectedIndex;
         undistortManager = new UndistortManager(UndistortProgressDialogController.this);
         undistortManager.undistortImages(model, imageItemList);
+
     }
 
     public interface UndistortCallback{

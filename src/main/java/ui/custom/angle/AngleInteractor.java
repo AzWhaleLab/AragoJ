@@ -20,7 +20,7 @@ public class AngleInteractor extends Interactor implements AngleGroup.AngleEvent
         && event.getButton() == MouseButton.PRIMARY) {
       event.consume();
       angleGroup.movePoint(pointIndex, x, y);
-      setStatus(angleGroup.getStatus());
+      setStatus(angleGroup.getStatus(getCurrentScale()));
     }
   }
 

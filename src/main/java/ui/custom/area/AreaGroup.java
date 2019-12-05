@@ -17,6 +17,7 @@ import ui.custom.base.LineGroup;
 import ui.custom.base.PointGroup;
 import ui.custom.base.selection.SelectableGroup;
 import ui.model.LayerListItem;
+import ui.model.ScaleRatio;
 import utils.AreaUtils;
 import utils.Utility;
 
@@ -254,7 +255,7 @@ public class AreaGroup extends SelectableGroup implements LayerListItem {
     return getRoundedArea() + " pixels\u00B2";
   }
 
-  @Override public String getStatus() {
+  @Override public String getStatus(ScaleRatio scaleRatio) {
     return "";
   }
 

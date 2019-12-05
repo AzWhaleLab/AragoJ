@@ -16,6 +16,7 @@ import ui.custom.base.LineGroup;
 import ui.custom.base.PointGroup;
 import ui.custom.base.selection.SelectableGroup;
 import ui.model.LayerListItem;
+import ui.model.ScaleRatio;
 import utils.Utility;
 
 public class SegLineGroup extends SelectableGroup implements LayerListItem {
@@ -218,11 +219,11 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
     return Utility.roundTwoDecimals(getLength()) + " pixels";
   }
 
-  @Override public String getStatus() {
-    return getStatus(points.size() - 1);
+  @Override public String getStatus(ScaleRatio scaleRatio) {
+    return getStatus(points.size() - 1, scaleRatio);
   }
 
-  public String getStatus(int pointIndex) {
+  public String getStatus(int pointIndex, ScaleRatio currentScale) {
     StringBuilder status = new StringBuilder();
     if (pointIndex >= 0 && pointIndex < points.size()) {
       if (pointIndex == 0 || (pointIndex == 1 && lines.size() == 1)) {
@@ -234,14 +235,28 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
         }
         status.append("length=")
             .append(Utility.roundTwoDecimals(getSubLine(0).getLength()))
-            .append("px, ");
+            .append("px");
+        if(currentScale != null && currentScale.hasScale()){
+          status.append(" (")
+              .append(currentScale.getRoundedScaledValue(getSubLine(0).getLength()))
+              .append(currentScale.getUnits())
+              .append(")");
+        }
+        status.append(", ");
         status.append("angle=")
             .append((Utility.roundTwoDecimals(Math.toDegrees(angle))))
             .append("\u00B0");
       } else if (pointIndex == points.size() - 1) {
         status.append("length=")
             .append(Utility.roundTwoDecimals((getSubLine(lines.size() - 1).getLength())))
-            .append("px, ");
+            .append("px");
+        if(currentScale != null && currentScale.hasScale()){
+          status.append(" (")
+              .append(currentScale.getRoundedScaledValue(getSubLine(lines.size() - 1).getLength()))
+              .append(currentScale.getUnits())
+              .append(")");
+        }
+        status.append(", ");
         status.append("angle=")
             .append(Utility.roundTwoDecimals((Math.toDegrees(lines.get(lines.size() - 1)
                 .getAngleWith(lines.get(lines.size() - 2))))))
@@ -251,10 +266,25 @@ public class SegLineGroup extends SelectableGroup implements LayerListItem {
         LineGroup secondLine = lines.get(pointIndex);
         status.append("length1=")
             .append(Utility.roundTwoDecimals(getSubLine(pointIndex - 1).getLength()))
-            .append("px, ");
+            .append("px");
+
+        if(currentScale != null && currentScale.hasScale()){
+          status.append(" (")
+              .append(currentScale.getRoundedScaledValue(getSubLine(pointIndex - 1).getLength()))
+              .append(currentScale.getUnits())
+              .append(")");
+        }
+        status.append(", ");
         status.append("length2=")
             .append(Utility.roundTwoDecimals(getSubLine(pointIndex).getLength()))
-            .append("px, ");
+            .append("px");
+        if(currentScale != null && currentScale.hasScale()){
+          status.append(" (")
+              .append(currentScale.getRoundedScaledValue(getSubLine(pointIndex).getLength()))
+              .append(currentScale.getUnits())
+              .append(")");
+        }
+        status.append(", ");
         status.append("angle=")
             .append((Utility.roundTwoDecimals(Math.toDegrees(firstLine.getAngleWith(secondLine)))))
             .append("\u00B0");

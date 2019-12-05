@@ -9,11 +9,13 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import session.model.EditorItemAngle;
@@ -151,7 +153,7 @@ public class ImageEditorStackGroup extends Group
       } else {
         segLineGroup.moveLastVertex(x, y);
       }
-      status.setValue(segLineGroup.getStatus());
+      status.setValue(segLineGroup.getStatus(currentScale));
     } else if (currentMode == ANG_POINT_SELECT) {
       SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
       PointGroup pointGroup = segLineGroup.getPoint(0);
@@ -162,7 +164,7 @@ public class ImageEditorStackGroup extends Group
     } else if (currentMode == ANGLE_POINT_SELECT) {
       AngleGroup angleGroup = ((AngleGroup) elements.get(elements.size() - 1));
       angleGroup.moveLastPoint(x, y);
-      status.setValue(angleGroup.getStatus());
+      status.setValue(angleGroup.getStatus(currentScale));
     }
   };
 
@@ -177,28 +179,28 @@ public class ImageEditorStackGroup extends Group
     double y = viewPreferencesManager.getPixelGridManager()
         .correct(e.getY());
 
+    if (currentMode == ImageEditorStackGroup.Mode.ZOOM) {
+      e.consume();
+      Parent stackPane = ((ImageEditorStackGroup) e.getSource()).getParent()
+          .getParent();
+      ZoomableScrollPane scrollPane = (ZoomableScrollPane) stackPane.getParent()
+          .getParent()
+          .getParent();
+      Point2D point = stackPane.sceneToLocal(new Point2D(e.getSceneX(), e.getSceneY()));
+      if (e.isPrimaryButtonDown()) {
+        scrollPane.onScroll(3, point);
+      } else if (e.isSecondaryButtonDown()) {
+        scrollPane.onScroll(-3, point);
+      }
+    }
+
     if (e.getButton() == MouseButton.SECONDARY) {
       if (currentMode == SELECT) {
-
+        // TODO: Right-click menu
       } else {
         cancelOrFinishModes();
       }
     } else if (e.getButton() == MouseButton.PRIMARY) {
-      if (currentMode == ImageEditorStackGroup.Mode.ZOOM) {
-        e.consume();
-        VBox vBox = (VBox) ((ImageEditorStackGroup) e.getSource()).getParent()
-            .getParent();
-        ZoomableScrollPane scrollPane = (ZoomableScrollPane) vBox.getParent()
-            .getParent()
-            .getParent();
-        Point2D point = vBox.sceneToLocal(new Point2D(e.getSceneX(), e.getSceneY()));
-        if (e.isPrimaryButtonDown()) {
-          scrollPane.onScroll(3, point);
-        } else if (e.isSecondaryButtonDown()) {
-          scrollPane.onScroll(-3, point);
-        }
-      }
-
       if (currentMode == Mode.LINE_POINT_SELECT || currentMode == ANG_POINT_SELECT) {
         e.consume();
         SegLineGroup segLineGroup = ((SegLineGroup) elements.get(elements.size() - 1));
