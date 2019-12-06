@@ -1,75 +1,108 @@
 group 'com.ffaoa'
-version '0.1'
+version '0.6.1'
 
 apply plugin: 'java'
 
 sourceCompatibility = "1.8"
 
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
-    }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin',
+        version: '8.8.2'
+  }
 }
 
 ext {
-    buildVersion = '0.3.1'
+  buildVersion = '0.3.1'
 }
 
 repositories {
-    mavenCentral()
-    maven { url 'http://jump-pilot.sourceforge.net/repository' }
+  mavenCentral()
+  maven { url 'http://jump-pilot.sourceforge.net/repository' }
 }
 
 apply plugin: 'javafx-gradle-plugin'
 
 jar {
-    manifest {
-        attributes(
-                'Main-Class': 'ui.MainApplication'
-        )
+  manifest {
+    attributes('Main-Class': 'ui.MainApplication')
+  }
+  into('lib') {
+    from('./lib')
+  }
+  from {
+    configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+}
+
+task release {
+  dependsOn jar
+  doLast {
+    exec {
+      def outputJar = rootProject.name + "-" + getVersion() + ".jar"
+      workingDir("${buildDir}/libs")
+      commandLine 'cmd', '/c',
+          'javapackager -deploy -native -outdir packages -outfile sample -srcfiles ' + outputJar +
+              ' -appclass ui.MainApplication -name AragoJ -title AragoJ -BuserJvmOptions=-Xmx=2G -BappVersion=' +
+              getVersion() +
+              ' -Bicon=../../icon.ico'
     }
-    into('lib') {
-        from 'libs'
+    exec {
+      workingDir("${buildDir}/libs")
+      commandLine 'cmd', '/c', 'mv packages/bundles/AragoJ AragoJ'
     }
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    exec {
+      workingDir("${buildDir}/libs")
+      commandLine 'cmd', '/c', 'rm -r packages'
     }
+    exec {
+      workingDir("${buildDir}/libs")
+      commandLine 'cmd', '/c', 'rm Aragoj/AragoJ.ico'
+    }
+    exec {
+      workingDir("${buildDir}")
+      commandLine 'cmd', '/c', 'cp -r ../libs libs/AragoJ/app/libs'
+    }
+    exec {
+      workingDir("${buildDir}")
+      commandLine 'cmd', '/c', 'cp -r ../plugins libs/AragoJ/app/plugins'
+    }
+  }
 }
 
 jfx {
-    // minimal requirement for jfxJar-task
-    mainClass = 'ui.MainApplication'
-    jfxAppOutputDir = "build/releases"
-    jfxMainAppJarName = "AragoJ-${BUILD_VERSION}.jar"
-    deployDir = "src/main/deploy"
+  // minimal requirement for jfxJar-task
+  mainClass = 'ui.MainApplication'
+  jfxAppOutputDir = "build/releases"
+  jfxMainAppJarName = "AragoJ-${BUILD_VERSION}.jar"
+  deployDir = "src/main/deploy"
 
+  css2bin = false
+  preLoader = null // String
+  updateExistingJar = false
+  allPermissions = false
+  manifestAttributes = null // Map<String, String>
+  addPackagerJar = true
+  copyAdditionalAppResourcesToJar = true
+  skipCopyingDependencies = false
+  useLibFolderContentForManifestClasspath = true
+  fixedManifestClasspath = null
 
-    css2bin = false
-    preLoader = null // String
-    updateExistingJar = false
-    allPermissions = false
-    manifestAttributes = null // Map<String, String>
-    addPackagerJar = true
-    copyAdditionalAppResourcesToJar = true
-    skipCopyingDependencies = false
-    useLibFolderContentForManifestClasspath = true
-    fixedManifestClasspath = null
-
-    // minimal requirement for jfxNative-task
-    vendor = 'franciscoaleixo'
+  // minimal requirement for jfxNative-task
+  vendor = 'franciscoaleixo'
 }
 
 dependencies {
-    compile fileTree('./libs')
-    compile 'com.jfoenix:jfoenix:1.6.0'
-    compile 'com.drewnoakes:metadata-extractor:2.10.1'
-    compile 'org.mariuszgromada.math:MathParser.org-mXparser:4.1.1'
-    compile 'org.fxmisc.richtext:richtextfx:0.9.1'
-    compile 'org.apache.commons:commons-imaging:1.0-SNAPSHOT'
+  compile fileTree(dir: './lib', include: '*.jar')
+  compile 'com.jfoenix:jfoenix:1.6.0'
+  compile 'com.drewnoakes:metadata-extractor:2.10.1'
+  compile 'org.mariuszgromada.math:MathParser.org-mXparser:4.1.1'
+  compile 'org.fxmisc.richtext:richtextfx:0.9.1'
+  compile 'org.apache.commons:commons-imaging:1.0-SNAPSHOT'
 
-    compileOnly 'org.projectlombok:lombok:1.18.2'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+  compileOnly 'org.projectlombok:lombok:1.18.2'
+  testCompile group: 'junit', name: 'junit', version: '4.12'
 }
