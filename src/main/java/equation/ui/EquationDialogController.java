@@ -30,7 +30,7 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import ui.custom.LineGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.model.LabeledComboOption;
 import ui.model.ScaleRatio;
 import utils.Translator;
@@ -38,6 +38,7 @@ import utils.Translator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import utils.Utility;
 
 public class EquationDialogController extends Dialog<Void> {
     private Stage stage;
@@ -55,12 +56,12 @@ public class EquationDialogController extends Dialog<Void> {
     private Timeline validationScheduler;
 
     private OnActionListener listener;
-    private List<LineGroup> lines;
+    private List<SegLineGroup> lines;
     private ScaleRatio currentScale;
 
     private int currentIndex = -1;
 
-    public void init(Window owner, OnActionListener listener, List<LineGroup> lines, ScaleRatio currentScale){
+    public void init(Window owner, OnActionListener listener, List<SegLineGroup> lines, ScaleRatio currentScale){
         this.listener = listener;
         this.lines = lines;
         this.currentScale = currentScale;
@@ -207,7 +208,7 @@ public class EquationDialogController extends Dialog<Void> {
                                 if(ident.contains(": ")){
                                     ident = ident.split(": ")[1];
                                     ident = ident.split(" ")[0];
-                                    if(!ident.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && ident.length() > 0){
+                                    if(!ident.matches(Utility.getNumberAccuracyRegex()) && ident.length() > 0){
                                         cell.setComboBoxValue(oldValue);
                                         param.getTableView().getItems().get(cell.getIndex()).setVariableValue(oldValue);
                                     } else {
@@ -216,7 +217,7 @@ public class EquationDialogController extends Dialog<Void> {
                                         param.getTableView().getItems().get(cell.getIndex()).setVariableValue(option);
                                     }
                                 } else{
-                                    if(!ident.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && ident.length() > 0){
+                                    if(!ident.matches(Utility.getNumberAccuracyRegex()) && ident.length() > 0){
                                         cell.setComboBoxValue(oldValue);
                                         param.getTableView().getItems().get(cell.getIndex()).setVariableValue(oldValue);
                                     }
@@ -229,9 +230,9 @@ public class EquationDialogController extends Dialog<Void> {
 
                 cell.setComboBoxEditable(true);
 
-                for(LineGroup line : lines){
-                    cell.getItems().add(new LabeledComboOption(line.getName() + ": " + line.getLength() + " px", String.valueOf(line.getLength())));
-                    if(currentScale != null){
+                for(SegLineGroup line : lines){
+                    cell.getItems().add(new LabeledComboOption(line.getName() + ": " + Utility.roundDecimals(line.getLength()) + " px", String.valueOf(line.getLength())));
+                    if(currentScale != null && currentScale.hasScale()){
                         double length = currentScale.getRoundedScaledValue(line.getLength());
                         cell.getItems().add(new LabeledComboOption(line.getName() + ": " + length + " "+ currentScale.getUnits(), String.valueOf(length)));
                     }

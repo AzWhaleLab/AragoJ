@@ -1,6 +1,5 @@
 package ui.model;
 
-import imageprocess.ImageItem;
 import session.model.EditorItem;
 
 public class UIEditorItem {
@@ -31,6 +30,7 @@ public class UIEditorItem {
 
   public void setImageItem(ImageItem imageItem) {
     this.imageItem = imageItem;
-    editorItem.setSourceImagePath(imageItem.getPath());
+    editorItem.setSourceImagePath(imageItem.getOriginalPath());
+    editorItem.setOpenedWith(imageItem.getOpenerSourceId());
   }
 }

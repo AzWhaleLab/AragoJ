@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <children>
+    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+        AnchorPane.topAnchor="0.0">
+      <children>
+        <!--        <HBox>-->
+        <!--          <children>-->
+        <!--            <Label text="%threshold">-->
+        <!--              <HBox.margin>-->
+        <!--                <Insets right="10.0" />-->
+        <!--              </HBox.margin>-->
+        <!--            </Label>-->
+        <!--            <AragoSlider fx:id="thresholdSlider" HBox.hgrow="ALWAYS" />-->
+        <!--          </children>-->
+        <!--          <padding>-->
+        <!--            <Insets top="5.0" />-->
+        <!--          </padding>-->
+        <!--        </HBox>-->
+        <Label text="%preview">
+          <VBox.margin>
+            <Insets bottom="5.0"/>
+          </VBox.margin>
+        </Label>
+        <Pane fx:id="previewPane" VBox.vgrow="ALWAYS"/>
+        <HBox alignment="CENTER_RIGHT">
+          <children>
+            <JFXButton fx:id="applyButton" focusTraversable="false" disable="true" text="%apply" onAction="#onApplyAction"/>
+            <JFXButton text="%cancel" focusTraversable="false" onAction="#onCloseAction"/>
+          </children>
+        </HBox>
+      </children>
+      <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+      </padding>
+    </VBox>
+  </children>
+</AnchorPane>

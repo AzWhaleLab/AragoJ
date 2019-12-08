@@ -2,6 +2,7 @@ package opencv.calibration.ui;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
+import java.nio.file.Files;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -147,7 +148,7 @@ public class UndistortDialog {
                 ch.setInitialDirectory(new File(path));
             }
         }
-        ch.getExtensionFilters().add(new FileChooser.ExtensionFilter(Translator.getString("acalibfilechooser"), "*.axml"));
+        ch.getExtensionFilters().add(new FileChooser.ExtensionFilter(Translator.getString("acalibfilechooser"), "*.acalib"));
         ch.setTitle(Translator.getString("importCalibration"));
 
         File file = ch.showOpenDialog(okButton.getScene().getWindow());
@@ -156,10 +157,21 @@ public class UndistortDialog {
             try {
                 CalibrationModel model = CalibrationFileManager.getCalibration(file);
                 calibrationComboBox.getItems().addAll(model);
+                calibrationComboBox.setValue(model);
+                copyToCalibs(file);
             } catch (FileNotFoundException e) {
                 //TODO
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void copyToCalibs(File file) {
+        File dest = new File("calibs\\" + file.getName());
+        try {
+            Files.copy(file.toPath(), dest.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

@@ -2,10 +2,10 @@ package opencv.calibration.ui;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
-import imageprocess.ImageItem;
+import opencv.calibration.model.CalibImageItem;
+import ui.model.ImageItem;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -70,7 +70,7 @@ public class CalibrationProgressDialogController implements CalibrationManager.C
         dialog.close();
     }
 
-    public void startCalibration(CalibrationConfig config, List<ImageItem> imageItemList, StackPane stackPane) throws IOException {
+    public void startCalibration(CalibrationConfig config, List<CalibImageItem> imageItemList, StackPane stackPane) throws IOException {
         dialog = new JFXDialog(stackPane, container, JFXDialog.DialogTransition.CENTER);
         dialog.setOverlayClose(false);
         dialog.show();

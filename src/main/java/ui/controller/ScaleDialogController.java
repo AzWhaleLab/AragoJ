@@ -19,18 +19,19 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import ui.MainApplication;
-import ui.custom.LineGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.model.LabeledComboOption;
 import ui.model.ScaleRatio;
 import utils.Translator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import utils.Utility;
 
 public class ScaleDialogController extends Dialog<Void> {
 
     private Stage stage;
-    private ArrayList<LineGroup> lines;
+    private ArrayList<SegLineGroup> lines;
 
     @FXML private JFXTextField trueLengthTextField;
     @FXML private JFXTextField unitsTextField;
@@ -42,7 +43,7 @@ public class ScaleDialogController extends Dialog<Void> {
     private OnActionListener listener;
     private double ratio = -1;
 
-    public void init(Window owner, OnActionListener listener,  ArrayList<LineGroup> lines){
+    public void init(Window owner, OnActionListener listener,  ArrayList<SegLineGroup> lines){
         this.lines = lines;
         this.listener = listener;
         try {
@@ -107,7 +108,7 @@ public class ScaleDialogController extends Dialog<Void> {
             public void changed(ObservableValue ov, LabeledComboOption oldV, LabeledComboOption newV) {
                 String val = newV.getValue();
                 String ident = newV.getIdentifier();
-                if(!val.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && val.length() > 0){
+                if(!val.matches(Utility.getNumberAccuracyRegex()) && val.length() > 0){
                     //String e = val.replaceAll("[^\\d]", "");
                     String e = oldV.getValue();
                     pixelLengthComboBox.setValue(new LabeledComboOption(ident,e));
@@ -119,7 +120,7 @@ public class ScaleDialogController extends Dialog<Void> {
         trueLengthTextField.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if(!newValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && newValue.length() > 0){
+                if(!newValue.matches(Utility.getNumberAccuracyRegex()) && newValue.length() > 0){
                     trueLengthTextField.setText(oldValue);
                 }
                 setLengthRatio();
@@ -133,8 +134,9 @@ public class ScaleDialogController extends Dialog<Void> {
             }
         });
 
-        for(LineGroup line : lines) {
-            pixelLengthComboBox.getItems().add(new LabeledComboOption(line.getName() + ": " + line.getLength(), String.valueOf(line.getLength())));
+        for(SegLineGroup line : lines) {
+            double length = Utility.roundDecimals(line.getLength());
+            pixelLengthComboBox.getItems().add(new LabeledComboOption(line.getName() + ": " + length, String.valueOf(length)));
         }
     }
 
@@ -143,7 +145,7 @@ public class ScaleDialogController extends Dialog<Void> {
         String pixelValue = pixelLengthComboBox.getValue().getValue();
         String trueValue = trueLengthTextField.getText();
 
-        if(pixelValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && pixelValue.length() > 0 && trueValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && trueValue.length() > 0) {
+        if(pixelValue.matches(Utility.getNumberAccuracyRegex()) && pixelValue.length() > 0 && trueValue.matches(Utility.getNumberAccuracyRegex()) && trueValue.length() > 0) {
             double pixels = Double.parseDouble(pixelValue);
             double truevals = Double.parseDouble(trueValue);
             if(pixels > 0){

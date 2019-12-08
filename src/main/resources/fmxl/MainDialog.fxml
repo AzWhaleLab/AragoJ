@@ -22,12 +22,14 @@
 <?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.ToggleGroup?>
 <StackPane fx:id="stackPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.controller.MainDialogController">
     <AnchorPane prefHeight="400.0" prefWidth="600.0"  >
         <children>
             <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <top>
-                    <MenuBar style="-fx-background-color: #FFFFFF;">
+                    <MenuBar fx:id="menuBar" style="-fx-background-color: #FFFFFF;">
                         <menus>
                             <Menu text="%file">
                                 <items>
@@ -70,13 +72,27 @@
                             <Menu mnemonicParsing="false" text="%view">
                                 <items>
                                     <Menu mnemonicParsing="false" text="%layer">
-                                        <CheckMenuItem fx:id="precisionLinesCheckItem" mnemonicParsing="false" onAction="#onPrecisionLinesToggle" text="%precisionLines" selected="true" />
-                                        <CheckMenuItem fx:id="identifierLinesCheckItem" mnemonicParsing="false" onAction="#onIdentifierLinesToggle" text="%identifierLines" selected="true" />
+                                        <CheckMenuItem fx:id="identifierLinesCheckItem" mnemonicParsing="false" onAction="#onIdentifierLinesToggle" text="%identifierShapes" selected="true" />
                                     </Menu>
+                                  <fx:define>
+                                    <ToggleGroup fx:id="pixelGridToggleGroup"/>
+                                  </fx:define>
+                                  <Menu mnemonicParsing="false" text="%pixelGrid">
+                                    <RadioMenuItem fx:id="pixelGridNoGridCheckItem" toggleGroup="$pixelGridToggleGroup" mnemonicParsing="false" onAction="#onPixelGridNoGrid" text="%noPixelGrid" selected="true" />
+                                    <RadioMenuItem fx:id="pixelGrid1PixelCheckItem" toggleGroup="$pixelGridToggleGroup" mnemonicParsing="false" onAction="#onPixelGrid1Pixel" text="%1pixelGrid" selected="true" />
+                                    <RadioMenuItem fx:id="pixelGridHalfPixelCheckItem" toggleGroup="$pixelGridToggleGroup" mnemonicParsing="false" onAction="#onPixelGridHalfPixel" text="%05pixelGrid" selected="true" />
+                                  </Menu>
                                 </items>
                             </Menu>
                             <Menu mnemonicParsing="false" text="%module">
                                 <items>
+                                    <Menu fx:id="filtersMenu" mnemonicParsing="false" text="%filters" disable="true">
+                                        <MenuItem fx:id="clearFiltersMenuItem"  mnemonicParsing="false" text="%clearFilters" onAction="#onClearFilters" />
+                                        <SeparatorMenuItem mnemonicParsing="false" />
+                                        <MenuItem fx:id="edgeDetectionItem" mnemonicParsing="false" text="%edgeDetectionDots" onAction="#onEdgeDetection" />
+                                        <MenuItem mnemonicParsing="false" text="%sharpenDots" onAction="#onSharpen" />
+                                        <!--<CheckMenuItem fx:id="autoUndistortCheckMenuItem" text="%autoUndistort"/>-->
+                                    </Menu>
                                     <Menu fx:id="calibrationMenu" mnemonicParsing="false" text="%calibration">
                                         <MenuItem mnemonicParsing="false" text="%calibrateCamera" onAction="#onCalibrateCamera" />
                                         <SeparatorMenuItem mnemonicParsing="false" />
@@ -122,6 +138,7 @@
                                                             <JFXButton fx:id="editorCursorBtn" mnemonicParsing="false" style="-fx-graphic: url('images/cursor.png');" />
                                                             <JFXButton fx:id="editorLineBtn" mnemonicParsing="false" style="-fx-graphic: url('images/line.png');" />
                                                             <JFXButton fx:id="editorAngBtn" mnemonicParsing="false" style="-fx-graphic: url('images/perpendicular.png');" />
+                                                            <JFXButton fx:id="angleBtn" mnemonicParsing="false" style="-fx-graphic: url('images/angle.png');" />
                                                             <JFXButton fx:id="editorAreaBtn" mnemonicParsing="false" style="-fx-graphic: url('images/area.png');" />
                                                             <HBox fx:id="imageEditorToolsSecondaryPane" style="-fx-background-color: #FFFFFF;" HBox.hgrow="ALWAYS">
                                                                 <children>
@@ -158,7 +175,18 @@
                                                         </children>
                                                     </HBox>
                                                 </children></AnchorPane>
-                                            <AnchorPane fx:id="imageEditorAnchorPane" VBox.vgrow="ALWAYS" />
+                                            <StackPane fx:id="imageEditorStackPane" VBox.vgrow="ALWAYS" />
+                                            <HBox  minHeight="24.0" prefWidth="200.0" alignment="CENTER_LEFT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                                <children>
+                                                    <Label fx:id="statusLabel" >
+                                                        <HBox.margin>
+                                                            <Insets>
+                                                                <left>5</left>
+                                                            </Insets>
+                                                        </HBox.margin>
+                                                    </Label>
+                                                </children>
+                                            </HBox>
                                         </children>
                                     </VBox>
                                 </children>
@@ -179,7 +207,8 @@
                                             </Tab>
                                         </tabs>
                                     </JFXTabPane>
-                                </children></AnchorPane>
+                                </children>
+                            </AnchorPane>
                         </items>
                     </SplitPane>
                 </center>

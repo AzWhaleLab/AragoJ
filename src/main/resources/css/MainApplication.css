@@ -8,6 +8,16 @@
     -fx-padding:2px;
 }
 
+.hyperlink {
+    -fx-border-color: transparent;
+    -fx-padding: 0 0 10 3;
+    -fx-underline: true;
+}
+
+.hyperlink:visited {
+    -fx-text-fill: -fx-focus-color;
+}
+
 .jfx-list-view{
     -fx-selection-bar: #c7e8f3;
 }
@@ -15,6 +25,61 @@
     -fx-background: -fx-selection-bar;
     -fx-table-cell-border-color: derive(-fx-selection-bar, 20%);
 }
+
+.jfx-slider {
+    -jfx-default-thumb: #0096C9;
+    -jfx-default-track: #cceaf4;
+}
+
+.jfx-slider .track,
+.jfx-slider:vertical .track {
+    -fx-background-color: -jfx-default-track;
+    -fx-background-radius: 5;
+    -fx-background-insets: 0;
+    -fx-pref-width: 2px;
+    -fx-pref-height: 2px;
+}
+
+.jfx-slider .thumb,
+.jfx-slider:focused .thumb {
+    -fx-background-color: -jfx-default-thumb;
+    -fx-background-radius: 15;
+    -fx-background-insets: 0;
+}
+
+.jfx-slider .colored-track {
+    -fx-background-color: -jfx-default-thumb;
+    -fx-background-radius: 5;
+    -fx-background-insets: 0;
+}
+
+.jfx-slider .slider-value {
+    -fx-stroke: WHITE;
+    -fx-font-size: 9;
+}
+
+.jfx-slider .animated-thumb {
+    -fx-pref-width: 20px;
+    -fx-pref-height: 20px;
+    -fx-background-color: -jfx-default-thumb;
+    -fx-background-radius: 50% 50% 50% 0%;
+    -fx-background-insets: 0;
+}
+
+.jfx-slider:min .thumb,
+.jfx-slider:min:focused .thumb {
+    -fx-background-color: -jfx-default-track;
+    -fx-background-radius: 20;
+    -fx-background-insets: 0;
+}
+
+.jfx-slider:min .animated-thumb {
+    -fx-background-color: -jfx-default-track;
+    -fx-background-radius: 50% 50% 50% 0%;
+    -fx-background-insets: 0;
+}
+
+
 
 
 .jfx-list-cell:filled:selected {

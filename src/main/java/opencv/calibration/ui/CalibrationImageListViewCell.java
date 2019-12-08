@@ -1,9 +1,8 @@
 package opencv.calibration.ui;
 
 import com.jfoenix.controls.JFXListCell;
-import imageprocess.ImageItem;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import opencv.calibration.model.CalibImageItem;
+import ui.model.ImageItem;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -11,14 +10,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.shape.Shape;
 import ui.cellfactory.ImageListViewCellController;
 
-public class CalibrationImageListViewCell extends JFXListCell<ImageItem> {
+public class CalibrationImageListViewCell extends JFXListCell<CalibImageItem> {
 
   private ImageListViewCellController controller = new ImageListViewCellController();
 
   public CalibrationImageListViewCell(){ }
 
   @Override
-  public void updateItem(ImageItem img, boolean empty) {
+  public void updateItem(CalibImageItem img, boolean empty) {
     super.updateItem(img,empty);
     if(img != null && !empty){
       try {

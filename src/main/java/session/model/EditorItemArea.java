@@ -1,6 +1,6 @@
 package session.model;
 
-import ui.custom.AreaGroup;
+import ui.custom.area.AreaGroup;
 
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;

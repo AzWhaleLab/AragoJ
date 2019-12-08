@@ -22,18 +22,19 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import ui.MainApplication;
-import ui.custom.LineGroup;
+import ui.custom.segline.SegLineGroup;
 import ui.model.LabeledComboOption;
 import ui.model.ScaleRatio;
 import utils.Translator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import utils.Utility;
 
 public class ConvertUnitsDialogController {
 
     private Stage stage;
-    private ArrayList<LineGroup> lines;
+    private ArrayList<SegLineGroup> lines;
 
     @FXML private JFXTextField unitLengthTextField;
     @FXML private JFXTextField unitsTextField;
@@ -46,7 +47,7 @@ public class ConvertUnitsDialogController {
     private ScaleRatio currentScale;
     private double ratio = -1;
 
-    public void init(Window owner, OnActionListener listener, ArrayList<LineGroup> lines, ScaleRatio currentScale){
+    public void init(Window owner, OnActionListener listener, ArrayList<SegLineGroup> lines, ScaleRatio currentScale){
         this.lines = lines;
         this.listener = listener;
         this.currentScale = currentScale;
@@ -102,7 +103,11 @@ public class ConvertUnitsDialogController {
 
             @Override
             public LabeledComboOption fromString(String string) {
-                return lengthReferenceComboBox.getItems().stream().filter(item -> string.equals(item.getValue())).findFirst().orElse(new LabeledComboOption(string, string));
+                return lengthReferenceComboBox.getItems()
+                    .stream()
+                    .filter(item -> string.equals(item.getValue()))
+                    .findFirst()
+                    .orElse(new LabeledComboOption(string, string));
             }
         });
 
@@ -112,7 +117,7 @@ public class ConvertUnitsDialogController {
             public void changed(ObservableValue ov, LabeledComboOption oldV, LabeledComboOption newV) {
                 String val = newV.getValue();
                 String ident = newV.getIdentifier();
-                if(!val.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && val.length() > 0){
+                if(!val.matches(Utility.getNumberAccuracyRegex()) && val.length() > 0){
                     //String e = val.replaceAll("[^\\d]", "");
                     String e = oldV.getValue();
                     lengthReferenceComboBox.setValue(new LabeledComboOption(ident,e));
@@ -124,7 +129,7 @@ public class ConvertUnitsDialogController {
         unitLengthTextField.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if(!newValue.matches("[0-9]{1,13}(\\.[0-9]{0,3})?") && newValue.length() > 0){
+                if(!newValue.matches(Utility.getNumberAccuracyRegex()) && newValue.length() > 0){
                     unitLengthTextField.setText(oldValue);
                 }
                 setLengthRatio();
@@ -138,8 +143,8 @@ public class ConvertUnitsDialogController {
             }
         });
 
-        for(LineGroup line : lines) {
-            double value = currentScale.getScaledValue(line.getLength());
+        for(SegLineGroup line : lines) {
+            double value = Utility.roundDecimals(currentScale.getScaledValue(line.getLength()));
             lengthReferenceComboBox.getItems().add(new LabeledComboOption(line.getName() + ": " + value + " " + currentScale.getUnits(), String.valueOf(value)));
         }
     }
@@ -153,7 +158,7 @@ public class ConvertUnitsDialogController {
             double refVal = Double.parseDouble(referenceValue);
             double newUnitVal = Double.parseDouble(newUnitValue);
             if(refVal > 0){
-                ratio = Math.round((double) newUnitVal/refVal * 1000.0) / 1000.0;
+                ratio = newUnitVal/refVal;
                 lengthRatioLabel.setText("1 "+ currentScale.getUnits()+ " : " + ratio + " " + unitsTextField.getText());
                 okButton.setDisable(false);
             }

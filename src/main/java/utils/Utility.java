@@ -35,6 +35,14 @@ public class Utility {
         return Math.round(number*100.0)/100.0;
     }
 
+    public static double roundDecimals(double number){
+        return Math.round(number*1000000.0)/1000000.0;
+    }
+
+    public static String getNumberAccuracyRegex(){
+        return "[0-9]{1,13}(\\.[0-9]{0,6})?";
+    }
+
     /**
      * Uses Newton Raphson to compute the square root of a BigDecimal.
      *

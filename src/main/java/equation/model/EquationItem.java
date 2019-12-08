@@ -9,6 +9,7 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import session.model.EditorItemLayer;
 import ui.model.LayerListItem;
+import ui.model.ScaleRatio;
 import utils.Utility;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -125,6 +126,10 @@ public class EquationItem implements LayerListItem, EditorItemLayer{
         } catch (Equation.ValidationError validationError) {
             return "";
         }
+    }
+
+    @Override public String getStatus(ScaleRatio scaleRatio) {
+        return "";
     }
 
     @Override

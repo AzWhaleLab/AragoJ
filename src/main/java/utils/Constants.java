@@ -6,6 +6,9 @@ public class Constants {
     public final static String STTGS_FILECHOOSER_SAVEAS = "filechooser_saveas_location";
     public final static String STTGS_FILECHOOSER_OPEN = "filechooser_open_location";
 
+    public final static String STTGS_VIEW_PIXEL_GRID = "view_pixel_grid";
+    public final static String STTGS_VIEW_IDENTIFIER_SHAPE = "view_identifier_shape";
+
     public final static String STTGS_EXPORT_PREFS = "export_prefs";
 
     public final static String STTGS_COLOR_PICKER = "color_picker";

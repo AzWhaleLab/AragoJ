@@ -1,10 +1,7 @@
-### Android template
 # Built application files
 *.apk
 *.ap_
 
-# Files for the Dalvik VM
-*.dex
 
 # Java class files
 *.class
@@ -31,7 +28,6 @@ proguard/
 *.log
 
 
-### Aptoide team custom excludes
 *.iml
 .idea/*
 #.idea/codeStyleSettings.xml

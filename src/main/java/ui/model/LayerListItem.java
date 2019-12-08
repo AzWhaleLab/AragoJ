@@ -9,10 +9,11 @@ public interface LayerListItem {
     String getPrimaryText();
     void setPrimaryText(String primaryText);
     String getSecondaryText();
+    String getStatus(ScaleRatio scaleRatio);
     Type getType();
     boolean isVisualElement();
 
     public enum  Type {
-        LINE, EQUATION, AREA
+        LINE, EQUATION, AREA, ANGLE
     }
 }
