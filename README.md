@@ -12,6 +12,8 @@ Latest release can be found **[here.](../../releases/latest)**
 Any info about the app, including description and usage can be found on the **[AragoJ Wiki](../../wiki)**.
 A printable pdf version is also available **[here](https://github.com/franciscoaleixo/AragoJ/blob/master/wiki/AragoJ_0_4.pdf)**
 
+**Note:** The latest release (0.6.1) is not reflected in this documentation yet. You can find what has changed [here.](https://github.com/franciscoaleixo/AragoJ/releases/tag/0.6.1)
+
 ## Contributions & status
 Any contribution is more than welcome, however note that for code contributions the application is currently being majorly rewritten to match current programming paradigms, see [#39](https://github.com/franciscoaleixo/AragoJ/issues/39)
 
