@@ -32,3 +32,6 @@ Any contribution is more than welcome, however note that for code contributions 
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+.. image:: https://zenodo.org/badge/103962006.svg
+   :target: https://zenodo.org/badge/latestdoi/103962006
