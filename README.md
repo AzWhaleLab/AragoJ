@@ -32,5 +32,8 @@ Any contribution is more than welcome, however note that for code contributions 
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+    
+ ##CITATION##
+Aleixo, F., O’Callaghan, S. A., Ducla Soares, L., Nunes, P., Prieto, R. 2020. AragoJ – A free, open-source software to aid single camera photogrammetry studies. Methods in Ecology and Evolution. **[DOI: 10.1111/2041-210X.13376.](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13376)**
 
 [![DOI](https://zenodo.org/badge/103962006.svg)](https://zenodo.org/badge/latestdoi/103962006)
