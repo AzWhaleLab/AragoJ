@@ -12,7 +12,7 @@ Latest release can be found **[here.](../../releases/latest)**
 Any info about the app, including description and usage can be found on the **[AragoJ Wiki](../../wiki)**.
 A printable pdf version is also available **[here](https://github.com/AzWhaleLab/AragoJ/blob/master/wiki/AragoJ_0_6_1.pdf)**
 
-**Note:** The latest release (0.6.1) is not reflected in the Wiki yet. You can find what has changed [here.](https://github.com/franciscoaleixo/AragoJ/releases/tag/0.6.1). The pdf version of the manual is up to date and can be downloaded from **[here](https://github.com/AzWhaleLab/AragoJ/blob/master/wiki/AragoJ_0_6_1.pdf)**
+**Note:** The latest release (0.6.1) is not reflected in the Wiki yet. You can find what has changed [here](https://github.com/franciscoaleixo/AragoJ/releases/tag/0.6.1). The pdf version of the manual is up to date and can be downloaded from **[here](https://github.com/AzWhaleLab/AragoJ/blob/master/wiki/AragoJ_0_6_1.pdf)**
 
 ## Contributions & status
 Any contribution is more than welcome, however note that for code contributions the application is currently being majorly rewritten to match current programming paradigms, see [#39](https://github.com/franciscoaleixo/AragoJ/issues/39)
